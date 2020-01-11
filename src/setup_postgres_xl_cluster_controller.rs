@@ -66,7 +66,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 // Pass to go template
                 let final_merged_object: structs::Value = merged_object?;
                 let output = gtmpl::template(
-                    "The answer is: {{ index .on_load.init \"test_init.sh\" }}",
+                    "The answer is: {{(index .on_load.init 0).name}}",
                     final_merged_object,
                 );
                 println!("{}", output.unwrap());

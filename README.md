@@ -44,7 +44,7 @@ To connect to the database, please connect to the db main service (which is the 
 kubectl port-forward svc/[release-name]-postgres-xl-svc
 ```
 
-# Custom Resource Values (Kind: SetupPostgresXlCluster, Field Data)
+# Custom Resource Values (Kind: PostgresXlCluster)
 
 [STS] = `datanodes` or `coordinators` or `proxies` or `gtm`
 

@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 // Global
 #[derive(Gtmpl, Debug, PartialEq, Serialize, Deserialize)]
@@ -72,8 +71,8 @@ pub struct OnLoad {
     enabled: bool,
     back_off_limit: u8,
     resources: OnLoadResource,
-    startup: HashMap<String, String>,
-    init: HashMap<String, String>,
+    startup: Vec<OnLoadStartup>,
+    init: Vec<OnLoadInit>,
 }
 
 #[derive(Gtmpl, Debug, PartialEq, Serialize, Deserialize)]
@@ -85,6 +84,18 @@ pub struct OnLoadResource {
 pub struct OnLoadResourceLimit {
     memory: String,
     cpu: String,
+}
+
+#[derive(Gtmpl, Debug, PartialEq, Serialize, Deserialize)]
+pub struct OnLoadStartup {
+    name: String,
+    script: String,
+}
+
+#[derive(Gtmpl, Debug, PartialEq, Serialize, Deserialize)]
+pub struct OnLoadInit {
+    name: String,
+    script: String,
 }
 
 // GTM

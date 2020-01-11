@@ -89,8 +89,12 @@ on_load:
     #  create_database2.sh: |-
     #    CREATE SCHEMA test;
     #    CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
-    test_startup.sh: |-
-      echo "test startup script"
+#    test_startup.sh: |-
+#      echo "test startup script"
+    - name: create_database.sh
+      script: |-
+        psql -c "CREATE DATABASE tester;"
+        export PGDATABASE="tester"
 
   # array of init scripts to be called only when the
   # the database is first initialized.
@@ -102,8 +106,12 @@ on_load:
     #  create_database2.sh: |-
     #    CREATE SCHEMA test;
     #    CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);    # Examples (One script is needed otherwise there will be an error which is why this is added)
-    test_init.sh: |-
-      echo "test init script"
+#    test_init.sh: |-
+#      echo "test init script"
+    - name: create_database.sh
+      script: |-
+        psql -c "CREATE DATABASE tester;"
+        export PGDATABASE="tester"
 
 gtm:
   resources:

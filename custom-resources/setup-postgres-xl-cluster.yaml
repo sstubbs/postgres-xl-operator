@@ -1,0 +1,7 @@
+apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
+kind: PostgresXlCluster
+metadata:
+  name: {{NAME}}
+spec:
+  data: |
+    image: aasdasdasdasdasda

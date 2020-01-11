@@ -82,28 +82,32 @@ on_load:
   # array of startup scripts, to be called whenever
   # the database is loaded.
   startup:
-    # Examples (One script is needed otherwise there will be an error which is why test_startup.sh is added)
-    #  create_database.sh: |-
-    #    psql -c "CREATE DATABASE tester;"
-    #    export PGDATABASE="tester"
-    #  create_database2.sh: |-
-    #    CREATE SCHEMA test;
-    #    CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
-    test_startup.sh: |-
-      echo "test startup script"
+    # - name: create_database.sh
+    #   script: |-
+    #     psql -c "CREATE DATABASE tester;"
+    #     export PGDATABASE="tester"
+    # - name: create_base_tables.sql
+    #   script: |-
+    #     CREATE SCHEMA test;
+    #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
+    - name: test_startup.sh
+      script: |-
+        echo "test startup script"
 
   # array of init scripts to be called only when the
   # the database is first initialized.
   init:
-    # Examples (One script is needed otherwise there will be an error which is why test_init.sh is added)
-    #  create_database.sh: |-
-    #    psql -c "CREATE DATABASE tester;"
-    #    export PGDATABASE="tester"
-    #  create_database2.sh: |-
-    #    CREATE SCHEMA test;
-    #    CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);    # Examples (One script is needed otherwise there will be an error which is why this is added)
-    test_init.sh: |-
-      echo "test init script"
+    # - name: create_database.sh
+    #   script: |-
+    #     psql -c "CREATE DATABASE tester;"
+    #     export PGDATABASE="tester"
+    # - name: create_base_tables.sql
+    #   script: |-
+    #     CREATE SCHEMA test;
+    #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
+    - name: test_init.sh
+      script: |-
+        echo "test init script"
 
 gtm:
   resources:

@@ -1,4 +1,5 @@
 use futures::StreamExt;
+use gtmpl::Value;
 use json_patch::merge;
 use kube::{
     api::{Informer, Object, RawApi, Void, WatchEvent},
@@ -8,7 +9,6 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fs;
-use gtmpl::{Value};
 
 use super::structs;
 
@@ -17,8 +17,8 @@ pub async fn watch() -> anyhow::Result<()> {
     let client = APIClient::new(config);
 
     let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
-    let custom_resource_group = std::env::var("CUSTOM_RESOURCE_GROUP")
-        .unwrap_or("postgres-xl-operator.vanqor.com".into());
+    let custom_resource_group =
+        std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or("postgres-xl-operator.vanqor.com".into());
 
     let resource = RawApi::customResource("postgres-xl-clusters")
         .group(&custom_resource_group)
@@ -64,7 +64,6 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
             let merged_object = serde_yaml::from_str(&merged_yaml);
 
             if merged_object.is_ok() {
-
                 // Create cluster object
                 let name = &custom_resource.metadata.name;
                 let final_merged_object: structs::Values = merged_object?;
@@ -77,19 +76,17 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                             name.truncate(45);
                             let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
                             let result = re.replace_all(&name, "-");
-                            return Ok(result.into())
+                            return Ok(result.into());
                         }
                     }
                     Err("Failed cleaning name".to_owned())
                 }
-
 
                 let final_values = structs::Cluster {
                     name: name.to_owned(),
                     values: final_merged_object,
                     cleaned_name,
                 };
-
 
                 // Pass to go template
                 let output = gtmpl::template(

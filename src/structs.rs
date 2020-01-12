@@ -1,5 +1,5 @@
+use gtmpl::Func;
 use serde::{Deserialize, Serialize};
-use gtmpl::{Func};
 
 // Cluster
 #[derive(Gtmpl)]

@@ -65,7 +65,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
 
             if merged_object.is_ok() {
 
-                // Create container object
+                // Create cluster object
                 let name = &custom_resource.metadata.name;
                 let final_merged_object: structs::Values = merged_object?;
                 // Create a default fully qualified kubernetes name, with max 50 chars,
@@ -84,7 +84,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 }
 
 
-                let final_values = structs::Container {
+                let final_values = structs::Cluster {
                     name: name.to_owned(),
                     values: final_merged_object,
                     cleaned_name,

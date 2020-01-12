@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use gtmpl::{Func};
 
-// Container
+// Cluster
 #[derive(Gtmpl)]
-pub struct Container {
+pub struct Cluster {
     pub name: String,
     pub values: Values,
     pub cleaned_name: Func,

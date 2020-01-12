@@ -1,8 +1,17 @@
 use serde::{Deserialize, Serialize};
+use gtmpl::{Func};
+
+// Container
+#[derive(Gtmpl)]
+pub struct Container {
+    pub name: String,
+    pub values: Values,
+    pub cleaned_name: Func,
+}
 
 // Global
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Value {
+pub struct Values {
     pub image: String,
     pub envs: String,
     pub extra_labels: String,

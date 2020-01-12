@@ -8,6 +8,7 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fs;
+use gtmpl::{Value};
 
 use super::structs;
 
@@ -63,11 +64,37 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
             let merged_object = serde_yaml::from_str(&merged_yaml);
 
             if merged_object.is_ok() {
+
+                // Create container object
+                let name = &custom_resource.metadata.name;
+                let final_merged_object: structs::Values = merged_object?;
+                // Create a default fully qualified kubernetes name, with max 50 chars,
+                // thus allowing for 13 chars of internal naming.
+                fn cleaned_name(args: &[Value]) -> Result<Value, String> {
+                    if let Value::Object(ref o) = &args[0] {
+                        if let Some(Value::String(ref n)) = o.get("name") {
+                            let mut name = n.to_owned();
+                            name.truncate(45);
+                            let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
+                            let result = re.replace_all(&name, "-");
+                            return Ok(result.into())
+                        }
+                    }
+                    Err("Failed cleaning name".to_owned())
+                }
+
+
+                let final_values = structs::Container {
+                    name: name.to_owned(),
+                    values: final_merged_object,
+                    cleaned_name,
+                };
+
+
                 // Pass to go template
-                let final_merged_object: structs::Value = merged_object?;
                 let output = gtmpl::template(
-                    "The answer is: {{(index .on_load.init 0).name}}",
-                    final_merged_object,
+                    "The answer is: {{(index .values.on_load.init 0).name}}",
+                    final_values,
                 );
                 println!("{}", output.unwrap());
             } else {

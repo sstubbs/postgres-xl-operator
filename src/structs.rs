@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Gtmpl)]
 pub struct Chart {
     pub name: String,
+    pub cleaned_name: Func,
     pub version: String,
     pub cluster: Cluster,
 }
@@ -13,8 +14,8 @@ pub struct Chart {
 #[derive(Gtmpl)]
 pub struct Cluster {
     pub name: String,
-    pub values: Values,
     pub cleaned_name: Func,
+    pub values: Values,
 }
 
 // Global

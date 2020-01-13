@@ -1,2 +1,1 @@
-there is {{- template "tmpl" . -}} template
-{{$test}}
+{{- template "print_env_value_or_secret" . -}}

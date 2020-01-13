@@ -4,4 +4,6 @@ metadata:
   name: {{NAME}}
 spec:
   data: |
-    image: aasdasdasdasdasda
+    security:
+      passwords_secret_name: test_secret
+      pg_password: test_key

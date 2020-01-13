@@ -126,7 +126,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 );
                 println!("{}", main_output.unwrap());
             } else {
-                println!("aaaaaa");
+                println!("There was an error rendering the template.");
             }
         }
         _ => println!("another event"),

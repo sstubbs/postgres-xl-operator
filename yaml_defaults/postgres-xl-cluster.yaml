@@ -5,15 +5,15 @@
 image: pavouk0/postgres-xl:XL_10_R1_1-6-g68c378f-4-g7a65119
 # This is the env set that appends to all pods.
 # will not affect the db configuration.
-envs:
+envs: ""
 # add extra labels to all pods.
-extra_labels:
+extra_labels: ""
 # the home directory depends on the image and will determine the
 # data storage location. the use postgres must have access to this directory.
 homedir: /var/lib/postgresql
 # The env set that appends to all pods.
 # may affect the db configuration.
-override_envs:
+override_envs: ""
 
 # general config.
 config:
@@ -28,13 +28,13 @@ config:
   # Append to the various config files.
   append:
     # append to gtm.
-    gtm:
+    gtm: ""
     # append to all proxies.
-    proxy:
+    proxy: ""
     # append to all datanodes.
-    datanode:
+    datanode: ""
     # append to all coordinators.
-    coordinator:
+    coordinator: ""
 
 # applies only to datanodes. Coordinators
 # are not stored, and are only considered part
@@ -49,15 +49,15 @@ wal:
     version: unversioned
     # will default to storage.
     storage_path: /wal_archive
-    # if dose not exist will default to empty folder.
-    pvc:
+    # if does not exist will default to empty folder.
+    pvc: ""
 
 security:
   # If exists will load all passwords from secrets.
-  passwords_secret_name:
+  passwords_secret_name: ""
   # If passwords_secret_name exists, is the name of the secret
   # key. Otherwise the password.
-  pg_password:
+  pg_password: ""
   # Set the password authentication method.
   postgres_auth_type: md5
   
@@ -117,15 +117,15 @@ gtm:
   pvc:
     resources:
       requests:
-        storage:
+        storage: ""
   # addons
-  add_containers:
-  volumes:
-  volume_mounts:
+  add_containers: ""
+  volumes: ""
+  volume_mounts: ""
   # overrides
-  inject_main_container_yaml:
-  inject_dep_yaml:
-  inject_sts_yaml:
+  inject_main_container_yaml: ""
+  inject_dep_yaml: ""
+  inject_sts_yaml: ""
 
 proxies:
   enabled: true
@@ -136,13 +136,13 @@ proxies:
       memory: 1Gi
       cpu: 1
   # addons
-  add_containers:
-  volumes:
-  volume_mounts:
+  add_containers: ""
+  volumes: ""
+  volume_mounts: ""
   # overrides
-  inject_main_container_yaml:
-  inject_spec_yaml:
-  inject_sts_yaml:
+  inject_main_container_yaml: ""
+  inject_spec_yaml: ""
+  inject_sts_yaml: ""
 
 coordinators:
   count: 1
@@ -153,15 +153,15 @@ coordinators:
   pvc:
     resources:
       requests:
-        storage:
+        storage: ""
   # addons
-  add_containers:
-  volumes:
-  volume_mounts:
+  add_containers: ""
+  volumes: ""
+  volume_mounts: ""
   # overrides
-  inject_main_container_yaml:
-  inject_spec_yaml:
-  inject_sts_yaml:
+  inject_main_container_yaml: ""
+  inject_spec_yaml: ""
+  inject_sts_yaml: ""
 
 datanodes:
   count: 1
@@ -172,13 +172,13 @@ datanodes:
   pvc:
     resources:
       requests:
-        storage:
+        storage: ""
   # addons
-  add_containers:
-  volumes:
-  volume_mounts:
-  add_volume_claims:
+  add_containers: ""
+  volumes: ""
+  volume_mounts: ""
+  add_volume_claims: ""
   # overrides
-  inject_main_container_yaml:
-  inject_spec_yaml:
-  inject_sts_yaml:
+  inject_main_container_yaml: ""
+  inject_spec_yaml: ""
+  inject_sts_yaml: ""

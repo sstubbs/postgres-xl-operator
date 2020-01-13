@@ -1,1 +1,8 @@
-The answer is: {{(index .values.on_load.init 0).name}}
+{{ define "tmpl"}}
+
+ashdkahsdaksd
+{{.name}}
+ashdahsdaksdhaksdkhjaskd
+
+{{ end -}}
+there is {{- template "tmpl" . -}} template

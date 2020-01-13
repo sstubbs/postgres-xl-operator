@@ -9,7 +9,6 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fs;
-use gtmpl::{Context, Template};
 
 use super::structs;
 
@@ -83,23 +82,6 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 }
 
                 let final_merged_object: structs::Values = merged_object?;
-
-                // Generate dynamic templates
-                let dynamic_object = final_merged_object.clone();
-                let mut dynamic_template = Template::default();
-                dynamic_template
-                    .parse(r#"{{ define "tmpl"}} some {{ end -}} there is {{- template "tmpl" . -}} template"#)
-                    .unwrap();
-
-                let dynamic_context = Context::from(structs::Cluster {
-                    name: name.to_owned(),
-                    values: dynamic_object,
-                    cleaned_name,
-                }).unwrap();
-
-                let dynamic_output = dynamic_template.render(&dynamic_context).unwrap();
-
-                println!("{:?}", dynamic_output);
 
                 // Main template
                 let main_object = final_merged_object.clone();

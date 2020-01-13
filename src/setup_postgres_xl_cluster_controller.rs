@@ -9,6 +9,7 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fs;
+use gtmpl::{Context, Template};
 
 use super::structs;
 
@@ -66,7 +67,6 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
             if merged_object.is_ok() {
                 // Create cluster object
                 let name = &custom_resource.metadata.name;
-                let final_merged_object: structs::Values = merged_object?;
                 // Create a default fully qualified kubernetes name, with max 50 chars,
                 // thus allowing for 13 chars of internal naming.
                 fn cleaned_name(args: &[Value]) -> Result<Value, String> {
@@ -82,21 +82,41 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     Err("Failed cleaning name".to_owned())
                 }
 
-                let final_values = structs::Cluster {
+                let final_merged_object: structs::Values = merged_object?;
+
+                // Generate dynamic templates
+                let dynamic_object = final_merged_object.clone();
+                let mut dynamic_template = Template::default();
+                dynamic_template
+                    .parse(r#"{{ define "tmpl"}} some {{ end -}} there is {{- template "tmpl" . -}} template"#)
+                    .unwrap();
+
+                let dynamic_context = Context::from(structs::Cluster {
                     name: name.to_owned(),
-                    values: final_merged_object,
+                    values: dynamic_object,
+                    cleaned_name,
+                }).unwrap();
+
+                let dynamic_output = dynamic_template.render(&dynamic_context).unwrap();
+
+                println!("{:?}", dynamic_output);
+
+                // Main template
+                let main_object = final_merged_object.clone();
+                let main_context = structs::Cluster {
+                    name: name.to_owned(),
+                    values: main_object,
                     cleaned_name,
                 };
 
-                // Pass to go template
-                let go_template =
+                let main_template =
                     fs::read_to_string("./templates/main.tpl")?;
 
-                let output = gtmpl::template(
-                    &go_template,
-                    final_values,
+                let main_output = gtmpl::template(
+                    &main_template,
+                    main_context,
                 );
-                println!("{}", output.unwrap());
+                println!("{}", main_output.unwrap());
             } else {
                 println!("aaaaaa");
             }

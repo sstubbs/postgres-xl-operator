@@ -49,7 +49,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
         WatchEvent::Added(custom_resource) => {
             // Get the yaml strings
             let yaml_template =
-                fs::read_to_string("./yaml_defaults/setup-postgres-xl-cluster.yaml")?;
+                fs::read_to_string("./yaml_defaults/postgres-xl-cluster.yaml")?;
             let yaml_added = &custom_resource.spec.data;
 
             // Convert them into serde values

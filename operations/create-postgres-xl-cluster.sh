@@ -7,5 +7,5 @@ export NAME="cluster1"
 
 cd ../
 
-YAML_CUSTOM_RESOURCE=$(replace_with_env "$(cat ./custom-resources/setup-postgres-xl-cluster.yaml)")
+YAML_CUSTOM_RESOURCE=$(replace_with_env "$(cat ./custom-resources/postgres-xl-cluster.yaml)")
 echo "${YAML_CUSTOM_RESOURCE}" | kubectl apply -n "${NAMESPACE}" -f -

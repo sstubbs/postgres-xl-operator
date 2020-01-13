@@ -83,7 +83,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
 
                 let final_merged_object: structs::Values = merged_object?;
 
-                // Main template
+                // Main context
                 let main_object = final_merged_object.clone();
                 let main_context = structs::Chart {
                     name: "postgres-xl-operator-chart".to_owned(),
@@ -95,15 +95,25 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     }
                 };
 
-                let operator_helper_template_path = "./templates/_operator_helpers.tpl";
+                // Global templates are always added as they are helper functions and envs which might be needed
+                let global_template_paths = [
+                    "./templates/_operator_helpers.tpl",
+                    "./templates/_operator_vars.tpl",
+                ];
 
-                let mut main_template = fs::read_to_string(&operator_helper_template_path)?.to_owned();
+                let mut main_template = "".to_owned();
 
+                for path in global_template_paths.iter() {
+                    let current_template = fs::read_to_string(&path)?.to_owned();
+                    main_template.push_str(&current_template);
+                }
+
+                // Other templates
                 let paths = fs::read_dir("./templates").unwrap();
 
                 for path in paths {
                     let path_string = path.unwrap().path().display().to_string();
-                    if &path_string != &operator_helper_template_path {
+                    if !global_template_paths.contains(&path_string.as_str()) {
                         let template_string = fs::read_to_string(&path_string)?;
                         main_template.push_str(&template_string);
                     }

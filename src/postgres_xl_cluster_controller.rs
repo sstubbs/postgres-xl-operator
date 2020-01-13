@@ -86,9 +86,9 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 // Main context
                 let main_object = final_merged_object.clone();
                 let main_context = structs::Chart {
-                    name: "postgres-xl-operator-chart".to_owned(),
+                    name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
                     cleaned_name,
-                    version: "0.0.1".to_owned(),
+                    version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
                     cluster: structs::Cluster {
                         name: name.to_owned(),
                         cleaned_name,

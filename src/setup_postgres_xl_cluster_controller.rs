@@ -89,8 +89,11 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 };
 
                 // Pass to go template
+                let go_template =
+                    fs::read_to_string("./templates/main.tpl")?;
+
                 let output = gtmpl::template(
-                    "The answer is: {{(index .values.on_load.init 0).name}}",
+                    &go_template,
                     final_values,
                 );
                 println!("{}", output.unwrap());

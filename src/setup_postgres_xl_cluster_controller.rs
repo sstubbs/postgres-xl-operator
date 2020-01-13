@@ -91,14 +91,18 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     cleaned_name,
                 };
 
-                let paths = fs::read_dir("./templates").unwrap();
+                let operator_helper_template_path = "./templates/_operator_helpers.tpl";
 
-                let mut main_template = "".to_owned();
+                let mut main_template = fs::read_to_string(&operator_helper_template_path)?.to_owned();
+
+                let paths = fs::read_dir("./templates").unwrap();
 
                 for path in paths {
                     let path_string = path.unwrap().path().display().to_string();
-                    let template_string = fs::read_to_string(path_string)?;
-                    main_template.push_str(&template_string);
+                    if &path_string != &operator_helper_template_path {
+                        let template_string = fs::read_to_string(&path_string)?;
+                        main_template.push_str(&template_string);
+                    }
                 }
 
                 let main_output = gtmpl::template(

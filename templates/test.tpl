@@ -1,0 +1,1 @@
+there is {{- template "tmpl" . -}} template

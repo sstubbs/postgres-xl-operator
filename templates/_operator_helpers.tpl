@@ -5,4 +5,3 @@ ashdkahsdaksd
 ashdahsdaksdhaksdkhjaskd
 
 {{ end -}}
-there is {{- template "tmpl" . -}} template

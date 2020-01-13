@@ -1,6 +1,14 @@
 use gtmpl::Func;
 use serde::{Deserialize, Serialize};
 
+// Chart
+#[derive(Gtmpl)]
+pub struct Chart {
+    pub name: String,
+    pub version: String,
+    pub cluster: Cluster,
+}
+
 // Cluster
 #[derive(Gtmpl)]
 pub struct Cluster {

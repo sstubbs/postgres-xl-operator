@@ -1,7 +1,7 @@
 {{ define "tmpl"}}
 
 ashdkahsdaksd
-{{.name}}
+{{.cluster.name}}
 ashdahsdaksdhaksdkhjaskd
 
 {{ end -}}

@@ -85,10 +85,14 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
 
                 // Main template
                 let main_object = final_merged_object.clone();
-                let main_context = structs::Cluster {
-                    name: name.to_owned(),
-                    values: main_object,
-                    cleaned_name,
+                let main_context = structs::Chart {
+                    name: "postgres-xl-operator-chart".to_owned(),
+                    version: "0.0.1".to_owned(),
+                    cluster: structs::Cluster {
+                        name: name.to_owned(),
+                        values: main_object,
+                        cleaned_name,
+                    }
                 };
 
                 let operator_helper_template_path = "./templates/_operator_helpers.tpl";

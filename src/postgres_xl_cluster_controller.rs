@@ -84,6 +84,20 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
 
                 let final_merged_object: structs::Values = merged_object?;
 
+                // Load scripts dir
+                let mut scripts = Vec::new();
+
+                let script_paths = fs::read_dir("./scripts").unwrap();
+
+                for path in script_paths {
+                    let final_path = path.unwrap();
+                    let path_name = &final_path.path().display().to_string();
+                    let name = &final_path.file_name().into_string().unwrap();
+                    let script = fs::read_to_string(&path_name)?;
+                    let script_object = structs::ClusterScript {name: name.to_owned(), script};
+                    scripts.push(script_object);
+                }
+
                 // Main context
                 let main_object = final_merged_object.clone();
                 let main_context = structs::Chart {
@@ -94,6 +108,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                         name: name.to_owned(),
                         cleaned_name,
                         values: main_object,
+                        scripts,
                     }
                 };
 

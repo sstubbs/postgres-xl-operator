@@ -11,11 +11,19 @@ pub struct Chart {
 }
 
 // Cluster
-#[derive(Gtmpl)]
+#[derive(Gtmpl, Clone)]
 pub struct Cluster {
     pub name: String,
     pub cleaned_name: Func,
     pub values: Values,
+    pub scripts: Vec<ClusterScript>,
+}
+
+// Scripts
+#[derive(Gtmpl, Clone)]
+pub struct ClusterScript {
+    pub name: String,
+    pub script: String,
 }
 
 // Global

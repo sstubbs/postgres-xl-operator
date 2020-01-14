@@ -110,6 +110,7 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     }
                 };
 
+                // Main template
                 let mut main_template = "".to_owned();
 
                 for asset in structs::EmbeddedTemplates::iter() {

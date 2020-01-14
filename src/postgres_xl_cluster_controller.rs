@@ -115,7 +115,6 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
 
                 for asset in structs::EmbeddedTemplates::iter() {
                     let filename = asset.as_ref();
-                    println!("{}", &filename);
                     let file_data = structs::EmbeddedTemplates::get(filename).unwrap();
                     let file_data_string = std::str::from_utf8(file_data.as_ref())?;
                     main_template.push_str(&file_data_string);

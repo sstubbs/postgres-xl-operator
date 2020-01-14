@@ -7,3 +7,9 @@ spec:
     security:
       passwords_secret_name: test_secret
       pg_password: test_key
+    on_load:
+      startup:
+      - name: create_database.sh
+        script: |-
+          psql -c "CREATE DATABASE tester;"
+          export PGDATABASE="tester"

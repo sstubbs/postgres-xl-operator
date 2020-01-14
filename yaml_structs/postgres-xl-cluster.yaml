@@ -81,7 +81,7 @@ on_load:
 
   # array of startup scripts, to be called whenever
   # the database is loaded.
-  startup:
+  startup: []
     # - name: create_database.sh
     #   script: |-
     #     psql -c "CREATE DATABASE tester;"
@@ -90,13 +90,10 @@ on_load:
     #   script: |-
     #     CREATE SCHEMA test;
     #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
-    - name: test_startup.sh
-      script: |-
-        echo "test startup script"
 
   # array of init scripts to be called only when the
   # the database is first initialized.
-  init:
+  init: []
     # - name: create_database.sh
     #   script: |-
     #     psql -c "CREATE DATABASE tester;"
@@ -105,9 +102,6 @@ on_load:
     #   script: |-
     #     CREATE SCHEMA test;
     #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
-    - name: test_init.sh
-      script: |-
-        echo "test init script"
 
 gtm:
   resources:

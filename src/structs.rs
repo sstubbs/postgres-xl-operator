@@ -1,6 +1,18 @@
 use gtmpl::Func;
 use serde::{Deserialize, Serialize};
 
+#[derive(RustEmbed)]
+#[folder = "scripts/"]
+pub struct EmbeddedScripts;
+
+#[derive(RustEmbed)]
+#[folder = "templates/"]
+pub struct EmbeddedTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "yaml_structs/"]
+pub struct EmbeddedYamlStructs;
+
 // Chart
 #[derive(Gtmpl)]
 pub struct Chart {

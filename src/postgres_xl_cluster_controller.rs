@@ -8,7 +8,6 @@ use kube::{
 };
 use serde::{Deserialize, Serialize};
 use serde_yaml;
-use std::fs;
 use sprig::SPRIG;
 
 use super::structs;
@@ -49,12 +48,13 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
             // Get the yaml strings
-            let yaml_template =
-                fs::read_to_string("./yaml_defaults/postgres-xl-cluster.yaml")?;
+            let yaml_struct_data = structs::EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
+            let yaml_struct_string = std::str::from_utf8(yaml_struct_data.as_ref())?;
+
             let yaml_added = &custom_resource.spec.data;
 
             // Convert them into serde values
-            let mut json_template_object = serde_yaml::from_str(&yaml_template)?;
+            let mut json_template_object = serde_yaml::from_str(&yaml_struct_string)?;
             let json_added_template = serde_yaml::from_str(&yaml_added)?;
 
             // Merge them
@@ -87,14 +87,12 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                 // Load scripts dir
                 let mut scripts = Vec::new();
 
-                let script_paths = fs::read_dir("./scripts").unwrap();
+                for asset in structs::EmbeddedScripts::iter() {
+                    let filename = asset.as_ref();
+                    let file_data = structs::EmbeddedScripts::get(filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
-                for path in script_paths {
-                    let final_path = path.unwrap();
-                    let path_name = &final_path.path().display().to_string();
-                    let name = &final_path.file_name().into_string().unwrap();
-                    let script = fs::read_to_string(&path_name)?;
-                    let script_object = structs::ClusterScript {name: name.to_owned(), script};
+                    let script_object = structs::ClusterScript {name: filename.to_owned(), script: file_data_string.to_owned()};
                     scripts.push(script_object);
                 }
 
@@ -112,28 +110,14 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     }
                 };
 
-                // Global templates are always added as they are helper functions and envs which might be needed
-                let global_template_paths = [
-                    "./templates/_operator_helpers.tpl",
-                    "./templates/_operator_vars.tpl",
-                ];
-
                 let mut main_template = "".to_owned();
 
-                for path in global_template_paths.iter() {
-                    let current_template = fs::read_to_string(&path)?.to_owned();
-                    main_template.push_str(&current_template);
-                }
-
-                // Other templates
-                let paths = fs::read_dir("./templates").unwrap();
-
-                for path in paths {
-                    let path_string = path.unwrap().path().display().to_string();
-                    if !global_template_paths.contains(&path_string.as_str()) {
-                        let template_string = fs::read_to_string(&path_string)?;
-                        main_template.push_str(&template_string);
-                    }
+                for asset in structs::EmbeddedTemplates::iter() {
+                    let filename = asset.as_ref();
+                    println!("{}", &filename);
+                    let file_data = structs::EmbeddedTemplates::get(filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+                    main_template.push_str(&file_data_string);
                 }
 
                 // Render template with gotmpl

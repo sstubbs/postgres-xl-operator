@@ -7,3 +7,5 @@
       key: {{ .cluster.values.security.pg_password }}
 {{- end -}}
 {{- end -}}
+
+{{ $test := "gggghhhhhhhgggggg" }}

@@ -9,6 +9,7 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fs;
+use sprig::SPRIG;
 
 use super::structs;
 
@@ -120,10 +121,14 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     }
                 }
 
-                let main_output = gtmpl::template(
-                    &main_template,
-                    main_context,
-                );
+                // Render template with gotmpl
+                let mut tmpl = gtmpl::Template::default();
+                tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
+                tmpl
+                    .parse(&main_template)
+                    .unwrap();
+                let context = gtmpl::Context::from(main_context).unwrap();
+                let main_output = tmpl.render(&context);
                 println!("{}", main_output.unwrap());
             } else {
                 println!("There was an error rendering the template.");

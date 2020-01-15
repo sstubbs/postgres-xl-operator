@@ -2,7 +2,7 @@ use futures::StreamExt;
 use gtmpl::Value;
 use json_patch::merge;
 use kube::{
-    api::{Informer, Object, Api, RawApi, Void, WatchEvent, PostParams},
+    api::{Api, Informer, Object, PostParams, RawApi, Void, WatchEvent},
     client::APIClient,
     config,
 };
@@ -47,7 +47,8 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
     match ev {
         WatchEvent::Added(custom_resource) => {
             // Get the yaml strings
-            let yaml_struct_data = structs::EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
+            let yaml_struct_data =
+                structs::EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
             let yaml_struct_string = std::str::from_utf8(yaml_struct_data.as_ref())?;
 
             let yaml_added = &custom_resource.spec.data;
@@ -104,7 +105,10 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                     let file_data = structs::EmbeddedScripts::get(filename).unwrap();
                     let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
-                    let script_object = structs::ClusterScript {name: filename.to_owned(), script: file_data_string.to_owned()};
+                    let script_object = structs::ClusterScript {
+                        name: filename.to_owned(),
+                        script: file_data_string.to_owned(),
+                    };
                     scripts.push(script_object);
                 }
 
@@ -113,10 +117,12 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
 
                 // Global template
                 let global_context = structs::Chart {
-                    name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
+                    name: std::env::var("CHART_NAME")
+                        .unwrap_or("postgres-xl-operator-chart".into()),
                     cleaned_name,
                     version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
-                    release_name: std::env::var("RELEASE_NAME").unwrap_or("postgres-xl-operator".into()),
+                    release_name: std::env::var("RELEASE_NAME")
+                        .unwrap_or("postgres-xl-operator".into()),
                     cleaned_release_name,
                     release_service: std::env::var("RELEASE_SERVICE").unwrap_or("helm".into()),
                     cluster: structs::Cluster {
@@ -124,7 +130,7 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                         cleaned_name,
                         values: main_object,
                         scripts,
-                    }
+                    },
                 };
                 let mut global_template = "".to_owned();
 
@@ -152,35 +158,51 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                     // Render template with gotmpl
                     let mut tmpl = gtmpl::Template::default();
                     tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
-                    tmpl
-                        .parse(&main_template)
-                        .unwrap();
+                    tmpl.parse(&main_template).unwrap();
                     let context = gtmpl::Context::from(main_context).unwrap();
                     let new_resource_yaml = tmpl.render(&context).unwrap();
 
                     // Convert new template into serde object to post
-                    let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
+                    let new_resource_object: serde_yaml::Value =
+                        serde_yaml::from_str(&new_resource_yaml)?;
 
                     // Create new resources
                     let pp = PostParams::default();
 
-                    let resource_name = &new_resource_object["metadata"]["name"].as_str().unwrap();
-
-                    match config_maps.replace(resource_name, &pp, serde_json::to_vec(&new_resource_object)?).await {
-                        Ok(_o) => {
-                            println!("config map created");
-//                        assert_eq!(p["metadata"]["name"], o.metadata.name);
-//                        info!("Created {}", o.metadata.name);
-                            // wait for it..
-//                        std::thread::sleep(std::time::Duration::from_millis(5_000));
+                    match config_maps
+                        .create(&pp, serde_json::to_vec(&new_resource_object)?)
+                        .await
+                    {
+                        Ok(o) => {
+                            assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
+                            println!("Created {}", o.metadata.name);
                         }
-                        Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                        Err(e) => return Err(e.into()),                        // any other case is probably bad
+                        Err(kube::Error::Api(ae)) => {
+                            let resource_name =
+                                &new_resource_object["metadata"]["name"].as_str().unwrap();
+
+                            match config_maps
+                                .replace(
+                                    resource_name,
+                                    &pp,
+                                    serde_json::to_vec(&new_resource_object)?,
+                                )
+                                .await
+                            {
+                                Ok(o) => {
+                                    assert_eq!(
+                                        new_resource_object["metadata"]["name"],
+                                        o.metadata.name
+                                    );
+                                    println!("Updated {}", o.metadata.name);
+                                }
+                                Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                                Err(e) => return Err(e.into()), // any other case is probably bad
+                            }
+                        } // if you skipped delete, for instance
+                        Err(e) => return Err(e.into()), // any other case is probably bad
                     }
-
                 }
-
-
             } else {
                 println!("There was an error rendering the template.");
             }

@@ -6,7 +6,8 @@ metadata:
     app.kubernetes.io/component: scripts
 {{- template "global_labels" . }}
 data:
+  # Load scripts from the scripts directory.
 {{ range .cluster.scripts -}}
-{{ indent 2 .name }}: |
-{{ indent 4 .script }}
+{{ .name | indent 2 }}: |
+{{ .script | indent 4 }}
 {{ end -}}

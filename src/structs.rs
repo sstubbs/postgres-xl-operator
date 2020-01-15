@@ -10,7 +10,7 @@ pub struct EmbeddedScripts;
 pub struct EmbeddedYamlStructs;
 
 #[derive(RustEmbed)]
-#[folder = "templates/global/"]
+#[folder = "templates/_global/"]
 pub struct EmbeddedGlobalTemplates;
 
 #[derive(RustEmbed)]

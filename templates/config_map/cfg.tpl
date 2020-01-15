@@ -48,7 +48,14 @@ data:
     # These short names are required by pg since the host
     # name is truncated by the Create Node sql query.
     local-alias-gtm {{ $app_name }}-gtm-0.{{ $app_name }}-svc-gtm
-
-{{- range $i := until (int .cluster.values.datanodes.count) }}
-    local-alias-dn-{{ $i }} {{ $app_name }}-dn-{{ $i }}.{{ $app_name }}-svc-dn
+{{- range (until .cluster.values.datanodes.count) }}
+    local-alias-dn-{{ . }} {{ $app_name }}-dn-{{ . }}.{{ $app_name }}-svc-dn
 {{- end }}
+{{- range (until .cluster.values.coordinators.count) }}
+    local-alias-crd-{{ . }} {{ $app_name }}-crd-{{ . }}.{{ $app_name }}-svc-crd
+{{- end }}
+{{- range (until .cluster.values.proxies.count) }}
+    local-alias-pxy-{{ . }} {{ $app_name }}-pxy-{{ . }}.{{ $app_name }}-svc-pxy
+{{- end }}
+
+

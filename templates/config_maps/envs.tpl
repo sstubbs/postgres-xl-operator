@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .cluster.name }}-envs
+  name: {{ .cluster.cleaned_name }}-envs
   labels:
     app.kubernetes.io/component: env-config
 {{- template "global_labels" . }}

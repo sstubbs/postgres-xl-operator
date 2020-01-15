@@ -6,15 +6,19 @@ use serde::{Deserialize, Serialize};
 pub struct EmbeddedScripts;
 
 #[derive(RustEmbed)]
-#[folder = "templates/"]
-pub struct EmbeddedTemplates;
-
-#[derive(RustEmbed)]
 #[folder = "yaml_structs/"]
 pub struct EmbeddedYamlStructs;
 
+#[derive(RustEmbed)]
+#[folder = "templates/global"]
+pub struct EmbeddedGlobalTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "templates/config_map"]
+pub struct EmbeddedConfigMapTemplates;
+
 // Chart
-#[derive(Gtmpl)]
+#[derive(Gtmpl, Clone)]
 pub struct Chart {
     pub name: String,
     pub cleaned_name: Func,

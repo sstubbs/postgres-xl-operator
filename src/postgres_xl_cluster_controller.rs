@@ -110,7 +110,9 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
 
                 // Main context
                 let main_object = final_merged_object.clone();
-                let main_context = structs::Chart {
+
+                // Global template
+                let global_context = structs::Chart {
                     name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
                     cleaned_name,
                     version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
@@ -124,50 +126,56 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                         scripts,
                     }
                 };
+                let mut global_template = "".to_owned();
 
-                // Main template
-                let mut main_template = "".to_owned();
-
-                for asset in structs::EmbeddedTemplates::iter() {
+                for asset in structs::EmbeddedGlobalTemplates::iter() {
                     let filename = asset.as_ref();
-                    let file_data = structs::EmbeddedTemplates::get(filename).unwrap();
+                    let file_data = structs::EmbeddedGlobalTemplates::get(filename).unwrap();
                     let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-                    main_template.push_str(&file_data_string);
+                    global_template.push_str(&file_data_string);
                 }
 
-                // Render template with gotmpl
-                let mut tmpl = gtmpl::Template::default();
-                tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
-                tmpl
-                    .parse(&main_template)
-                    .unwrap();
-                let context = gtmpl::Context::from(main_context).unwrap();
-                let new_resource_yaml = tmpl.render(&context).unwrap();
-
-//                println!("{}", &new_resource_yaml);
-
-                // Convert new template into serde object to post
-                let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
-
-                println!("{:?}", new_resource_object);
-
-                // Create new configmaps
                 let config = config::load_kube_config().await?;
                 let client = APIClient::new(config);
                 let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
                 let config_maps = Api::v1ConfigMap(client).within(&namespace);
-                let pp = PostParams::default();
 
-                match config_maps.create(&pp, serde_json::to_vec(&new_resource_object)?).await {
-                    Ok(_o) => {
-                        println!("config map created");
+                // Config map templates
+                for asset in structs::EmbeddedConfigMapTemplates::iter() {
+                    let main_context = global_context.clone();
+                    let mut main_template = global_template.clone();
+                    let filename = asset.as_ref();
+                    let file_data = structs::EmbeddedConfigMapTemplates::get(&filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+                    main_template.push_str(&file_data_string);
+
+                    // Render template with gotmpl
+                    let mut tmpl = gtmpl::Template::default();
+                    tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
+                    tmpl
+                        .parse(&main_template)
+                        .unwrap();
+                    let context = gtmpl::Context::from(main_context).unwrap();
+                    let new_resource_yaml = tmpl.render(&context).unwrap();
+
+                    // Convert new template into serde object to post
+                    let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
+
+                    // Create new configmaps
+                    let pp = PostParams::default();
+
+                    match config_maps.create(&pp, serde_json::to_vec(&new_resource_object)?).await {
+                        Ok(_o) => {
+                            println!("config map created");
 //                        assert_eq!(p["metadata"]["name"], o.metadata.name);
 //                        info!("Created {}", o.metadata.name);
-                        // wait for it..
+                            // wait for it..
 //                        std::thread::sleep(std::time::Duration::from_millis(5_000));
+                        }
+                        Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                        Err(e) => return Err(e.into()),                        // any other case is probably bad
                     }
-                    Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                    Err(e) => return Err(e.into()),                        // any other case is probably bad
+
                 }
 
 

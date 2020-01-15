@@ -1,8 +1,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your crd.
 
-# The default postgres-xl image to use in all pods.
-image: pavouk0/postgres-xl:XL_10_R1_1-6-g68c378f-4-g7a65119
+image:
+  # The default postgres-xl image to use in all pods.
+  name: pavouk0/postgres-xl
+  # The default postgres-xl image version to use in all pods.
+  version: XL_10_R1_1-6-g68c378f-4-g7a65119
 # This is the env set that appends to all pods.
 # will not affect the db configuration.
 envs: ""

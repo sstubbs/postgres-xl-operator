@@ -19,6 +19,9 @@ pub struct Chart {
     pub name: String,
     pub cleaned_name: Func,
     pub version: String,
+    pub release_name: String,
+    pub cleaned_release_name: Func,
+    pub release_service: String,
     pub cluster: Cluster,
 }
 
@@ -41,7 +44,7 @@ pub struct ClusterScript {
 // Global
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Values {
-    pub image: String,
+    pub image: Image,
     pub envs: String,
     pub extra_labels: String,
     pub homedir: String,
@@ -53,6 +56,13 @@ pub struct Values {
     pub gtm: Gtm,
     pub proxies: Proxy,
     pub coordinators: Coordinator,
+}
+
+// Image
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Image {
+    pub name: String,
+    pub version: String,
 }
 
 // Config

@@ -56,7 +56,8 @@ Example: datanodes.count = 32
 
 name | description | default value 
 --- | --- | ---
-image | The image to use | pavouk0/postgres-xl:XL_10_R1_1-6-g68c378f-4-g7a65119
+image.name | The image to use | pavouk0/postgres-xl
+image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
 envs | Additional envs to add to all pods | [null]
 extra_labels | YAML for adding container labels to be added to all the pods | [null]
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING

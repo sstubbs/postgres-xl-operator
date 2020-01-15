@@ -82,6 +82,19 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     Err("Failed cleaning name".to_owned())
                 }
 
+                fn cleaned_release_name(args: &[Value]) -> Result<Value, String> {
+                    if let Value::Object(ref o) = &args[0] {
+                        if let Some(Value::String(ref n)) = o.get("release_name") {
+                            let mut name = n.to_owned();
+                            name.truncate(45);
+                            let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
+                            let result = re.replace_all(&name, "-");
+                            return Ok(result.into());
+                        }
+                    }
+                    Err("Failed cleaning name".to_owned())
+                }
+
                 let final_merged_object: structs::Values = merged_object?;
 
                 // Load scripts dir
@@ -102,6 +115,9 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
                     cleaned_name,
                     version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
+                    release_name: std::env::var("RELEASE_NAME").unwrap_or("postgres-xl-operator".into()),
+                    cleaned_release_name,
+                    release_service: std::env::var("RELEASE_SERVICE").unwrap_or("helm".into()),
                     cluster: structs::Cluster {
                         name: name.to_owned(),
                         cleaned_name,

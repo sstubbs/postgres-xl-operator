@@ -164,7 +164,9 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                     // Create new configmaps
                     let pp = PostParams::default();
 
-                    match config_maps.create(&pp, serde_json::to_vec(&new_resource_object)?).await {
+                    let resource_name = &new_resource_object["metadata"]["name"].as_str().unwrap();
+
+                    match config_maps.replace(resource_name, &pp, serde_json::to_vec(&new_resource_object)?).await {
                         Ok(_o) => {
                             println!("config map created");
 //                        assert_eq!(p["metadata"]["name"], o.metadata.name);

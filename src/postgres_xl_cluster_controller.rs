@@ -2,7 +2,7 @@ use futures::StreamExt;
 use gtmpl::Value;
 use json_patch::merge;
 use kube::{
-    api::{Informer, Object, RawApi, Void, WatchEvent},
+    api::{Informer, Object, Api, RawApi, Void, WatchEvent, PostParams},
     client::APIClient,
     config,
 };
@@ -15,7 +15,6 @@ use super::structs;
 pub async fn watch() -> anyhow::Result<()> {
     let config = config::load_kube_config().await?;
     let client = APIClient::new(config);
-
     let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
     let custom_resource_group =
         std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or("postgres-xl-operator.vanqor.com".into());
@@ -31,7 +30,7 @@ pub async fn watch() -> anyhow::Result<()> {
 
         while let Some(event) = events.next().await {
             let event = event?;
-            handle_events(event)?;
+            handle_events(event).await?;
         }
     }
 }
@@ -44,7 +43,7 @@ pub struct CustomResource {
 
 type KubeCustomResource = Object<CustomResource, Void>;
 
-pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
+pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
             // Get the yaml strings
@@ -143,8 +142,35 @@ pub fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
                     .parse(&main_template)
                     .unwrap();
                 let context = gtmpl::Context::from(main_context).unwrap();
-                let main_output = tmpl.render(&context);
-                println!("{}", main_output.unwrap());
+                let new_resource_yaml = tmpl.render(&context).unwrap();
+
+//                println!("{}", &new_resource_yaml);
+
+                // Convert new template into serde object to post
+                let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
+
+                println!("{:?}", new_resource_object);
+
+                // Create new configmaps
+                let config = config::load_kube_config().await?;
+                let client = APIClient::new(config);
+                let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
+                let config_maps = Api::v1ConfigMap(client).within(&namespace);
+                let pp = PostParams::default();
+
+                match config_maps.create(&pp, serde_json::to_vec(&new_resource_object)?).await {
+                    Ok(_o) => {
+                        println!("config map created");
+//                        assert_eq!(p["metadata"]["name"], o.metadata.name);
+//                        info!("Created {}", o.metadata.name);
+                        // wait for it..
+//                        std::thread::sleep(std::time::Duration::from_millis(5_000));
+                    }
+                    Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                    Err(e) => return Err(e.into()),                        // any other case is probably bad
+                }
+
+
             } else {
                 println!("There was an error rendering the template.");
             }

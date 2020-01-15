@@ -1,3 +1,5 @@
+{{ $app_name := printf "%s-%s" .cleaned_release_name .cluster.cleaned_name }}
+
 {{ define "global_labels" }}
     app.kubernetes.io/name: {{ .cluster.cleaned_name }}
     helm.sh/chart: {{ .cleaned_name }}-{{ .version }}

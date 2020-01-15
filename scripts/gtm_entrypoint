@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# bash script for GTM
+cur_path="$(dirname ${BASH_SOURCE[0]})"
+source "$cur_path/common.sh"
+log:info "Starting as global transaction manager (GTM)"
+
+# init and load methods.
+source "$cur_path/initialize_env_dependencies"
+source "$cur_path/methods_recovery"
+
+# validating data directory.
+log:info "Creating data directory if dose not exist"
+mkdir -p "${PGDATA}"
+
+# call to recover if needed.
+recover_if_needed || exit $?
+
+log:info "Set data folder permissions 0700"
+chmod -R 0700 "${PGDATA}"
+
+# loading current gtm control info.
+control_info=""
+if [ -f "${PGDATA}/gtm.control" ]; then
+  control_info=$(cat "${PGDATA}/gtm.control")
+  control_info=${control_info##*( )}
+fi
+
+if [ -z "$control_info" ]; then
+  log:info "GTM configuration not found, calling initdb"
+
+  initgtm -D "${PGDATA}" -Z gtm
+
+  source "$cur_path/initialize_networks" || exit $?
+  source "$cur_path/initialize_node_config" || exit $?
+
+else
+  log:info "GTM configuration found, init skipped."
+  if [ -f "${PGDATA}/gtm.pid" ]; then
+    log:warning "GTM process not shut down properly or chart was terminated." \
+      "Lock file gtm.pid still exists. Deleting old lock file."
+    rm "${PGDATA}/gtm.pid"
+  fi
+
+  log:info "Current control state:"
+  echo "$control_info"
+  echo
+fi
+
+backup_data_state &
+log:info "Started gtm recovery process"
+
+# start the GTM
+gtm -D "${PGDATA}" -h "${PG_HOST}" -n "${PG_NODE}" -p "${PG_GTM_PORT}" -l /dev/stdout

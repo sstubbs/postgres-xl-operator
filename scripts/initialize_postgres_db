@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Initialize the postgres database.
+cur_path="$(dirname ${BASH_SOURCE[0]})"
+source "$cur_path/common.sh"
+log:info "Initializing database on node $PG_NODE"
+
+if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
+  rm -R "${PGDATA}"
+fi
+
+if [ ! -f "${PGDATA}/postgresql.conf" ]; then
+  log:info "Database configuration not found, calling initdb"
+
+  PG_PW_FILE=""
+
+  if [ -z "$PGPASSWORD" ]; then
+    log:warning "Database superuser password not found, DB is insecure."
+    initdb \
+      -D "${PGDATA}" \
+      -U "${PGUSER}" \
+      --nodename="${PG_NODE}"
+      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+  else
+    log:info "Database superuser password found, initializing db with password."
+    PG_PW_FILE="/tmp/$(mktemp pgpass-XXXXX.pwd)"
+    echo "${PGPASSWORD}" > "$PG_PW_FILE"
+
+    initdb \
+      -A "${AUTH_TYPE}"\
+      -D "${PGDATA}" \
+      -U "${PGUSER}" \
+      --nodename="${PG_NODE}" \
+      --pwfile="${PG_PW_FILE}"
+    assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+  fi
+
+  export PG_PW_FILE
+
+  source "$cur_path/initialize_networks" || exit $?
+  source "$cur_path/initialize_node_config" || exit $?
+
+  log:info "Database configuration initialized."
+else
+  log:info "Database configuration found, init skipped."
+fi
+
+# required for postgrs permissions.
+# the loaded values are actually set by kuberntes. :(
+log:info "Set data folder permissions 0700"
+chmod -R 0700 ${PGDATA}
+assert $? "Failed to change data folder permissions" || exit $?
+
+# check for proxy.
+if [ "$PROXY_ENABLED" = "true" ]; then
+  export PG_GTM_HOST="$PROXY_SERVICE"
+  log:info "looking for GTM proxy host @ $PG_GTM_HOST..."
+else
+  log:info "looking for GTM host @ $PG_GTM_HOST..."
+fi
+
+# waiting for GTM.
+"$cur_path/wait_for_connection" "$PG_GTM_HOST" "$PG_GTM_PORT"
+assert $? "Error while waiting for connection. Deployment not ready." || exit $?

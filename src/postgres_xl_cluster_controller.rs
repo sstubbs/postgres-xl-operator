@@ -161,7 +161,7 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                     // Convert new template into serde object to post
                     let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
 
-                    // Create new configmaps
+                    // Create new resources
                     let pp = PostParams::default();
 
                     let resource_name = &new_resource_object["metadata"]["name"].as_str().unwrap();

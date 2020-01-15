@@ -141,6 +141,7 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                     global_template.push_str(&file_data_string);
                 }
 
+                // Config Maps
                 let config = config::load_kube_config().await?;
                 let client = APIClient::new(config);
                 let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());

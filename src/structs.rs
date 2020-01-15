@@ -50,12 +50,14 @@ pub struct Values {
     pub homedir: String,
     pub override_envs: String,
     pub config: Config,
+    pub wal: Wal,
     pub security: Security,
     pub service: Service,
     pub on_load: OnLoad,
     pub gtm: Gtm,
     pub proxies: Proxy,
     pub coordinators: Coordinator,
+    pub datanodes: Datanode,
 }
 
 // Image
@@ -256,7 +258,7 @@ pub struct CoordinatorPvcResourceResourceRequestStorage {
 pub struct Datanode {
     count: u8,
     resources: DatanodeResource,
-    pvc: DatanodeResource,
+    pvc: DatanodePvcResource,
     add_containers: String,
     volumes: String,
     volume_mounts: String,

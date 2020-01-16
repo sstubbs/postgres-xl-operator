@@ -8,13 +8,15 @@ extern crate rust_embed;
 #[macro_use]
 extern crate anyhow;
 
-mod postgres_xl_cluster_controller;
+mod controller_config_map;
+mod controller_postgres_xl_cluster_informer;
+mod functions;
 mod structs;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     std::env::set_var("RUST_LOG", "info,kube=trace");
     env_logger::init();
-    task::spawn(postgres_xl_cluster_controller::watch()).await??;
+    task::spawn(controller_postgres_xl_cluster_informer::watch()).await??;
     Ok(())
 }

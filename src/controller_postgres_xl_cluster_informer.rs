@@ -8,7 +8,6 @@ use kube::{
 };
 use serde::{Deserialize, Serialize};
 use serde_yaml;
-use sprig::SPRIG;
 
 use super::structs;
 
@@ -158,27 +157,6 @@ async fn create_global_template() -> anyhow::Result<String> {
     return Ok(global_template);
 }
 
-async fn create_resource_object(
-    context_unwrapped: &structs::Chart,
-    global_template: &String,
-    file_data_string: &String,
-) -> anyhow::Result<serde_yaml::Value> {
-    let mut main_template = global_template.clone();
-    main_template.push_str(&file_data_string);
-
-    // Render template with gotmpl
-    let mut tmpl = gtmpl::Template::default();
-    tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
-    tmpl.parse(&main_template).unwrap();
-    let context = gtmpl::Context::from(context_unwrapped.to_owned()).unwrap();
-    let new_resource_yaml = tmpl.render(&context).unwrap();
-
-    // Convert new template into serde object to post
-    let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
-
-    return Ok(new_resource_object);
-}
-
 pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
@@ -188,38 +166,7 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                 let context_unwrapped = context?;
                 let global_template = create_global_template().await?;
 
-                // Config Maps
-                let config = config::load_kube_config().await?;
-                let client = APIClient::new(config);
-                let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
-                let config_maps = Api::v1ConfigMap(client).within(&namespace);
-
-                for asset in structs::EmbeddedConfigMapTemplates::iter() {
-                    let filename = asset.as_ref();
-                    let file_data = structs::EmbeddedConfigMapTemplates::get(&filename).unwrap();
-                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-                    let new_resource_object = create_resource_object(
-                        &context_unwrapped,
-                        &global_template,
-                        &file_data_string.to_owned(),
-                    )
-                    .await?;
-
-                    // Create new resources
-                    let pp = PostParams::default();
-
-                    match config_maps
-                        .create(&pp, serde_json::to_vec(&new_resource_object)?)
-                        .await
-                    {
-                        Ok(o) => {
-                            assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
-                            println!("Created {}", o.metadata.name);
-                        }
-                        Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                        Err(e) => return Err(e.into()), // any other case is probably bad
-                    }
-                }
+                super::controller_config_map::create(context_unwrapped, global_template).await?;
             } else {
                 println!("{}", context.err().unwrap())
             }

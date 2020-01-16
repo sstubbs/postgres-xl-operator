@@ -9,7 +9,6 @@ pub async fn create(
     context_unwrapped: structs::Chart,
     global_template: String,
 ) -> anyhow::Result<()> {
-    // Config Maps
     let config = config::load_kube_config().await?;
     let client = APIClient::new(config);
     let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());

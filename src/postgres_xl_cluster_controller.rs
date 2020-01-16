@@ -54,85 +54,90 @@ async fn get_context(
 
     // Convert them into serde values
     let mut json_template_object = serde_yaml::from_str(&yaml_struct_string)?;
-    let json_added_template = serde_yaml::from_str(&yaml_added)?;
+    let json_added_template = serde_yaml::from_str(&yaml_added);
 
-    // Merge them
-    merge(&mut json_template_object, &json_added_template);
+    if json_added_template.is_ok() {
+        // Merge them
+        let json_added_values = json_added_template?;
+        merge(&mut json_template_object, &json_added_values);
 
-    // Convert into struct
-    let merged_yaml = serde_json::to_string(&json_template_object)?;
+        // Convert into struct
+        let merged_yaml = serde_json::to_string(&json_template_object)?;
 
-    let merged_object = serde_yaml::from_str(&merged_yaml);
+        let merged_object = serde_yaml::from_str(&merged_yaml);
 
-    if merged_object.is_ok() {
-        // Create cluster object
-        let name = &custom_resource.metadata.name;
-        // Create a default fully qualified kubernetes name, with max 50 chars,
-        // thus allowing for 13 chars of internal naming.
-        fn cleaned_name(args: &[Value]) -> Result<Value, String> {
-            if let Value::Object(ref o) = &args[0] {
-                if let Some(Value::String(ref n)) = o.get("name") {
-                    let mut name = n.to_owned();
-                    name.truncate(45);
-                    let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
-                    let result = re.replace_all(&name, "-");
-                    return Ok(result.into());
+        if merged_object.is_ok() {
+            // Create cluster object
+            let name = &custom_resource.metadata.name;
+            // Create a default fully qualified kubernetes name, with max 50 chars,
+            // thus allowing for 13 chars of internal naming.
+            fn cleaned_name(args: &[Value]) -> Result<Value, String> {
+                if let Value::Object(ref o) = &args[0] {
+                    if let Some(Value::String(ref n)) = o.get("name") {
+                        let mut name = n.to_owned();
+                        name.truncate(45);
+                        let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
+                        let result = re.replace_all(&name, "-");
+                        return Ok(result.into());
+                    }
                 }
+                Err("Failed cleaning name".to_owned())
             }
-            Err("Failed cleaning name".to_owned())
-        }
 
-        fn cleaned_release_name(args: &[Value]) -> Result<Value, String> {
-            if let Value::Object(ref o) = &args[0] {
-                if let Some(Value::String(ref n)) = o.get("release_name") {
-                    let mut name = n.to_owned();
-                    name.truncate(45);
-                    let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
-                    let result = re.replace_all(&name, "-");
-                    return Ok(result.into());
+            fn cleaned_release_name(args: &[Value]) -> Result<Value, String> {
+                if let Value::Object(ref o) = &args[0] {
+                    if let Some(Value::String(ref n)) = o.get("release_name") {
+                        let mut name = n.to_owned();
+                        name.truncate(45);
+                        let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
+                        let result = re.replace_all(&name, "-");
+                        return Ok(result.into());
+                    }
                 }
+                Err("Failed cleaning name".to_owned())
             }
-            Err("Failed cleaning name".to_owned())
-        }
 
-        let final_merged_object: structs::Values = merged_object?;
+            let final_merged_object: structs::Values = merged_object?;
 
-        // Load scripts dir
-        let mut scripts = Vec::new();
+            // Load scripts dir
+            let mut scripts = Vec::new();
 
-        for asset in structs::EmbeddedScripts::iter() {
-            let filename = asset.as_ref();
-            let file_data = structs::EmbeddedScripts::get(filename).unwrap();
-            let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+            for asset in structs::EmbeddedScripts::iter() {
+                let filename = asset.as_ref();
+                let file_data = structs::EmbeddedScripts::get(filename).unwrap();
+                let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
-            let script_object = structs::ClusterScript {
-                name: filename.to_owned(),
-                script: file_data_string.to_owned(),
-            };
-            scripts.push(script_object);
-        }
+                let script_object = structs::ClusterScript {
+                    name: filename.to_owned(),
+                    script: file_data_string.to_owned(),
+                };
+                scripts.push(script_object);
+            }
 
-        // Main context
-        let main_object = final_merged_object.clone();
+            // Main context
+            let main_object = final_merged_object.clone();
 
-        // Global template
-        let global_context = structs::Chart {
-            name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
-            cleaned_name,
-            version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
-            release_name: std::env::var("RELEASE_NAME").unwrap_or("postgres-xl-operator".into()),
-            cleaned_release_name,
-            release_service: std::env::var("RELEASE_SERVICE").unwrap_or("helm".into()),
-            cluster: structs::Cluster {
-                name: name.to_owned(),
+            // Global template
+            let global_context = structs::Chart {
+                name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
                 cleaned_name,
-                values: main_object,
-                scripts,
-            },
-        };
-        return Ok(global_context);
+                version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
+                release_name: std::env::var("RELEASE_NAME")
+                    .unwrap_or("postgres-xl-operator".into()),
+                cleaned_release_name,
+                release_service: std::env::var("RELEASE_SERVICE").unwrap_or("helm".into()),
+                cluster: structs::Cluster {
+                    name: name.to_owned(),
+                    cleaned_name,
+                    values: main_object,
+                    scripts,
+                },
+            };
+            return Ok(global_context);
+        }
+        return Err(anyhow!("Unable to create template"));
     }
-    return Err(anyhow!("Unable to create template"));
+    return Err(anyhow!("Error in resource data"));
 }
 
 pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {

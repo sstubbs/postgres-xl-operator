@@ -5,6 +5,8 @@ extern crate gtmpl_value;
 extern crate gtmpl_derive;
 #[macro_use]
 extern crate rust_embed;
+#[macro_use]
+extern crate anyhow;
 
 mod postgres_xl_cluster_controller;
 mod structs;

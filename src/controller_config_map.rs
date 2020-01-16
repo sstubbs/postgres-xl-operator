@@ -1,6 +1,6 @@
 use super::structs;
 use kube::{
-    api::{Api, Object, PostParams, RawApi, Void, WatchEvent},
+    api::{Api, PostParams},
     client::APIClient,
     config,
 };

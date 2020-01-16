@@ -2,7 +2,7 @@ use futures::StreamExt;
 use gtmpl::Value;
 use json_patch::merge;
 use kube::{
-    api::{Api, Informer, Object, PostParams, RawApi, Void, WatchEvent},
+    api::{Informer, Object, RawApi, Void, WatchEvent},
     client::APIClient,
     config,
 };

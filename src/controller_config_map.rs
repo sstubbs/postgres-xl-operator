@@ -27,22 +27,21 @@ pub async fn create(
                 &global_template,
                 &file_data_string.to_owned(),
             )
-                .await?;
+            .await?;
             let pp = PostParams::default();
 
             match config_maps
                 .create(&pp, serde_json::to_vec(&new_resource_object)?)
                 .await
-                {
-                    Ok(o) => {
-                        assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
-                        println!("Created {}", o.metadata.name);
-                    }
-                    Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                    Err(e) => return Err(e.into()),                        // any other case is probably bad
+            {
+                Ok(o) => {
+                    assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
+                    println!("Created {}", o.metadata.name);
                 }
+                Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                Err(e) => return Err(e.into()), // any other case is probably bad
+            }
         }
-
     }
     Ok(())
 }

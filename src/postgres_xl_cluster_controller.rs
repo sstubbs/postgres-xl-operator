@@ -192,10 +192,8 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                 let config = config::load_kube_config().await?;
                 let client = APIClient::new(config);
                 let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
-
                 let config_maps = Api::v1ConfigMap(client).within(&namespace);
 
-                // Config map templates
                 for asset in structs::EmbeddedConfigMapTemplates::iter() {
                     let filename = asset.as_ref();
                     let file_data = structs::EmbeddedConfigMapTemplates::get(&filename).unwrap();

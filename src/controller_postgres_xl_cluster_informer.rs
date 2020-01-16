@@ -42,7 +42,7 @@ pub struct CustomResource {
 
 type KubeCustomResource = Object<CustomResource, Void>;
 
-async fn get_context(
+async fn create_context(
     custom_resource: &Object<CustomResource, Void>,
 ) -> anyhow::Result<structs::Chart> {
     // Get the yaml strings
@@ -160,7 +160,7 @@ async fn create_global_template() -> anyhow::Result<String> {
 pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
-            let context = get_context(&custom_resource).await;
+            let context = create_context(&custom_resource).await;
 
             if context.is_ok() {
                 let context_unwrapped = context?;

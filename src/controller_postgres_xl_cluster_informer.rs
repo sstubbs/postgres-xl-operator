@@ -107,14 +107,16 @@ async fn create_context(
 
             for asset in structs::EmbeddedScripts::iter() {
                 let filename = asset.as_ref();
-                let file_data = structs::EmbeddedScripts::get(filename).unwrap();
-                let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+                if !filename.starts_with(".") {
+                    let file_data = structs::EmbeddedScripts::get(filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
-                let script_object = structs::ClusterScript {
-                    name: filename.to_owned(),
-                    script: file_data_string.to_owned(),
-                };
-                scripts.push(script_object);
+                    let script_object = structs::ClusterScript {
+                        name: filename.to_owned(),
+                        script: file_data_string.to_owned(),
+                    };
+                    scripts.push(script_object);
+                }
             }
 
             // Global context
@@ -150,9 +152,11 @@ async fn create_global_template() -> anyhow::Result<String> {
     let mut global_template = "".to_owned();
     for asset in structs::EmbeddedGlobalTemplates::iter() {
         let filename = asset.as_ref();
-        let file_data = structs::EmbeddedGlobalTemplates::get(filename).unwrap();
-        let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-        global_template.push_str(&file_data_string);
+        if !filename.starts_with(".") {
+            let file_data = structs::EmbeddedGlobalTemplates::get(filename).unwrap();
+            let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+            global_template.push_str(&file_data_string);
+        }
     }
     return Ok(global_template);
 }

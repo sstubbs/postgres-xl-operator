@@ -17,6 +17,22 @@ pub struct EmbeddedGlobalTemplates;
 #[folder = "templates/config_map/"]
 pub struct EmbeddedConfigMapTemplates;
 
+#[derive(RustEmbed)]
+#[folder = "templates/deployment/"]
+pub struct EmbeddedDeploymentTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "templates/job/"]
+pub struct EmbeddedJobTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "templates/service/"]
+pub struct EmbeddedServiceTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "templates/stateful_set/"]
+pub struct EmbeddedStatefulSetTemplates;
+
 // Chart
 #[derive(Gtmpl, Clone)]
 pub struct Chart {

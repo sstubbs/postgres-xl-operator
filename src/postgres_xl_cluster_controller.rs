@@ -47,27 +47,31 @@ async fn get_context(
     custom_resource: &Object<CustomResource, Void>,
 ) -> anyhow::Result<structs::Chart> {
     // Get the yaml strings
-    let yaml_struct_data = structs::EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
-    let yaml_struct_string = std::str::from_utf8(yaml_struct_data.as_ref())?;
-
-    let yaml_added = &custom_resource.spec.data;
+    let yaml_struct_file = structs::EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
+    let yaml_struct_string = std::str::from_utf8(yaml_struct_file.as_ref())?;
+    let yaml_added_string = &custom_resource.spec.data;
 
     // Convert them into serde values
-    let mut json_template_object = serde_yaml::from_str(&yaml_struct_string)?;
-    let json_added_template = serde_yaml::from_str(&yaml_added);
+    let mut yaml_struct_object_unwrapped = serde_yaml::from_str(&yaml_struct_string)?;
+    let yaml_added_object = serde_yaml::from_str(&yaml_added_string);
 
-    if json_added_template.is_ok() {
+    if yaml_added_object.is_ok() {
         // Merge them
-        let json_added_values = json_added_template?;
-        merge(&mut json_template_object, &json_added_values);
+        let yaml_added_object_unwrapped = yaml_added_object?;
+        merge(
+            &mut yaml_struct_object_unwrapped,
+            &yaml_added_object_unwrapped,
+        );
 
         // Convert into struct
-        let merged_yaml = serde_json::to_string(&json_template_object)?;
+        let yaml_struct_merged_string_unwrapped =
+            serde_json::to_string(&yaml_struct_object_unwrapped)?;
+        let yaml_struct_merged_object = serde_yaml::from_str(&yaml_struct_merged_string_unwrapped);
 
-        let merged_object = serde_yaml::from_str(&merged_yaml);
-
-        if merged_object.is_ok() {
+        if yaml_struct_merged_object.is_ok() {
             // Create cluster object
+            let yaml_struct_merged_object_unwrapped: structs::Values = yaml_struct_merged_object?;
+
             let name = &custom_resource.metadata.name;
             // Create a default fully qualified kubernetes name, with max 50 chars,
             // thus allowing for 13 chars of internal naming.
@@ -84,6 +88,8 @@ async fn get_context(
                 Err("Failed cleaning name".to_owned())
             }
 
+            // Create a default fully qualified kubernetes name, with max 50 chars,
+            // thus allowing for 13 chars of internal naming.
             fn cleaned_release_name(args: &[Value]) -> Result<Value, String> {
                 if let Value::Object(ref o) = &args[0] {
                     if let Some(Value::String(ref n)) = o.get("release_name") {
@@ -96,8 +102,6 @@ async fn get_context(
                 }
                 Err("Failed cleaning name".to_owned())
             }
-
-            let final_merged_object: structs::Values = merged_object?;
 
             // Load scripts dir
             let mut scripts = Vec::new();
@@ -114,10 +118,7 @@ async fn get_context(
                 scripts.push(script_object);
             }
 
-            // Main context
-            let main_object = final_merged_object.clone();
-
-            // Global template
+            // Global context
             let global_context = structs::Chart {
                 name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
                 cleaned_name,
@@ -129,93 +130,99 @@ async fn get_context(
                 cluster: structs::Cluster {
                     name: name.to_owned(),
                     cleaned_name,
-                    values: main_object,
+                    values: yaml_struct_merged_object_unwrapped,
                     scripts,
                 },
             };
             return Ok(global_context);
         }
-        return Err(anyhow!("Unable to create template"));
+        return Err(anyhow!("Error in resource and struct template merge: \n {}", yaml_struct_merged_object.err().unwrap()));
     }
-    return Err(anyhow!("Error in resource data"));
+    return Err(anyhow!("Error in resource data: \n {}", yaml_added_object.err().unwrap()));
 }
 
 pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
-            let global_context = get_context(&custom_resource).await?;
+            let context = get_context(&custom_resource).await;
 
-            let mut global_template = "".to_owned();
+            if context.is_ok() {
+                let context_unwrapped = context?;
 
-            for asset in structs::EmbeddedGlobalTemplates::iter() {
-                let filename = asset.as_ref();
-                let file_data = structs::EmbeddedGlobalTemplates::get(filename).unwrap();
-                let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-                global_template.push_str(&file_data_string);
-            }
+                let mut global_template = "".to_owned();
 
-            // Config Maps
-            let config = config::load_kube_config().await?;
-            let client = APIClient::new(config);
-            let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
-            let config_maps = Api::v1ConfigMap(client).within(&namespace);
-
-            // Config map templates
-            for asset in structs::EmbeddedConfigMapTemplates::iter() {
-                let main_context = global_context.clone();
-                let mut main_template = global_template.clone();
-                let filename = asset.as_ref();
-                let file_data = structs::EmbeddedConfigMapTemplates::get(&filename).unwrap();
-                let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-                main_template.push_str(&file_data_string);
-
-                // Render template with gotmpl
-                let mut tmpl = gtmpl::Template::default();
-                tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
-                tmpl.parse(&main_template).unwrap();
-                let context = gtmpl::Context::from(main_context).unwrap();
-                let new_resource_yaml = tmpl.render(&context).unwrap();
-
-                // Convert new template into serde object to post
-                let new_resource_object: serde_yaml::Value =
-                    serde_yaml::from_str(&new_resource_yaml)?;
-
-                // Create new resources
-                let pp = PostParams::default();
-
-                match config_maps
-                    .create(&pp, serde_json::to_vec(&new_resource_object)?)
-                    .await
-                {
-                    Ok(o) => {
-                        assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
-                        println!("Created {}", o.metadata.name);
-                    }
-                    Err(kube::Error::Api(ae)) => {
-                        let resource_name =
-                            &new_resource_object["metadata"]["name"].as_str().unwrap();
-
-                        match config_maps
-                            .replace(
-                                resource_name,
-                                &pp,
-                                serde_json::to_vec(&new_resource_object)?,
-                            )
-                            .await
-                        {
-                            Ok(o) => {
-                                assert_eq!(
-                                    new_resource_object["metadata"]["name"],
-                                    o.metadata.name
-                                );
-                                println!("Updated {}", o.metadata.name);
-                            }
-                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                            Err(e) => return Err(e.into()), // any other case is probably bad
-                        }
-                    } // if you skipped delete, for instance
-                    Err(e) => return Err(e.into()), // any other case is probably bad
+                for asset in structs::EmbeddedGlobalTemplates::iter() {
+                    let filename = asset.as_ref();
+                    let file_data = structs::EmbeddedGlobalTemplates::get(filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+                    global_template.push_str(&file_data_string);
                 }
+
+                // Config Maps
+                let config = config::load_kube_config().await?;
+                let client = APIClient::new(config);
+                let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
+                let config_maps = Api::v1ConfigMap(client).within(&namespace);
+
+                // Config map templates
+                for asset in structs::EmbeddedConfigMapTemplates::iter() {
+                    let main_context = context_unwrapped.clone();
+                    let mut main_template = global_template.clone();
+                    let filename = asset.as_ref();
+                    let file_data = structs::EmbeddedConfigMapTemplates::get(&filename).unwrap();
+                    let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+                    main_template.push_str(&file_data_string);
+
+                    // Render template with gotmpl
+                    let mut tmpl = gtmpl::Template::default();
+                    tmpl.add_funcs(SPRIG as &[(&str, gtmpl::Func)]);
+                    tmpl.parse(&main_template).unwrap();
+                    let context = gtmpl::Context::from(main_context).unwrap();
+                    let new_resource_yaml = tmpl.render(&context).unwrap();
+
+                    // Convert new template into serde object to post
+                    let new_resource_object: serde_yaml::Value =
+                        serde_yaml::from_str(&new_resource_yaml)?;
+
+                    // Create new resources
+                    let pp = PostParams::default();
+
+                    match config_maps
+                        .create(&pp, serde_json::to_vec(&new_resource_object)?)
+                        .await
+                    {
+                        Ok(o) => {
+                            assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
+                            println!("Created {}", o.metadata.name);
+                        }
+                        Err(kube::Error::Api(ae)) => {
+                            let resource_name =
+                                &new_resource_object["metadata"]["name"].as_str().unwrap();
+
+                            match config_maps
+                                .replace(
+                                    resource_name,
+                                    &pp,
+                                    serde_json::to_vec(&new_resource_object)?,
+                                )
+                                .await
+                            {
+                                Ok(o) => {
+                                    assert_eq!(
+                                        new_resource_object["metadata"]["name"],
+                                        o.metadata.name
+                                    );
+                                    println!("Updated {}", o.metadata.name);
+                                }
+                                Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                                Err(e) => return Err(e.into()), // any other case is probably bad
+                            }
+                        } // if you skipped delete, for instance
+                        Err(e) => return Err(e.into()), // any other case is probably bad
+                    }
+                }
+            } else {
+                println!("{}", context.err().unwrap())
             }
         }
         _ => println!("another event"),

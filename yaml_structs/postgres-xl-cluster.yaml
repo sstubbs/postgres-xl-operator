@@ -68,7 +68,7 @@ security:
 service:
   enabled: true
   port: 5432
-  service_type: LoadBalancer  
+  service_type: clusterIP
 
 # Configuration for a job that is called when the database
 # has finished loading.

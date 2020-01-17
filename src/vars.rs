@@ -8,3 +8,4 @@ pub static RUST_LOG: &str = "info,kube=trace";
 //pub static CLUSTER_RESOURCE_SINGULAR: &str = "postgres-xl-cluster";
 pub static CLUSTER_RESOURCE_PLURAL: &str = "postgres-xl-clusters";
 //pub static CLUSTER_RESOURCE_KIND: &str = "PostgresXlCluster";
+//pub static CLUSTER_RESOURCE_KIND_LOWER: &str = "postgresxlcluster";

@@ -10,7 +10,10 @@ image:
 # will not affect the db configuration.
 envs: ""
 # add extra labels to all pods.
-extra_labels: ""
+extra_labels: []
+  # - name: test_label
+  #   label: test_label
+
 # the home directory depends on the image and will determine the
 # data storage location. the use postgres must have access to this directory.
 homedir: /var/lib/postgresql

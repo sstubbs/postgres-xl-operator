@@ -4,6 +4,6 @@ metadata:
   name: {{NAME}}
 spec:
   data: |
-    extra_labels |
-      aaa: aaa1
-      bbb: bbb1
+    extra_labels:
+    - name: test_label
+      label: test_label_content

@@ -59,7 +59,7 @@ name | description | default value
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
 envs | Additional envs to add to all pods | [null]
-extra_labels | YAML for adding container labels to be added to all the pods | [null]
+extra_labels | List of {name: "", label: ""} to be run in this pod on startup | []
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING
 config.managers_port | The port to use for transaction management (GTM or proxies) | 6666
 config.postgres_port | The internal postgres port | 5432
@@ -78,8 +78,8 @@ service.type | The external service type | clusterIP
 on_load.enabled | If true enables loading scripts on startup and initialisation | true
 on_load.back_off_limit | The number of times the job will restart | 5
 on_load.resources | The on load pods resources | Limits, 250m cpu; 250Mi memory
-on_load.startup | List of script name: script content to be run in this pod on startup (One script is needed otherwise there will be an error which is why test_init.sh is added) | test_init.sh |- echo "test startup script"
-on_load.init | List of script name: script content to be run in this pod on initialisation (One script is needed otherwise there will be an error which is why test_startup.sh is added) | test_init.sh |- echo "test init script"
+on_load.startup | List of {name: "", script: ""} to be run in this pod on startup | []
+on_load.init | List of {name: "", script: ""} to be run in this pod on initialisation | []
 
 ### For any StatefulSet
 

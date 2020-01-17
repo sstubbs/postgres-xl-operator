@@ -66,7 +66,7 @@ pub struct ClusterScript {
 pub struct Values {
     pub image: Image,
     pub envs: String,
-    pub extra_labels: String,
+    pub extra_labels: Vec<ExtraLabels>,
     pub homedir: String,
     pub override_envs: String,
     pub config: Config,
@@ -85,6 +85,13 @@ pub struct Values {
 pub struct Image {
     pub name: String,
     pub version: String,
+}
+
+// Extra Labels
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ExtraLabels {
+    pub name: String,
+    pub label: String,
 }
 
 // Config

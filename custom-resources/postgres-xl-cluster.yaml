@@ -4,6 +4,21 @@ metadata:
   name: {{NAME}}
 spec:
   data: |
-    extra_labels:
-    - name: test_label
-      content: test_label_content
+    config:
+      append:
+        gtm:
+        # append to gtm.
+        - name: max_connections
+          content: 100
+        proxy:
+        # append to all proxies.
+        - name: max_connections
+          content: 150
+        datanode:
+        # append to all datanodes.
+        - name: max_connections
+          content: 200
+        coordinator:
+        # append to all coordinators.
+        - name: max_connections
+          content: 250

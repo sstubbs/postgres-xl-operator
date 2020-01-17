@@ -14,14 +14,18 @@ data:
     # applies only on startup.
     log_min_messages = {{ upper .cluster.values.config.log_level }}
 {{- if .cluster.values.config.append.gtm }}
-{{ .cluster.values.config.append.gtm | indent 4 }}
+{{ range .cluster.values.config.append.gtm -}}
+{{ .name | indent 4 }} = {{ .content }}
+{{ end -}}
 {{- end }}
 
   config_append_proxy: |
     # applies only on startup.
     log_min_messages = {{ upper .cluster.values.config.log_level }}
 {{- if .cluster.values.config.append.proxy }}
-{{ .cluster.values.config.append.proxy | indent 4 }}
+{{ range .cluster.values.config.append.proxy -}}
+{{ .name | indent 4 }} = {{ .content }}
+{{ end -}}
 {{- end }}
 
   config_append_datanode: |
@@ -34,14 +38,18 @@ data:
     archive_command = '/scripts/wal_archive %p %f'
 {{- end }}
 {{- if .cluster.values.config.append.datanode }}
-{{ .cluster.values.config.append.datanode | indent 4 }}
+{{ range .cluster.values.config.append.datanode -}}
+{{ .name | indent 4 }} = {{ .content }}
+{{ end -}}
 {{- end }}
 
   config_append_coordinator: |
     # applies only on startup.
     log_min_messages = {{ lower .cluster.values.config.log_level }}
 {{- if .cluster.values.config.append.coordinator }}
-{{ .cluster.values.config.append.coordinator | indent 4 }}
+{{ range .cluster.values.config.append.coordinator -}}
+{{ .name | indent 4 }} = {{ .content }}
+{{ end -}}
 {{- end }}
 
   host_aliases: |

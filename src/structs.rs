@@ -106,10 +106,34 @@ pub struct Config {
 
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppend {
-    gtm: String,
-    proxy: String,
-    datanode: String,
-    coordinator: String,
+    gtm: Vec<ConfigAppendGtm>,
+    proxy: Vec<ConfigAppendProxy>,
+    datanode: Vec<ConfigAppendDatanode>,
+    coordinator: Vec<ConfigAppendCoordinator>,
+}
+
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendGtm {
+    name: String,
+    content: String,
+}
+
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendProxy {
+    name: String,
+    content: String,
+}
+
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendDatanode {
+    name: String,
+    content: String,
+}
+
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendCoordinator {
+    name: String,
+    content: String,
 }
 
 // WAL

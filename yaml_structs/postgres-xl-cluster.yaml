@@ -33,14 +33,22 @@ config:
   postgres_user: postgres
   # Append to the various config files.
   append:
+    gtm: []
     # append to gtm.
-    gtm: ""
+    # - name: max_connections
+    #   content: 100
+    proxy: []
     # append to all proxies.
-    proxy: ""
+    # - name: max_connections
+    #   content: 100    
+    datanode: []
     # append to all datanodes.
-    datanode: ""
+    # - name: max_connections
+    #   content: 100    
+    coordinator: []
     # append to all coordinators.
-    coordinator: ""
+    # - name: max_connections
+    #   content: 100    
 
 # applies only to datanodes. Coordinators
 # are not stored, and are only considered part

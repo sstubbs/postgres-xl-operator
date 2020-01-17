@@ -1,8 +1,8 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     structs::{
-        Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts, EmbeddedYamlStructs,
-        Values,
+        Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts,
+        EmbeddedYamlStructs, Values,
     },
     vars::{CHART_NAME, CHART_VERSION, RELEASE_NAME, RELEASE_SERVICE},
 };

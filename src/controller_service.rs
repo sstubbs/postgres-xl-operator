@@ -39,7 +39,7 @@ pub async fn action(
                     &global_template,
                     &file_data_string.to_owned(),
                 )
-                    .await?;
+                .await?;
                 let pp = PostParams::default();
 
                 match resource_action {
@@ -47,23 +47,23 @@ pub async fn action(
                         match resource_client
                             .create(&pp, serde_json::to_vec(&new_resource_object)?)
                             .await
-                            {
-                                Ok(o) => {
-                                    assert_eq!(
-                                        new_resource_object["metadata"]["name"],
-                                        o.metadata.name
-                                    );
-                                    info!("Created {}", o.metadata.name);
-                                }
-                                Err(kube::Error::Api(ae)) => {
-                                    assert_eq!(ae.code, 409);
-                                    info!(
-                                        "{} already exists",
-                                        new_resource_object["metadata"]["name"].as_str().unwrap()
-                                    )
-                                } // if you skipped delete, for instance
-                                Err(e) => return Err(e.into()), // any other case is probably bad
+                        {
+                            Ok(o) => {
+                                assert_eq!(
+                                    new_resource_object["metadata"]["name"],
+                                    o.metadata.name
+                                );
+                                info!("Created {}", o.metadata.name);
                             }
+                            Err(kube::Error::Api(ae)) => {
+                                assert_eq!(ae.code, 409);
+                                info!(
+                                    "{} already exists",
+                                    new_resource_object["metadata"]["name"].as_str().unwrap()
+                                )
+                            } // if you skipped delete, for instance
+                            Err(e) => return Err(e.into()), // any other case is probably bad
+                        }
                     }
                     ResourceAction::Modified => {
                         let resource_name =
@@ -75,17 +75,17 @@ pub async fn action(
                                 serde_json::to_vec(&new_resource_object)?,
                             )
                             .await
-                            {
-                                Ok(o) => {
-                                    assert_eq!(
-                                        new_resource_object["metadata"]["name"],
-                                        o.metadata.name
-                                    );
-                                    info!("Updated {}", o.metadata.name);
-                                }
-                                Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                                Err(e) => return Err(e.into()), // any other case is probably bad
+                        {
+                            Ok(o) => {
+                                assert_eq!(
+                                    new_resource_object["metadata"]["name"],
+                                    o.metadata.name
+                                );
+                                info!("Updated {}", o.metadata.name);
                             }
+                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                            Err(e) => return Err(e.into()), // any other case is probably bad
+                        }
                     }
                     ResourceAction::Deleted => {
                         let resource_name =
@@ -93,14 +93,14 @@ pub async fn action(
                         match resource_client
                             .delete(resource_name, &DeleteParams::default())
                             .await
-                            {
-                                Ok(_o) => info!(
-                                    "Deleted {}",
-                                    new_resource_object["metadata"]["name"].as_str().unwrap()
-                                ),
-                                Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                                Err(e) => return Err(e.into()), // any other case is probably bad
-                            }
+                        {
+                            Ok(_o) => info!(
+                                "Deleted {}",
+                                new_resource_object["metadata"]["name"].as_str().unwrap()
+                            ),
+                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                            Err(e) => return Err(e.into()), // any other case is probably bad
+                        }
                     }
                 }
             }

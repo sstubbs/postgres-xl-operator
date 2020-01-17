@@ -1,4 +1,5 @@
 use super::structs;
+use super::vars;
 use kube::{
     api::{Api, PostParams},
     client::APIClient,
@@ -11,7 +12,7 @@ pub async fn create(
 ) -> anyhow::Result<()> {
     let config = config::load_kube_config().await?;
     let client = APIClient::new(config);
-    let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
+    let namespace = std::env::var("NAMESPACE").unwrap_or(vars::NAMESPACE.into());
     let config_maps = Api::v1ConfigMap(client).within(&namespace);
 
     for asset in structs::EmbeddedConfigMapTemplates::iter() {

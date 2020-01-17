@@ -12,6 +12,7 @@ mod controller_config_map;
 mod controller_postgres_xl_cluster_informer;
 mod functions;
 mod structs;
+mod vars;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

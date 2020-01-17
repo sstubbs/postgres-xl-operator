@@ -1,3 +1,5 @@
+use super::structs;
+use super::vars;
 use futures::StreamExt;
 use gtmpl::Value;
 use json_patch::merge;
@@ -9,14 +11,12 @@ use kube::{
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 
-use super::structs;
-
 pub async fn watch() -> anyhow::Result<()> {
     let config = config::load_kube_config().await?;
     let client = APIClient::new(config);
-    let namespace = std::env::var("NAMESPACE").unwrap_or("pgxl".into());
+    let namespace = std::env::var("NAMESPACE").unwrap_or(vars::NAMESPACE.into());
     let custom_resource_group =
-        std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or("postgres-xl-operator.vanqor.com".into());
+        std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or(vars::CUSTOM_RESOURCE_GROUP.into());
 
     let resource = RawApi::customResource("postgres-xl-clusters")
         .group(&custom_resource_group)
@@ -121,13 +121,13 @@ async fn create_context(
 
             // Global context
             let global_context = structs::Chart {
-                name: std::env::var("CHART_NAME").unwrap_or("postgres-xl-operator-chart".into()),
+                name: std::env::var("CHART_NAME").unwrap_or(vars::CHART_NAME.into()),
                 cleaned_name,
-                version: std::env::var("CHART_VERSION").unwrap_or("0.0.1".into()),
-                release_name: std::env::var("RELEASE_NAME")
-                    .unwrap_or("postgres-xl-operator".into()),
+                version: std::env::var("CHART_VERSION").unwrap_or(vars::CHART_VERSION.into()),
+                release_name: std::env::var("RELEASE_NAME").unwrap_or(vars::RELEASE_NAME.into()),
                 cleaned_release_name,
-                release_service: std::env::var("RELEASE_SERVICE").unwrap_or("helm".into()),
+                release_service: std::env::var("RELEASE_SERVICE")
+                    .unwrap_or(vars::RELEASE_SERVICE.into()),
                 cluster: structs::Cluster {
                     name: name.to_owned(),
                     cleaned_name,

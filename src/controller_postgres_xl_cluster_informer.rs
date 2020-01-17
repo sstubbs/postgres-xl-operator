@@ -172,10 +172,10 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
 
                 super::controller_config_map::create(context_unwrapped, global_template).await?;
             } else {
-                println!("{}", context.err().unwrap())
+                error!("{}", context.err().unwrap())
             }
         }
-        _ => println!("another event"),
+        _ => info!("no controller created for event."),
     }
     Ok(())
 }

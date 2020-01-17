@@ -37,7 +37,7 @@ pub async fn create(
             {
                 Ok(o) => {
                     assert_eq!(new_resource_object["metadata"]["name"], o.metadata.name);
-                    println!("Created {}", o.metadata.name);
+                    info!("Created {}", o.metadata.name);
                 }
                 Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
                 Err(e) => return Err(e.into()), // any other case is probably bad

@@ -18,7 +18,7 @@ pub async fn watch() -> anyhow::Result<()> {
     let custom_resource_group =
         std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or(vars::CUSTOM_RESOURCE_GROUP.into());
 
-    let resource = RawApi::customResource("postgres-xl-clusters")
+    let resource = RawApi::customResource(&std::env::var("CLUSTER_RESOURCE_PLURAL").unwrap_or(vars::CLUSTER_RESOURCE_PLURAL.into()))
         .group(&custom_resource_group)
         .within(&namespace);
 

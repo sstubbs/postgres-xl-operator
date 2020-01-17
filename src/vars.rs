@@ -5,3 +5,6 @@ pub static CHART_VERSION: &str = "0.0.1";
 pub static RELEASE_NAME: &str = "postgres-xl-operator";
 pub static RELEASE_SERVICE: &str = "helm";
 pub static RUST_LOG: &str = "info,kube=trace";
+//pub static CLUSTER_RESOURCE_SINGULAR: &str = "postgres-xl-cluster";
+pub static CLUSTER_RESOURCE_PLURAL: &str = "postgres-xl-clusters";
+//pub static CLUSTER_RESOURCE_KIND: &str = "PostgresXlCluster";

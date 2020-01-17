@@ -1,5 +1,5 @@
 apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
-kind: PostgresXlCluster
+kind: {{CLUSTER_RESOURCE_KIND}}
 metadata:
   name: {{NAME}}
 spec:

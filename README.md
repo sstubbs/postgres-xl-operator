@@ -58,19 +58,19 @@ name | description | default value
 --- | --- | ---
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
-envs | Additional envs to add to all pods | [null]
+envs | List of {name: "", content: ""} to be included environment variables to add to all pods (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 extra_labels | List of {name: "", content: ""} to be included as labels (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING
 config.managers_port | The port to use for transaction management (GTM or proxies) | 6666
 config.postgres_port | The internal postgres port | 5432
-config.postgres_user | The internal postgres user | [null]
-config.append.[STS] | List of {name: "", content: ""} to append to the end of the postgres config file for a specific StatefulSet. | []
-wal.archive.enabled | Enable wal archiving of datanodes | [false]
+config.postgres_user | The internal postgres user | postgres
+config.append.[STS] | List of {name: "", content: ""} to append to the end of the postgres config file for a specific StatefulSet (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+wal.archive.enabled | Enable wal archiving of datanodes | false
 wal.archive.version | Use versions for WAL of datanodes | unversioned
 wal.archive.storage_path | The storage path for WAL of datanodes | /wal_archive
-wal.archive.pvc | Enable PVC for wal archiving of datanodes | [null]
-security.passwords_secret_name | The kubernetes secret value set to be used for passwords. | [null]
-security.pg_password | The superuser postgres password | [null]
+wal.archive.pvc | Enable PVC for wal archiving of datanodes | null
+security.passwords_secret_name | The kubernetes secret value set to be used for passwords. | null
+security.pg_password | The superuser postgres password | null
 security.postgres_auth_type | The authentication type used | md5
 service.enabled | If true enables the external load balancer service | true
 service.port | The external service port | 5432
@@ -87,7 +87,7 @@ name | description | default value
 --- | --- | ---
 [STS].count | The total number of replicas, dose not apply to gtm | 1
 [STS].resources | The main pod resources | Limits, GTM - 2Gi, 2 cpu; All others - 1Gi, 1 cpu
-[STS].pvc | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. | [null]
+[STS].pvc | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. | null
 [STS].add_containers | YAML inject to add more containers
 [STS].volumes | YAML inject to add more volumes
 [STS].volume_mounts | YAML inject to add more volume mounts
@@ -101,8 +101,8 @@ name | description | default value
 name | description | default value 
 --- | --- | ---
 homedir | The image home directory | /var/lib/postgresql 
-override_envs | A set of envs which are added after the chart core envs, and allows to override the chart. | [null]
-service.inject_spec_yaml | Injects YAML into the external service | [null]
+override_envs | List of {name: "", content: ""} to be included environment variables which are added after the chart core envs, and allows to override the chart (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+service.inject_spec_yaml | Injects YAML into the external service | null
 
 #### For any stateful set
 

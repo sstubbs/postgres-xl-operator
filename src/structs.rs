@@ -65,10 +65,10 @@ pub struct ClusterScript {
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Values {
     pub image: Image,
-    pub envs: String,
+    pub envs: Vec<Envs>,
     pub extra_labels: Vec<ExtraLabels>,
     pub homedir: String,
-    pub override_envs: String,
+    pub override_envs: Vec<OverrideEnvs>,
     pub config: Config,
     pub wal: Wal,
     pub security: Security,
@@ -87,9 +87,23 @@ pub struct Image {
     pub version: String,
 }
 
+// Envs
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Envs {
+    pub name: String,
+    pub content: String,
+}
+
 // Extra Labels
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExtraLabels {
+    pub name: String,
+    pub content: String,
+}
+
+// Envs
+#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct OverrideEnvs {
     pub name: String,
     pub content: String,
 }

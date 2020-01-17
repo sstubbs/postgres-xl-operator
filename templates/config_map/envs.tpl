@@ -24,7 +24,9 @@ data:
 
 {{- if .cluster.values.envs -}}
   # Added envs. These will not affect the db operation.
-{{- .cluster.values.envs | indent 2 -}}
+{{ range .cluster.values.envs -}}
+{{ .name | indent 2 }}: "{{ .content }}"
+{{ end -}}
 {{ end }}
 
   PG_GTM_HOST: "{{ $app_name }}-svc-gtm"
@@ -53,5 +55,7 @@ data:
 
 {{- if .cluster.values.override_envs -}}
   # Added envs, these may affect pod operation.
-{{- .cluster.values.override_envs | indent 2 -}}
+{{ range .cluster.values.override_envs -}}
+{{ .name | indent 2 }}: "{{ .content }}"
+{{ end -}}
 {{- end -}}

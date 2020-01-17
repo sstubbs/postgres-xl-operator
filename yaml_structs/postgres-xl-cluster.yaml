@@ -6,20 +6,24 @@ image:
   name: pavouk0/postgres-xl
   # The default postgres-xl image version to use in all pods.
   version: XL_10_R1_1-6-g68c378f-4-g7a65119
-# This is the env set that appends to all pods.
-# will not affect the db configuration.
-envs: ""
-# add extra labels to all pods.
+envs: []
+  # This is the env set that appends to all pods.
+  # will not affect the db configuration.
+  # - name: TEST_ENV_VARIABLE
+  #   content: "testing 123"
 extra_labels: []
+  # add extra labels to all pods.
   # - name: test_label
   #   content: test_label
 
 # the home directory depends on the image and will determine the
 # data storage location. the use postgres must have access to this directory.
 homedir: /var/lib/postgresql
-# The env set that appends to all pods.
-# may affect the db configuration.
-override_envs: ""
+override_envs: []
+  # The env set that appends to all pods.
+  # may affect the db configuration.
+  # - name: TEST_ENV_VARIABLE
+  #   content: "testing 123"
 
 # general config.
 config:
@@ -40,15 +44,15 @@ config:
     proxy: []
     # append to all proxies.
     # - name: max_connections
-    #   content: 100    
+    #   content: 100
     datanode: []
     # append to all datanodes.
     # - name: max_connections
-    #   content: 100    
+    #   content: 100
     coordinator: []
     # append to all coordinators.
     # - name: max_connections
-    #   content: 100    
+    #   content: 100
 
 # applies only to datanodes. Coordinators
 # are not stored, and are only considered part

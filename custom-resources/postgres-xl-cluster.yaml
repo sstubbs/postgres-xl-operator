@@ -22,3 +22,9 @@ spec:
         # append to all coordinators.
         - name: max_connections
           content: 250
+    envs:
+      - name: TEST_ENV_VARIABLE
+        content: "testing 123"
+    override_envs:
+      - name: TEST_OVERRIDE_ENV_VARIABLE
+        content: "testing 123456"

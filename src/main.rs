@@ -11,6 +11,7 @@ extern crate anyhow;
 extern crate log;
 
 mod controller_config_map;
+mod controller_deployment;
 mod controller_postgres_xl_cluster_informer;
 mod controller_service;
 mod controller_stateful_set;

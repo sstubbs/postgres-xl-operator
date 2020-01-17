@@ -1,5 +1,5 @@
 use super::{
-    controller_config_map, controller_service, controller_stateful_set, custom_resources, enums::ResourceAction, vars,
+    controller_config_map, controller_service, controller_stateful_set, controller_deployment, custom_resources, enums::ResourceAction, vars,
 };
 use futures::StreamExt;
 use kube::{
@@ -39,16 +39,19 @@ pub async fn handle_events(
     match ev {
         WatchEvent::Added(custom_resource) => {
             controller_config_map::action(&custom_resource, &ResourceAction::Added).await?;
+            controller_deployment::action(&custom_resource, &ResourceAction::Added).await?;
             controller_service::action(&custom_resource, &ResourceAction::Added).await?;
             controller_stateful_set::action(&custom_resource, &ResourceAction::Added).await?;
         }
         WatchEvent::Modified(custom_resource) => {
             controller_config_map::action(&custom_resource, &ResourceAction::Modified).await?;
+            controller_deployment::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_service::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_stateful_set::action(&custom_resource, &ResourceAction::Modified).await?;
         }
         WatchEvent::Deleted(custom_resource) => {
             controller_config_map::action(&custom_resource, &ResourceAction::Deleted).await?;
+            controller_deployment::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_service::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_stateful_set::action(&custom_resource, &ResourceAction::Deleted).await?;
         }

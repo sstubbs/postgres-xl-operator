@@ -1,3 +1,4 @@
+use super::enums;
 use super::structs;
 use super::vars;
 use futures::StreamExt;
@@ -18,9 +19,11 @@ pub async fn watch() -> anyhow::Result<()> {
     let custom_resource_group =
         std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or(vars::CUSTOM_RESOURCE_GROUP.into());
 
-    let resource = RawApi::customResource(&std::env::var("CLUSTER_RESOURCE_PLURAL").unwrap_or(vars::CLUSTER_RESOURCE_PLURAL.into()))
-        .group(&custom_resource_group)
-        .within(&namespace);
+    let resource = RawApi::customResource(
+        &std::env::var("CLUSTER_RESOURCE_PLURAL").unwrap_or(vars::CLUSTER_RESOURCE_PLURAL.into()),
+    )
+    .group(&custom_resource_group)
+    .within(&namespace);
 
     let ei = Informer::raw(client, resource).init().await?;
 
@@ -170,7 +173,46 @@ pub async fn handle_events(ev: WatchEvent<KubeCustomResource>) -> anyhow::Result
                 let context_unwrapped = context?;
                 let global_template = create_global_template().await?;
 
-                super::controller_config_map::create(context_unwrapped, global_template).await?;
+                super::controller_config_map::action(
+                    context_unwrapped,
+                    global_template,
+                    enums::ResourceAction::Added,
+                )
+                .await?;
+            } else {
+                error!("{}", context.err().unwrap())
+            }
+        }
+        WatchEvent::Modified(custom_resource) => {
+            let context = create_context(&custom_resource).await;
+
+            if context.is_ok() {
+                let context_unwrapped = context?;
+                let global_template = create_global_template().await?;
+
+                super::controller_config_map::action(
+                    context_unwrapped,
+                    global_template,
+                    enums::ResourceAction::Modified,
+                )
+                .await?;
+            } else {
+                error!("{}", context.err().unwrap())
+            }
+        }
+        WatchEvent::Deleted(custom_resource) => {
+            let context = create_context(&custom_resource).await;
+
+            if context.is_ok() {
+                let context_unwrapped = context?;
+                let global_template = create_global_template().await?;
+
+                super::controller_config_map::action(
+                    context_unwrapped,
+                    global_template,
+                    enums::ResourceAction::Deleted,
+                )
+                .await?;
             } else {
                 error!("{}", context.err().unwrap())
             }

@@ -12,13 +12,17 @@ extern crate log;
 
 mod controller_config_map;
 mod controller_postgres_xl_cluster_informer;
+mod enums;
 mod functions;
 mod structs;
 mod vars;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    std::env::set_var("RUST_LOG", std::env::var("RUST_LOG").unwrap_or(vars::RUST_LOG.into()));
+    std::env::set_var(
+        "RUST_LOG",
+        std::env::var("RUST_LOG").unwrap_or(vars::RUST_LOG.into()),
+    );
     env_logger::init();
     task::spawn(controller_postgres_xl_cluster_informer::watch()).await??;
     Ok(())

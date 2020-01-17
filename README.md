@@ -59,7 +59,7 @@ name | description | default value
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
 envs | Additional envs to add to all pods | [null]
-extra_labels | List of {name: "", content: ""} to be run in this pod on startup | []
+extra_labels | List of {name: "", content: ""} to be included as labels | []
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING
 config.managers_port | The port to use for transaction management (GTM or proxies) | 6666
 config.postgres_port | The internal postgres port | 5432

@@ -1,6 +1,4 @@
-use super::custom_resources;
-use super::enums;
-use super::vars;
+use super::{controller_config_map, controller_service, custom_resources, enums::{ResourceAction}, vars};
 use futures::StreamExt;
 use kube::{
     api::{Informer, RawApi, WatchEvent},
@@ -38,16 +36,18 @@ pub async fn handle_events(
 ) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
-            super::controller_config_map::action(custom_resource, enums::ResourceAction::Added)
-                .await?;
+            controller_config_map::action(&custom_resource, &ResourceAction::Added).await?;
+            controller_service::action(&custom_resource, &ResourceAction::Added).await?;
         }
         WatchEvent::Modified(custom_resource) => {
-            super::controller_config_map::action(custom_resource, enums::ResourceAction::Modified)
+            controller_config_map::action(&custom_resource, &ResourceAction::Modified)
+                .await?;
+            controller_service::action(&custom_resource, &ResourceAction::Modified)
                 .await?;
         }
         WatchEvent::Deleted(custom_resource) => {
-            super::controller_config_map::action(custom_resource, enums::ResourceAction::Deleted)
-                .await?;
+            controller_config_map::action(&custom_resource, &ResourceAction::Deleted).await?;
+            controller_service::action(&custom_resource, &ResourceAction::Deleted).await?;
         }
         _ => info!("no controller created for event."),
     }

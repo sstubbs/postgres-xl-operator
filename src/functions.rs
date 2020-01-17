@@ -1,6 +1,11 @@
-use super::custom_resources::{KubePostgresXlCluster};
-use super::structs::{Chart, Cluster, ClusterScript, EmbeddedYamlStructs, EmbeddedGlobalTemplates, EmbeddedScripts, Values};
-use super::vars::{CHART_NAME, CHART_VERSION, RELEASE_NAME, RELEASE_SERVICE};
+use super::{
+    custom_resources::KubePostgresXlCluster,
+    structs::{
+        Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts, EmbeddedYamlStructs,
+        Values,
+    },
+    vars::{CHART_NAME, CHART_VERSION, RELEASE_NAME, RELEASE_SERVICE},
+};
 use gtmpl::Value;
 use json_patch::merge;
 use sprig::SPRIG;

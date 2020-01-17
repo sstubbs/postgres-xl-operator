@@ -55,14 +55,14 @@ pub struct Cluster {
 }
 
 // Scripts
-#[derive(Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone)]
 pub struct ClusterScript {
     pub name: String,
     pub content: String,
 }
 
 // Global
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Values {
     pub image: Image,
     pub envs: Vec<Envs>,
@@ -81,35 +81,35 @@ pub struct Values {
 }
 
 // Image
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Image {
     pub name: String,
     pub version: String,
 }
 
 // Envs
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Envs {
     pub name: String,
     pub content: String,
 }
 
 // Extra Labels
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ExtraLabels {
     pub name: String,
     pub content: String,
 }
 
 // Envs
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OverrideEnvs {
     pub name: String,
     pub content: String,
 }
 
 // Config
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     log_level: String,
     managers_port: u16,
@@ -118,7 +118,7 @@ pub struct Config {
     append: ConfigAppend,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppend {
     gtm: Vec<ConfigAppendGtm>,
     proxy: Vec<ConfigAppendProxy>,
@@ -126,37 +126,37 @@ pub struct ConfigAppend {
     coordinator: Vec<ConfigAppendCoordinator>,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppendGtm {
     name: String,
     content: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppendProxy {
     name: String,
     content: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppendDatanode {
     name: String,
     content: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppendCoordinator {
     name: String,
     content: String,
 }
 
 // WAL
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Wal {
     archive: WalArchive,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WalArchive {
     enable: bool,
     version: String,
@@ -165,7 +165,7 @@ pub struct WalArchive {
 }
 
 // Security
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Security {
     passwords_secret_name: String,
     pg_password: String,
@@ -173,7 +173,7 @@ pub struct Security {
 }
 
 // Service
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Service {
     enabled: bool,
     port: u16,
@@ -181,7 +181,7 @@ pub struct Service {
 }
 
 // On Load
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoad {
     enabled: bool,
     back_off_limit: u8,
@@ -190,31 +190,31 @@ pub struct OnLoad {
     init: Vec<OnLoadInit>,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadResource {
     limits: OnLoadResourceLimit,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadResourceLimit {
     memory: String,
     cpu: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadStartup {
     name: String,
     content: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadInit {
     name: String,
     content: String,
 }
 
 // GTM
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Gtm {
     resources: GtmResource,
     pvc: GtmPvcResource,
@@ -226,34 +226,34 @@ pub struct Gtm {
     inject_sts_yaml: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmResource {
     limits: GtmResourceRequestLimit,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmResourceRequestLimit {
     memory: String,
     cpu: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmPvcResource {
     resources: GtmPvcResourceResourceRequest,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmPvcResourceResourceRequest {
     requests: GtmPvcResourceResourceRequestStorage,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmPvcResourceResourceRequestStorage {
     storage: String,
 }
 
 // GTM Proxies
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Proxy {
     enabled: bool,
     count: u8,
@@ -267,19 +267,19 @@ pub struct Proxy {
     inject_sts_yaml: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProxyResource {
     limits: ProxyResourceLimit,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProxyResourceLimit {
     memory: String,
     cpu: String,
 }
 
 // Coordinators
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Coordinator {
     count: u8,
     resources: CoordinatorResource,
@@ -292,34 +292,34 @@ pub struct Coordinator {
     inject_sts_yaml: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorResource {
     limits: CoordinatorResourceLimit,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorResourceLimit {
     memory: String,
     cpu: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorPvcResource {
     resources: CoordinatorPvcResourceResourceRequest,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorPvcResourceResourceRequest {
     requests: CoordinatorPvcResourceResourceRequestStorage,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorPvcResourceResourceRequestStorage {
     storage: String,
 }
 
 // Datanodes
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Datanode {
     count: u8,
     resources: DatanodeResource,
@@ -333,28 +333,28 @@ pub struct Datanode {
     inject_sts_yaml: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodeResource {
     limits: DatanodeResourceLimit,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodeResourceLimit {
     memory: String,
     cpu: String,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodePvcResource {
     resources: DatanodePvcResourceResourceRequest,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodePvcResourceResourceRequest {
     requests: DatanodePvcResourceResourceRequestStorage,
 }
 
-#[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodePvcResourceResourceRequestStorage {
     storage: String,
 }

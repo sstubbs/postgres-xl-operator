@@ -2,7 +2,7 @@ use super::enums;
 use super::structs;
 use super::vars;
 use kube::{
-    api::{Api, PostParams, DeleteParams},
+    api::{Api, DeleteParams, PostParams},
     client::APIClient,
     config,
 };
@@ -45,8 +45,11 @@ pub async fn action(
                         }
                         Err(kube::Error::Api(ae)) => {
                             assert_eq!(ae.code, 409);
-                            info!("{} already exists", new_resource_object["metadata"]["name"].as_str().unwrap())
-                        }, // if you skipped delete, for instance
+                            info!(
+                                "{} already exists",
+                                new_resource_object["metadata"]["name"].as_str().unwrap()
+                            )
+                        } // if you skipped delete, for instance
                         Err(e) => return Err(e.into()), // any other case is probably bad
                     }
                 }
@@ -71,18 +74,16 @@ pub async fn action(
                 enums::ResourceAction::Deleted => {
                     let resource_name = &new_resource_object["metadata"]["name"].as_str().unwrap();
                     match config_maps
-                        .delete(
-                            resource_name,
-                            &DeleteParams::default()
-                        )
+                        .delete(resource_name, &DeleteParams::default())
                         .await
-                        {
-                            Ok(_o) => {
-                                info!("Deleted {}", new_resource_object["metadata"]["name"].as_str().unwrap())
-                            }
-                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                            Err(e) => return Err(e.into()), // any other case is probably bad
-                        }
+                    {
+                        Ok(_o) => info!(
+                            "Deleted {}",
+                            new_resource_object["metadata"]["name"].as_str().unwrap()
+                        ),
+                        Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
+                        Err(e) => return Err(e.into()), // any other case is probably bad
+                    }
                 }
             }
         }

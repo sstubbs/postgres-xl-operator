@@ -8,6 +8,6 @@ metadata:
 data:
   # Load scripts from the scripts directory.
 {{ range .cluster.scripts -}}
-{{ .name | indent 2 }}: |
+{{ .name | indent 2 }}: |-
 {{ .script | indent 4 }}
 {{ end -}}

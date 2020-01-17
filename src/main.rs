@@ -12,6 +12,7 @@ extern crate log;
 
 mod controller_config_map;
 mod controller_postgres_xl_cluster_informer;
+mod custom_resources;
 mod enums;
 mod functions;
 mod structs;

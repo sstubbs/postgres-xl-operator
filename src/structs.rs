@@ -58,7 +58,7 @@ pub struct Cluster {
 #[derive(Gtmpl, Clone)]
 pub struct ClusterScript {
     pub name: String,
-    pub script: String,
+    pub content: String,
 }
 
 // Global
@@ -91,7 +91,7 @@ pub struct Image {
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ExtraLabels {
     pub name: String,
-    pub label: String,
+    pub content: String,
 }
 
 // Config
@@ -166,13 +166,13 @@ pub struct OnLoadResourceLimit {
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadStartup {
     name: String,
-    script: String,
+    content: String,
 }
 
 #[derive(Gtmpl, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadInit {
     name: String,
-    script: String,
+    content: String,
 }
 
 // GTM

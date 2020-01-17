@@ -6,4 +6,4 @@ spec:
   data: |
     extra_labels:
     - name: test_label
-      label: test_label_content
+      content: test_label_content

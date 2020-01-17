@@ -12,7 +12,7 @@ envs: ""
 # add extra labels to all pods.
 extra_labels: []
   # - name: test_label
-  #   label: test_label
+  #   content: test_label
 
 # the home directory depends on the image and will determine the
 # data storage location. the use postgres must have access to this directory.
@@ -89,11 +89,11 @@ on_load:
   # the database is loaded.
   startup: []
     # - name: create_database.sh
-    #   script: |-
+    #   content: |-
     #     psql -c "CREATE DATABASE tester;"
     #     export PGDATABASE="tester"
     # - name: create_base_tables.sql
-    #   script: |-
+    #   content: |-
     #     CREATE SCHEMA test;
     #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
 
@@ -101,11 +101,11 @@ on_load:
   # the database is first initialized.
   init: []
     # - name: create_database.sh
-    #   script: |-
+    #   content: |-
     #     psql -c "CREATE DATABASE tester;"
     #     export PGDATABASE="tester"
     # - name: create_base_tables.sql
-    #   script: |-
+    #   content: |-
     #     CREATE SCHEMA test;
     #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
 

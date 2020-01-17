@@ -78,7 +78,7 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
 
                 let script_object = ClusterScript {
                     name: filename.to_owned(),
-                    script: file_data_string.to_owned(),
+                    content: file_data_string.to_owned(),
                 };
                 scripts.push(script_object);
             }

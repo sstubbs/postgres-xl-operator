@@ -8,7 +8,7 @@
     app.kubernetes.io/version: {{ .cluster.values.image.version }}
 {{- if .cluster.values.extra_labels }}
 {{ range .cluster.values.extra_labels -}}
-{{ .name | indent 4 }}: {{ .label }}
+{{ .name | indent 4 }}: {{ .content }}
 {{ end -}}
 {{- end }}
 {{- end -}}

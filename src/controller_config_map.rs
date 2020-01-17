@@ -22,7 +22,7 @@ pub async fn action(
         let config = config::load_kube_config().await?;
         let client = APIClient::new(config);
         let namespace = std::env::var("NAMESPACE").unwrap_or(NAMESPACE.into());
-        let config_maps = Api::v1ConfigMap(client).within(&namespace);
+        let resource_client = Api::v1ConfigMap(client).within(&namespace);
 
         for asset in EmbeddedConfigMapTemplates::iter() {
             let filename = asset.as_ref();
@@ -42,7 +42,7 @@ pub async fn action(
 
                 match resource_action {
                     ResourceAction::Added => {
-                        match config_maps
+                        match resource_client
                             .create(&pp, serde_json::to_vec(&new_resource_object)?)
                             .await
                         {
@@ -66,7 +66,7 @@ pub async fn action(
                     ResourceAction::Modified => {
                         let resource_name =
                             &new_resource_object["metadata"]["name"].as_str().unwrap();
-                        match config_maps
+                        match resource_client
                             .replace(
                                 resource_name,
                                 &pp,
@@ -88,7 +88,7 @@ pub async fn action(
                     ResourceAction::Deleted => {
                         let resource_name =
                             &new_resource_object["metadata"]["name"].as_str().unwrap();
-                        match config_maps
+                        match resource_client
                             .delete(resource_name, &DeleteParams::default())
                             .await
                         {

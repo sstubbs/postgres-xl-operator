@@ -1,4 +1,5 @@
 apiVersion: v1
+kind: ConfigMap
 metadata:
   name: {{ $app_name }}-cfg
   labels:

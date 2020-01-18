@@ -15,6 +15,7 @@ spec:
     - metadata:
         name: datastore
       spec:
+        accessModes: [ "ReadWriteOnce" ]
         pvc:
           resources:
             requests:

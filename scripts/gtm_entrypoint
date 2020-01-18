@@ -9,7 +9,7 @@ source "$cur_path/initialize_env_dependencies"
 source "$cur_path/methods_recovery"
 
 # validating data directory.
-log:info "Creating data directory if dose not exist"
+log:info "Creating data directory if does not exist"
 mkdir -p "${PGDATA}"
 
 # call to recover if needed.

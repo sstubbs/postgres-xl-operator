@@ -1,9 +1,11 @@
+{{- $component := "scripts" -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $app_name }}-scripts
+  name: {{ $app_name }}-{{ $component }}
   labels:
-    app.kubernetes.io/component: scripts
+    app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 data:
   # Load scripts from the scripts directory.

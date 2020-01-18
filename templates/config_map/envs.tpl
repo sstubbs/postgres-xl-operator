@@ -1,9 +1,11 @@
+{{- $component := "envs" -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $app_name }}-envs
+  name: {{ $app_name }}-{{ $component }}
   labels:
-    app.kubernetes.io/component: envs
+    app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 data:
   PORT_WAIT_INTERVAL: "1"

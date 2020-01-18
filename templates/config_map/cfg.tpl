@@ -1,9 +1,11 @@
+{{- $component := "cfg" -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $app_name }}-cfg
+  name: {{ $app_name }}-{{ $component }}
   labels:
-    app.kubernetes.io/component: cfg
+    app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 data:
   config_append_internal_global: |

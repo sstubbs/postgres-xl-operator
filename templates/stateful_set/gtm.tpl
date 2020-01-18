@@ -1,12 +1,13 @@
+{{- $component := "gtm" -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ $app_name }}-gtm
+  name: {{ $app_name }}-{{ $component }}
   labels:
-    app.kubernetes.io/component: gtm
+    app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 spec:
-  serviceName: {{ $app_name }}-svc-gm
+  serviceName: {{ $app_name }}-svc-{{ $component }}
   replicas: 1
   podManagementPolicy: Parallel
   volumeClaimTemplates:
@@ -24,16 +25,18 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app: {{ $app_name }}
-      type: gtm
+      app.kubernetes.io/instance: {{ .cleaned_release_name }}
+      app.kubernetes.io/name: {{ .cluster.cleaned_name }}
+      app.kubernetes.io/component: {{ $component }}
 {{- if .cluster.values.gtm.inject_sts_yaml }}
 {{ .cluster.values.gtm.inject_sts_yaml | indent 2 }}
 {{- end }}
   template:
     metadata:
       labels:
-        app: {{ $app_name }}
-        type: gtm
+        app.kubernetes.io/instance: {{ .cleaned_release_name }}
+        app.kubernetes.io/name: {{ .cluster.cleaned_name }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       securityContext:
         fsGroup: 3000
@@ -41,28 +44,35 @@ spec:
 {{ .cluster.values.gtm.inject_spec_yaml | indent 6 }}
 {{- end }}
       containers:
-      - name: gtm
+      - name: {{ $component }}
         image: {{ .cluster.values.image.name }}:{{ .cluster.values.image.version }}
         command:
           - bash
           - /scripts/gtm_entrypoint
         envFrom:
         - configMapRef:
-            name: {{$app_name}}-envs
+            name: {{ $app_name }}-envs
         ports:
           - containerPort: {{ .cluster.values.config.managers_port }}
             name: gtm
         resources:
-{{- if .cluster.values.gtm.resources.requests.memory }}
-{{- if .cluster.values.gtm.resources.requests.cpu }}
+{{- if or .cluster.values.gtm.resources.requests.memory .cluster.values.gtm.resources.requests.cpu }}
           requests:
+{{- end }}
 {{- if .cluster.values.gtm.resources.requests.memory }}
             memory: {{ .cluster.values.gtm.resources.requests.memory }}
 {{- end }}
 {{- if .cluster.values.gtm.resources.requests.cpu }}
             cpu: {{ .cluster.values.gtm.resources.requests.cpu }}
 {{- end }}
+{{- if or .cluster.values.gtm.resources.limits.memory .cluster.values.gtm.resources.limits.cpu }}
+          limits:
 {{- end }}
+{{- if .cluster.values.gtm.resources.limits.memory }}
+            memory: {{ .cluster.values.gtm.resources.limits.memory }}
+{{- end }}
+{{- if .cluster.values.gtm.resources.limits.cpu }}
+            cpu: {{ .cluster.values.gtm.resources.limits.cpu }}
 {{- end }}
         env:
           - name: POD_NAME

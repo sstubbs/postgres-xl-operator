@@ -1,9 +1,10 @@
+{{- $component := "gtm" -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $app_name }}-svc-gtm
+  name: {{ $app_name }}-svc-{{ $component }}
   labels:
-    app.kubernetes.io/component: svc-gtm
+    app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 spec:
   clusterIP: None
@@ -11,7 +12,8 @@ spec:
   - port: {{ .cluster.values.config.managers_port }}
     protocol: TCP
     targetPort: {{ .cluster.values.config.managers_port }}
-    name: gtm
+    name: {{ $component }}
   selector:
-    app: {{ $app_name }}
-    type: gtm
+    app.kubernetes.io/instance: {{ .cleaned_release_name }}
+    app.kubernetes.io/name: {{ .cluster.cleaned_name }}
+    app.kubernetes.io/component: {{ $component }}

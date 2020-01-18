@@ -84,7 +84,7 @@ spec:
               fieldRef:
                 fieldPath: status.podIP
           - name: NODE_TYPE
-            value: gtm
+            value: {{ $component }}
         volumeMounts:
           - name: {{ $app_name }}-scripts
             mountPath: /scripts

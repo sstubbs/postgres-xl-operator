@@ -93,9 +93,12 @@ on_load:
   back_off_limit: 5
   # if set, will determine the startup script resources.
   resources:
-    limits:
+    requests:
       memory: 250Mi
-      cpu: 250m
+      cpu: 0.25
+    limits:
+      memory: 4Gi
+      cpu: 2.00
 
   # array of startup scripts, to be called whenever
   # the database is loaded.
@@ -123,9 +126,12 @@ on_load:
 
 gtm:
   resources:
+    requests:
+      memory: 250Mi
+      cpu: 0.25
     limits:
-      memory: 2Gi
-      cpu: 2
+      memory: 4Gi
+      cpu: 2.00
   pvc:
     resources:
       requests:
@@ -134,9 +140,10 @@ gtm:
   add_containers: ""
   volumes: ""
   volume_mounts: ""
+  add_volume_claims: ""
   # overrides
   inject_main_container_yaml: ""
-  inject_dep_yaml: ""
+  inject_spec_yaml: ""
   inject_sts_yaml: ""
 
 proxies:
@@ -144,13 +151,17 @@ proxies:
   count: 1
   thread_count: 3
   resources:
+    requests:
+      memory: 250Mi
+      cpu: 0.25
     limits:
-      memory: 1Gi
-      cpu: 1
+      memory: 4Gi
+      cpu: 2.00
   # addons
   add_containers: ""
   volumes: ""
   volume_mounts: ""
+  add_volume_claims: ""
   # overrides
   inject_main_container_yaml: ""
   inject_spec_yaml: ""
@@ -159,9 +170,12 @@ proxies:
 coordinators:
   count: 1
   resources:
+    requests:
+      memory: 250Mi
+      cpu: 0.25
     limits:
-      memory: 1Gi
-      cpu: 1
+      memory: 4Gi
+      cpu: 2.00
   pvc:
     resources:
       requests:
@@ -170,6 +184,7 @@ coordinators:
   add_containers: ""
   volumes: ""
   volume_mounts: ""
+  add_volume_claims: ""
   # overrides
   inject_main_container_yaml: ""
   inject_spec_yaml: ""
@@ -178,9 +193,12 @@ coordinators:
 datanodes:
   count: 1
   resources:
+    requests:
+      memory: 250Mi
+      cpu: 0.25
     limits:
-      memory: 1Gi
-      cpu: 1
+      memory: 4Gi
+      cpu: 2.00
   pvc:
     resources:
       requests:

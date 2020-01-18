@@ -49,20 +49,11 @@ pub async fn action(
                             .await
                         {
                             Ok(o) => {
-                                assert_eq!(
-                                    new_resource_object["metadata"]["name"],
-                                    o.metadata.name
-                                );
-                                info!("Created {}", o.metadata.name);
+                                if new_resource_object["metadata"]["name"] == o.metadata.name {
+                                    info!("Created {}", o.metadata.name);
+                                }
                             }
-                            Err(kube::Error::Api(ae)) => {
-                                assert_eq!(ae.code, 409);
-                                info!(
-                                    "{} already exists",
-                                    new_resource_object["metadata"]["name"].as_str().unwrap()
-                                )
-                            } // if you skipped delete, for instance
-                            Err(e) => return Err(e.into()), // any other case is probably bad
+                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
                     }
                     ResourceAction::Modified => {
@@ -77,14 +68,11 @@ pub async fn action(
                             .await
                         {
                             Ok(o) => {
-                                assert_eq!(
-                                    new_resource_object["metadata"]["name"],
-                                    o.metadata.name
-                                );
-                                info!("Updated {}", o.metadata.name);
+                                if new_resource_object["metadata"]["name"] == o.metadata.name {
+                                    info!("Updated {}", o.metadata.name);
+                                }
                             }
-                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                            Err(e) => return Err(e.into()), // any other case is probably bad
+                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
                     }
                     ResourceAction::Deleted => {
@@ -98,8 +86,7 @@ pub async fn action(
                                 "Deleted {}",
                                 new_resource_object["metadata"]["name"].as_str().unwrap()
                             ),
-                            Err(kube::Error::Api(ae)) => assert_eq!(ae.code, 409), // if you skipped delete, for instance
-                            Err(e) => return Err(e.into()), // any other case is probably bad
+                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
                     }
                 }

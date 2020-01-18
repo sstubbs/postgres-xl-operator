@@ -68,7 +68,7 @@ config.append.[STS] | List of {name: "", content: ""} to append to the end of th
 wal.archive.enabled | Enable wal archiving of datanodes | false
 wal.archive.version | Use versions for WAL of datanodes | unversioned
 wal.archive.storage_path | The storage path for WAL of datanodes | /wal_archive
-wal.archive.pvc | Enable PVC for wal archiving of datanodes | null
+wal.archive.pvc.resources.requests.storage | Enable PVC for wal archiving of datanodes | null
 security.passwords_secret_name | The kubernetes secret value set to be used for passwords. | null
 security.pg_password | The superuser postgres password | null
 security.postgres_auth_type | The authentication type used | md5
@@ -77,7 +77,10 @@ service.port | The external service port | 5432
 service.type | The external service type | clusterIP
 on_load.enabled | If true enables loading scripts on startup and initialisation | true
 on_load.back_off_limit | The number of times the job will restart | 5
-on_load.resources | The on load pods resources | Limits, 250m cpu; 250Mi memory
+on_load.resources.requests.memory | The on load pod memory request | 250Mi
+on_load.resources.requests.cpu | The on load pod cpu request | 0.25 (Must be a decimal)
+on_load.resources.limits.memory | The on load pod memory limit | 250Mi
+on_load.resources.limits.cpu | The on load pod cpu limit | 0.25 (Must be a decimal)
 on_load.startup | List of {name: "", content: ""} to be run in this pod on startup as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 on_load.init | List of {name: "", content: ""} to be run in this pod on initialisation as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 
@@ -86,8 +89,11 @@ on_load.init | List of {name: "", content: ""} to be run in this pod on initiali
 name | description | default value 
 --- | --- | ---
 [STS].count | The total number of replicas, dose not apply to gtm | 1
-[STS].resources | The main pod resources | Limits, GTM - 2Gi, 2 cpu; All others - 1Gi, 1 cpu
-[STS].pvc | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. | null
+[STS].resources.requests.memory | The main pod memory request | 250Mi
+[STS].resources.requests.cpu | The main pod cpu request | 0.25 (Must be a decimal)
+[STS].resources.limits.memory | The main pod memory limit | 250Mi
+[STS].resources.limits.cpu | The main pod cpu limit | 0.25 (Must be a decimal)
+[STS].pvc.resources.requests.storage | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. | null
 [STS].add_containers | YAML inject to add more containers
 [STS].volumes | YAML inject to add more volumes
 [STS].volume_mounts | YAML inject to add more volume mounts
@@ -110,7 +116,6 @@ name | description
 --- | ---
 [STS].inject_main_container_yaml | Inject YAML into the main container.
 [STS].inject_spec_yaml | Inject YAML into the template spec.
-[STS].inject_dep_yaml | Inject YAML into the main deployment spec.
 [STS].inject_sts_yaml | Inject YAML into the main STS spec.
 
 # Persistence

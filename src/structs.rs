@@ -192,13 +192,20 @@ pub struct OnLoad {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadResource {
+    requests: OnLoadResourceRequest,
     limits: OnLoadResourceLimit,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OnLoadResourceRequest {
+    memory: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadResourceLimit {
     memory: String,
-    cpu: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
@@ -221,20 +228,28 @@ pub struct Gtm {
     add_containers: String,
     volumes: String,
     volume_mounts: String,
+    add_volume_claims: String,
     inject_main_container_yaml: String,
-    inject_dep_yaml: String,
+    inject_spec_yaml: String,
     inject_sts_yaml: String,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmResource {
-    limits: GtmResourceRequestLimit,
+    requests: GtmResourceRequest,
+    limits: GtmResourceLimit,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct GtmResourceRequestLimit {
+pub struct GtmResourceRequest {
     memory: String,
-    cpu: String,
+    cpu: f32,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GtmResourceLimit {
+    memory: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
@@ -262,6 +277,7 @@ pub struct Proxy {
     add_containers: String,
     volumes: String,
     volume_mounts: String,
+    add_volume_claims: String,
     inject_main_container_yaml: String,
     inject_spec_yaml: String,
     inject_sts_yaml: String,
@@ -269,13 +285,20 @@ pub struct Proxy {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProxyResource {
+    requests: ProxyResourceRequest,
     limits: ProxyResourceLimit,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProxyResourceRequest {
+    memory: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProxyResourceLimit {
     memory: String,
-    cpu: String,
+    cpu: f32,
 }
 
 // Coordinators
@@ -287,6 +310,7 @@ pub struct Coordinator {
     add_containers: String,
     volumes: String,
     volume_mounts: String,
+    add_volume_claims: String,
     inject_main_container_yaml: String,
     inject_spec_yaml: String,
     inject_sts_yaml: String,
@@ -294,13 +318,20 @@ pub struct Coordinator {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorResource {
+    requests: CoordinatorResourceRequest,
     limits: CoordinatorResourceLimit,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CoordinatorResourceRequest {
+    memory: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorResourceLimit {
     memory: String,
-    cpu: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
@@ -335,13 +366,20 @@ pub struct Datanode {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodeResource {
+    requests: DatanodeResourceRequest,
     limits: DatanodeResourceLimit,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DatanodeResourceRequest {
+    memory: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodeResourceLimit {
     memory: String,
-    cpu: String,
+    cpu: f32,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]

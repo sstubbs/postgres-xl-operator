@@ -53,13 +53,15 @@ spec:
           - containerPort: {{ .cluster.values.config.managers_port }}
             name: gtm
         resources:
-{{- if or .cluster.values.gtm.resources.requests.memory .cluster.values.gtm.resources.requests.cpu }}
+{{- if .cluster.values.gtm.resources.requests.memory }}
+{{- if .cluster.values.gtm.resources.requests.cpu }}
           requests:
 {{- if .cluster.values.gtm.resources.requests.memory }}
-{{- .cluster.values.gtm.resources.requests.memory | intent 12 }}
+            memory: {{ .cluster.values.gtm.resources.requests.memory }}
 {{- end }}
 {{- if .cluster.values.gtm.resources.requests.cpu }}
-{{- .cluster.values.gtm.resources.requests.cpu | intent 12 }}
+            cpu: {{ .cluster.values.gtm.resources.requests.cpu }}
+{{- end }}
 {{- end }}
 {{- end }}
         env:
@@ -74,12 +76,12 @@ spec:
           - name: NODE_TYPE
             value: gtm
         volumeMounts:
-          - name: {{$app_name}}-scripts
+          - name: {{ $app_name }}-scripts
             mountPath: /scripts
-          - name: {{$app_name}}-cfg
+          - name: {{ $app_name }}-cfg
             mountPath: /config
           - name: datastore
-            mountPath: {{ .Values.homedir }}/storage
+            mountPath: {{ .cluster.values.homedir }}/storage
 {{- if .cluster.values.gtm.volume_mounts }}
 {{ .cluster.values.gtm.volume_mounts | indent 10 }}
 {{- end }}

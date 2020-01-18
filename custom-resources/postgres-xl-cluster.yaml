@@ -4,27 +4,3 @@ metadata:
   name: {{NAME}}
 spec:
   data: |
-    config:
-      append:
-        gtm:
-        # append to gtm.
-        - name: max_connections
-          content: 100
-        proxy:
-        # append to all proxies.
-        - name: max_connections
-          content: 150
-        datanode:
-        # append to all datanodes.
-        - name: max_connections
-          content: 200
-        coordinator:
-        # append to all coordinators.
-        - name: max_connections
-          content: 250
-    envs:
-      - name: TEST_ENV_VARIABLE
-        content: "testing 123"
-    override_envs:
-      - name: TEST_OVERRIDE_ENV_VARIABLE
-        content: "testing 123456"

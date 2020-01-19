@@ -25,8 +25,8 @@ mod vars;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     std::env::set_var(
-        "RUST_LOG",
-        std::env::var("RUST_LOG").unwrap_or(vars::RUST_LOG.into()),
+        "LOG_LEVEL",
+        std::env::var("LOG_LEVEL").unwrap_or(vars::LOG_LEVEL.into()),
     );
     env_logger::init();
     task::spawn(controller_postgres_xl_cluster_informer::watch()).await??;

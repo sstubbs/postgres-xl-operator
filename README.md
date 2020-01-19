@@ -47,7 +47,7 @@ CHART_NAME | This is the chart name which will be used in helm installations | p
 CHART_VERSION | This is the chart version which will be used in helm installations | 0.0.1
 RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
 RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
-RUST_LOG | This is the log_level of the operator. Current values are `info` and `debug`. Debug will also show the YAML of resources that will be generated at cluster creation time. | info
+LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will also show the YAML of resources that will be generated at cluster creation time. | info
 CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
 CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
 CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster

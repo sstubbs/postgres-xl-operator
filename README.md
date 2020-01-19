@@ -78,9 +78,9 @@ service.type | The external service type | clusterIP
 on_load.enabled | If true enables loading scripts on startup and initialisation | true
 on_load.back_off_limit | The number of times the job will restart | 5
 on_load.resources.requests.memory | The on load pod memory request | 250Mi
-on_load.resources.requests.cpu | The on load pod cpu request | 0.25 (Must be a decimal)
+on_load.resources.requests.cpu | The on load pod cpu request (Must be a decimal) | 0.25
 on_load.resources.limits.memory | The on load pod memory limit | 250Mi
-on_load.resources.limits.cpu | The on load pod cpu limit | 0.25 (Must be a decimal)
+on_load.resources.limits.cpu | The on load pod cpu limit (Must be a decimal) | 0.25
 on_load.startup | List of {name: "", content: ""} to be run in this pod on startup as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 on_load.init | List of {name: "", content: ""} to be run in this pod on initialisation as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 
@@ -90,10 +90,10 @@ name | description | default value
 --- | --- | ---
 [STS].count | The total number of replicas, dose not apply to gtm | 1
 [STS].resources.requests.memory | The main pod memory request | 250Mi
-[STS].resources.requests.cpu | The main pod cpu request | 0.25 (Must be a decimal)
+[STS].resources.requests.cpu | The main pod cpu request (Must be a decimal) | 0.25
 [STS].resources.limits.memory | The main pod memory limit | 250Mi
-[STS].resources.limits.cpu | The main pod cpu limit | 0.25 (Must be a decimal)
-[STS].pvc.resources.requests.storage | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. | null
+[STS].resources.limits.cpu | The main pod cpu limit (Must be a decimal) | 0.25
+[STS].pvc.resources.requests.storage | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. (This does not apply to proxies) | null
 [STS].add_containers | YAML inject to add more containers
 [STS].volumes | YAML inject to add more volumes
 [STS].volume_mounts | YAML inject to add more volume mounts

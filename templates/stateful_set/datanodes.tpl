@@ -63,6 +63,23 @@ spec:
         command:
           - bash
           - /scripts/data_node_entrypoint
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: NODE_TYPE
+            value: datanode
+        envFrom:
+        - configMapRef:
+            name: {{ $app_name }}-envs
+        ports:
+          - containerPort: {{ .cluster.values.config.managers_port }}
+            name: {{ $component }}
         readinessProbe:
           exec:
             command:
@@ -75,12 +92,6 @@ spec:
             - /scripts/probe_liveness_postgres
           initialDelaySeconds: 30
           periodSeconds: 5
-        envFrom:
-        - configMapRef:
-            name: {{ $app_name }}-envs
-        ports:
-          - containerPort: {{ .cluster.values.config.managers_port }}
-            name: {{ $component }}
         resources:
 {{- if or .cluster.values.datanodes.resources.requests.memory .cluster.values.datanodes.resources.requests.cpu }}
           requests:
@@ -100,17 +111,6 @@ spec:
 {{- if .cluster.values.datanodes.resources.limits.cpu }}
             cpu: {{ .cluster.values.datanodes.resources.limits.cpu }}
 {{- end }}
-        env:
-          - name: POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          - name: POD_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
-          - name: NODE_TYPE
-            value: datanode
         volumeMounts:
           - name: {{ $app_name }}-scripts
             mountPath: /scripts

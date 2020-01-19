@@ -1,4 +1,4 @@
-{{- $component := "gtm" -}}
+{{- $component := "pxy" -}}
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -9,30 +9,16 @@ metadata:
 {{- template "global_labels" . }}
 spec:
   serviceName: {{ $app_name }}-svc-{{ $component }}
-  replicas: 1
+  replicas: {{ .cluster.values.proxies.count }}
   podManagementPolicy: Parallel
-  volumeClaimTemplates:
-{{- if .cluster.values.gtm.pvc.resources.requests.storage }}
-    - metadata:
-        name: datastore
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        pvc:
-          resources:
-            requests:
-              storage: {{ .cluster.values.gtm.pvc.resources.requests.storage }}
-{{- end }}
-{{- if .cluster.values.gtm.add_volume_claims }}
-{{ .cluster.values.gtm.add_volume_claims | indent 4 }}
-{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: {{ $component }}
 {{ range .cluster.selector_labels -}}
 {{ .name | indent 6 }}: {{ .content }}
 {{ end }}
-{{- if .cluster.values.gtm.inject_sts_yaml }}
-{{ .cluster.values.gtm.inject_sts_yaml | indent 2 }}
+{{- if .cluster.values.proxies.inject_sts_yaml }}
+{{ .cluster.values.proxies.inject_sts_yaml | indent 2 }}
 {{- end }}
   template:
     metadata:
@@ -42,17 +28,15 @@ spec:
 {{ .name | indent 8 }}: {{ .content }}
 {{ end }}
     spec:
-      securityContext:
-        fsGroup: 3000
-{{- if .cluster.values.gtm.inject_spec_yaml }}
-{{ .cluster.values.gtm.inject_spec_yaml | indent 6 }}
+{{- if .cluster.values.proxies.inject_spec_yaml }}
+{{ .cluster.values.proxies.inject_spec_yaml | indent 6 }}
 {{- end }}
       containers:
       - name: {{ $component }}
         image: {{ .cluster.values.image.name }}:{{ .cluster.values.image.version }}
         command:
           - bash
-          - /scripts/gtm_entrypoint
+          - /scripts/proxy_entrypoint
         env:
           - name: POD_NAME
             valueFrom:
@@ -63,31 +47,37 @@ spec:
               fieldRef:
                 fieldPath: status.podIP
           - name: NODE_TYPE
-            value: gtm
+            value: proxy
         envFrom:
         - configMapRef:
             name: {{ $app_name }}-envs
         ports:
           - containerPort: {{ .cluster.values.config.managers_port }}
             name: {{ $component }}
+        readinessProbe:
+          exec:
+            command:
+            - /scripts/probe_readiness_proxy
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources:
-{{- if or .cluster.values.gtm.resources.requests.memory .cluster.values.gtm.resources.requests.cpu }}
+{{- if or .cluster.values.proxies.resources.requests.memory .cluster.values.proxies.resources.requests.cpu }}
           requests:
 {{- end }}
-{{- if .cluster.values.gtm.resources.requests.memory }}
-            memory: {{ .cluster.values.gtm.resources.requests.memory }}
+{{- if .cluster.values.proxies.resources.requests.memory }}
+            memory: {{ .cluster.values.proxies.resources.requests.memory }}
 {{- end }}
-{{- if .cluster.values.gtm.resources.requests.cpu }}
-            cpu: {{ .cluster.values.gtm.resources.requests.cpu }}
+{{- if .cluster.values.proxies.resources.requests.cpu }}
+            cpu: {{ .cluster.values.proxies.resources.requests.cpu }}
 {{- end }}
-{{- if or .cluster.values.gtm.resources.limits.memory .cluster.values.gtm.resources.limits.cpu }}
+{{- if or .cluster.values.proxies.resources.limits.memory .cluster.values.proxies.resources.limits.cpu }}
           limits:
 {{- end }}
-{{- if .cluster.values.gtm.resources.limits.memory }}
-            memory: {{ .cluster.values.gtm.resources.limits.memory }}
+{{- if .cluster.values.proxies.resources.limits.memory }}
+            memory: {{ .cluster.values.proxies.resources.limits.memory }}
 {{- end }}
-{{- if .cluster.values.gtm.resources.limits.cpu }}
-            cpu: {{ .cluster.values.gtm.resources.limits.cpu }}
+{{- if .cluster.values.proxies.resources.limits.cpu }}
+            cpu: {{ .cluster.values.proxies.resources.limits.cpu }}
 {{- end }}
         volumeMounts:
           - name: {{ $app_name }}-scripts
@@ -96,20 +86,18 @@ spec:
             mountPath: /config
           - name: datastore
             mountPath: {{ .cluster.values.homedir }}/storage
-{{- if .cluster.values.gtm.volume_mounts }}
-{{ .cluster.values.gtm.volume_mounts | indent 10 }}
+{{- if .cluster.values.proxies.volume_mounts }}
+{{ .cluster.values.proxies.volume_mounts | indent 10 }}
 {{- end }}
-{{- if .cluster.values.gtm.inject_main_container_yaml }}
-{{ .cluster.values.gtm.inject_main_container_yaml | indent 8 }}
+{{- if .cluster.values.proxies.inject_main_container_yaml }}
+{{ .cluster.values.proxies.inject_main_container_yaml | indent 8 }}
 {{- end }}
-{{- if .cluster.values.gtm.add_containers }}
-{{ .cluster.values.gtm.add_containers | indent 6 }}
+{{- if .cluster.values.proxies.add_containers }}
+{{ .cluster.values.proxies.add_containers | indent 6 }}
 {{- end }}
       volumes:
-{{- if .cluster.values.gtm.pvc.resources.requests.storage }}{{- else }}
         - name: datastore
           emptyDir: {}
-{{- end }}
         - name: {{ $app_name }}-scripts
           configMap:
             name: {{ $app_name }}-scripts
@@ -118,6 +106,6 @@ spec:
           configMap:
             name: {{ $app_name }}-cfg
             defaultMode: 511
-{{- if .cluster.values.gtm.volumes }}
-{{ .cluster.values.gtm.volumes | indent 8 }}
+{{- if .cluster.values.proxies.volumes }}
+{{ .cluster.values.proxies.volumes | indent 8 }}
 {{- end }}

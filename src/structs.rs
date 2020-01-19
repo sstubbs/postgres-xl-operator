@@ -33,7 +33,7 @@ pub struct EmbeddedServiceTemplates;
 pub struct EmbeddedStatefulSetTemplates;
 
 // Chart
-#[derive(Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Chart {
     pub name: String,
     pub cleaned_name: String,
@@ -45,7 +45,7 @@ pub struct Chart {
 }
 
 // Cluster
-#[derive(Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Cluster {
     pub name: String,
     pub cleaned_name: String,
@@ -56,21 +56,21 @@ pub struct Cluster {
 }
 
 // Labels
-#[derive(Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GlobalLabel {
     pub name: String,
     pub content: String,
 }
 
 // Selector Labels
-#[derive(Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SelectorLabel {
     pub name: String,
     pub content: String,
 }
 
 // Scripts
-#[derive(Debug, Gtmpl, Clone)]
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ClusterScript {
     pub name: String,
     pub content: String,

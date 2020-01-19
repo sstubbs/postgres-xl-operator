@@ -68,7 +68,10 @@ wal:
     # will default to storage.
     storage_path: /wal_archive
     # if does not exist will default to empty folder.
-    pvc: ""
+    pvc:
+      resources:
+        requests:
+          storage: ""
 
 security:
   # If exists will load all passwords from secrets.

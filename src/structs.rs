@@ -176,7 +176,22 @@ pub struct WalArchive {
     enable: bool,
     version: String,
     storage_path: String,
-    pvc: String,
+    pvc: WalArchivePvcResource,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WalArchivePvcResource {
+    resources: WalArchivePvcResourceRequest,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WalArchivePvcResourceRequest {
+    requests: WalArchivePvcResourceRequestStorage,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WalArchivePvcResourceRequestStorage {
+    storage: String,
 }
 
 // Security
@@ -269,16 +284,16 @@ pub struct GtmResourceLimit {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GtmPvcResource {
-    resources: GtmPvcResourceResourceRequest,
+    resources: GtmPvcResourceRequest,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct GtmPvcResourceResourceRequest {
-    requests: GtmPvcResourceResourceRequestStorage,
+pub struct GtmPvcResourceRequest {
+    requests: GtmPvcResourceRequestStorage,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct GtmPvcResourceResourceRequestStorage {
+pub struct GtmPvcResourceRequestStorage {
     storage: String,
 }
 
@@ -351,16 +366,16 @@ pub struct CoordinatorResourceLimit {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoordinatorPvcResource {
-    resources: CoordinatorPvcResourceResourceRequest,
+    resources: CoordinatorPvcResourceRequest,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CoordinatorPvcResourceResourceRequest {
-    requests: CoordinatorPvcResourceResourceRequestStorage,
+pub struct CoordinatorPvcResourceRequest {
+    requests: CoordinatorPvcResourceRequestStorage,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CoordinatorPvcResourceResourceRequestStorage {
+pub struct CoordinatorPvcResourceRequestStorage {
     storage: String,
 }
 
@@ -399,15 +414,15 @@ pub struct DatanodeResourceLimit {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DatanodePvcResource {
-    resources: DatanodePvcResourceResourceRequest,
+    resources: DatanodePvcResourceRequest,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct DatanodePvcResourceResourceRequest {
-    requests: DatanodePvcResourceResourceRequestStorage,
+pub struct DatanodePvcResourceRequest {
+    requests: DatanodePvcResourceRequestStorage,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct DatanodePvcResourceResourceRequestStorage {
+pub struct DatanodePvcResourceRequestStorage {
     storage: String,
 }

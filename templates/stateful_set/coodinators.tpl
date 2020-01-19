@@ -22,16 +22,6 @@ spec:
             requests:
               storage: {{ .cluster.values.coordinators.pvc.resources.requests.storage }}
 {{- end }}
-{{- if and .cluster.values.wal.archive.enable .cluster.values.wal.archive.pvc.resources.requests.storage }}
-    - metadata:
-        name: wal-archive
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        pvc:
-          resources:
-            requests:
-              storage: {{ .cluster.values.coordinators.pvc.resources.requests.storage }}
-{{- end }}
 {{- if .cluster.values.coordinators.add_volume_claims }}
 {{ .cluster.values.coordinators.add_volume_claims | indent 4 }}
 {{- end }}
@@ -118,10 +108,6 @@ spec:
             mountPath: /config
           - name: datastore
             mountPath: {{ .cluster.values.homedir }}/storage
-{{- if .cluster.values.wal.archive.enable }}
-          - name: wal-archive
-            mountPath: "{{ .cluster.values.homedir }}/wal_archive"
-{{- end }}
 {{- if .cluster.values.coordinators.volume_mounts }}
 {{ .cluster.values.coordinators.volume_mounts | indent 10 }}
 {{- end }}
@@ -134,10 +120,6 @@ spec:
       volumes:
 {{- if .cluster.values.coordinators.pvc.resources.requests.storage }}{{- else }}
         - name: datastore
-          emptyDir: {}
-{{- end }}
-{{- if and .cluster.values.wal.archive.enable .cluster.values.wal.archive.pvc.resources.requests.storage }}{{- else }}
-        - name: wal-archive
           emptyDir: {}
 {{- end }}
         - name: {{ $app_name }}-scripts

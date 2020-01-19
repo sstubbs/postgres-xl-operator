@@ -10,27 +10,11 @@ For a graph description of the connections structure see [here](https://www.2ndq
 
 If using clusters created by the operator, please make sure you read the sections about persistence, backup and restore. 
 
-### BETA
+## BETA
 
 This operator is in beta. Any contributions are welcome.
 
-### Installation
-
-Currently this only works locally but a helm chart will be created for setting it up in cluster.
-To run it locally:
-1. Setup a kubernetes cluster and make sure you can connect with kubectl.
-2. Install rust.
-3. Clone this repo.
-4. Change operations/run/vars.sh `NAMESPACE` and `CUSTOM_RESOURCE_GROUP` if required.
-5. `cd operations`
-6. `./run.sh` 
-
-### Run an operation (Currently only one operation exists which parses yaml and echoes out a value using go template syntax)
-1. Clone this repo.
-2. `cd operations`
-3. `./setup-postgres-xl-cluster.sh`
-
-# Components Overview
+## Components Overview
 
 See: [Postgres-XL documentation](https://www.postgres-xl.org/documentation/xc-overview-components.html)
 
@@ -44,15 +28,51 @@ To connect to the database, please connect to the db main service (which is the 
 kubectl port-forward svc/[release-name]-postgres-xl-svc
 ```
 
-# Custom Resource Data
+## Installation
 
-## Kind: PostgresXlCluster
+Currently this only works locally using the source but a binary will be provided and a helm chart will be created for setting it up in cluster.
+
+### Operator Running Locally From Source
+
+1. Setup a kubernetes cluster and make sure you can connect with kubectl as this uses your kube config for authorisation.
+2. Install rust.
+3. Clone this repo.
+4. Change `operations/run/vars.sh` if required. These are the global values applied to all clusters which are:
+
+name | description | default value 
+--- | --- | ---
+NAMESPACE | The namespace that this operator will work in and create clusters in | pgxl
+CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
+CHART_NAME | This is the chart name which will be used in helm installations | postgres-xl-operator-chart
+CHART_VERSION | This is the chart version which will be used in helm installations | 0.0.1
+RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
+RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
+RUST_LOG | This is the log_level of the operator. Current values are `info` and `debug`. Debug will also show the YAML of resources that will be generated at cluster creation time. | info
+CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
+CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
+CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
+CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
+
+This application must be running when performing any operations by running the following:
+1. `cd operations`
+1. `./run.sh`
+
+## Operations
+
+### Cluster
+
+Clusters are controlled via the `CLUSTER_RESOURCE` in `custom-resources/postgres-xl-cluster.yaml` so it can be copied, altered and applied as required.
+The custom resource `metadata.name` is used for cluster names.
+for simplification this is populated from `CURRENT_CLUSTER_NAME` variable in operation bash scripts but can be manually changed.
+The name of clusters is `$RELEASE_NAME`-`metadata.name`
+`$CURRENT_CLUSTER_NAME` is set in the bash scripts in the operations directory which has a default value of `cluster1`
+`spec.data` accepts the following values:
 
 [STS] = `datanodes` or `coordinators` or `proxies` or `gtm`
 
 Example: datanodes.count = 32
 
-### Global values
+#### Global values
 
 name | description | default value 
 --- | --- | ---
@@ -84,7 +104,7 @@ on_load.resources.limits.cpu | The on load pod cpu limit (Must be a decimal) | 0
 on_load.startup | List of {name: "", content: ""} to be run in this pod on startup as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 on_load.init | List of {name: "", content: ""} to be run in this pod on initialisation as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
 
-### For any StatefulSet
+#### For any StatefulSet
 
 name | description | default value 
 --- | --- | ---
@@ -100,7 +120,7 @@ name | description | default value
 [STS].add_volume_claims | YAML inject to add STS dependent volume claims. See [here](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/) for more info about these
 [STS].thread_count | Applies only to proxies, and is the proxy worker thread count | 3 
 
-### Advanced overriding values (use with care)
+#### Advanced overriding values (use with care)
 
 #### Global
 
@@ -118,7 +138,7 @@ name | description
 [STS].inject_spec_yaml | Inject YAML into the template spec.
 [STS].inject_sts_yaml | Inject YAML into the main STS spec.
 
-# Persistence
+#### Persistence
 
 The implementation in this chart relies on StatefulSets to maintain data persistence between recoveries and restarts.
 To do so, one must define the `pvc` argument in the values. If you do not define the `pvc` argument, the 
@@ -146,7 +166,7 @@ Once these are defined, the DB will recover when any of datanode/coordinator/pro
 See more about persistence in Stateful Sets [here](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/)
 and [here](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
 
-# Backup and restore
+#### Backup and restore
 
 In order to keep to kubernetes principles, this helm chart allows to specify the persistent volume claim class for the workers, coordinators and gtm. This data will persist between restarts. The persistent volumes created will be prefixed by `datastore-`
 
@@ -158,6 +178,26 @@ In order to make a copy of the database one must copy all the data of each and e
 1. You CANNOT decrease the number of executing datanodes and coordinators otherwise data will be lost. Scaling up may require the redistribution of tables, information about such operations can be found [here]().
 
 [ More about replication and high availability.](https://www.postgres-xl.org/documentation/different-replication-solutions.html)
+
+### Create Cluster
+
+1. Open a new terminal as the operator must be running
+2. Change `CURRENT_CLUSTER_NAME` in `operations/create-postgres-xl-cluster.sh` to the required cluster name
+2. `cd operations`
+3. `./setup-postgres-xl-cluster.sh`
+
+### Delete Cluster
+
+1. Open a new terminal as the operator must be running
+2. Change `CURRENT_CLUSTER_NAME` in `operations/create-postgres-xl-cluster.sh` to the required cluster name
+2. `cd operations`
+3. `./delete-postgres-xl-cluster.sh`
+
+### List clusters
+
+1. Open a new terminal as the operator must be running
+2. `cd operations`
+3. `./list-postgres-xl-cluster.sh`
 
 ### TODO: WAL restore using buckets @
 1. GCS

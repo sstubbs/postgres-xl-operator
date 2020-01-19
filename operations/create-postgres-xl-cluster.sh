@@ -3,7 +3,7 @@
 source ./run/vars.sh
 source ./run/functions.sh
 
-export NAME="cluster1"
+export CURRENT_CLUSTER_NAME="cluster1"
 
 cd ../
 

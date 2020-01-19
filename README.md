@@ -96,7 +96,7 @@ security.pg_password | The superuser postgres password | null
 security.postgres_auth_type | The authentication type used | md5
 service.enabled | If true enables the external load balancer service | true
 service.port | The external service port | 5432
-service.service_type | The external service type | clusterIP
+service.service_type | The external service type | ClusterIP
 on_load.enabled | If true enables loading scripts on startup and initialisation | true
 on_load.back_off_limit | The number of times the job will restart | 5
 on_load.resources.requests.memory | The on load pod memory request | 250Mi

@@ -25,7 +25,7 @@ mod vars;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     std::env::set_var(
-        "LOG_LEVEL",
+        "RUST_LOG",
         std::env::var("LOG_LEVEL").unwrap_or(vars::LOG_LEVEL.into()),
     );
     env_logger::init();

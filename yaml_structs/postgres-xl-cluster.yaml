@@ -86,7 +86,7 @@ security:
 service:
   enabled: true
   port: 5432
-  service_type: clusterIP
+  service_type: ClusterIP
 
 # Configuration for a job that is called when the database
 # has finished loading.

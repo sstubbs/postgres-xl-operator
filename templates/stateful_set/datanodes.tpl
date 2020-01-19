@@ -78,7 +78,7 @@ spec:
         - configMapRef:
             name: {{ $app_name }}-envs
         ports:
-          - containerPort: {{ .cluster.values.config.managers_port }}
+          - containerPort: {{ .cluster.values.config.postgres_port }}
             name: {{ $component }}
         readinessProbe:
           exec:

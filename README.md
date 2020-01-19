@@ -41,13 +41,13 @@ Currently this only works locally using the source but a binary will be provided
 
 name | description | default value 
 --- | --- | ---
-NAMESPACE | The namespace that this operator will work in and create clusters in | pgxl
+NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
 CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
 CHART_NAME | This is the chart name which will be used in helm installations | postgres-xl-operator-chart
 CHART_VERSION | This is the chart version which will be used in helm installations | 0.0.1
 RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
 RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
-LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will also show the YAML of resources that will be generated at cluster creation time. | info
+LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will show the YAML of resources that will be generated at cluster creation time. | info
 CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
 CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
 CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
@@ -62,11 +62,8 @@ This application must be running when performing any operations by running the f
 ### Cluster
 
 Clusters are controlled via the `CLUSTER_RESOURCE` in `custom-resources/postgres-xl-cluster.yaml` so it can be copied, altered and applied as required.
-The custom resource `metadata.name` is used for cluster names.
-for simplification this is populated from `CURRENT_CLUSTER_NAME` variable in operation bash scripts but can be manually changed.
-The name of clusters is `$RELEASE_NAME`-`metadata.name`
 
-`$CURRENT_CLUSTER_NAME` is set in the bash scripts in the operations directory which has a default value of `cluster1`
+The custom resource `metadata.name` is used for cluster names and formatted as `RELEASE_NAME`-`metadata.name`.
 
 `spec.data` accepts the following values:
 
@@ -80,13 +77,13 @@ name | description | default value
 --- | --- | ---
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
-envs | List of {name: "", content: ""} to be included environment variables to add to all pods (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
-extra_labels | List of {name: "", content: ""} to be included as labels (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+envs | List of `{name: "", content: ""}` to be included environment variables to add to all pods, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
+extra_labels | List of `{name: "", content: ""}` to be included as labels, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING
 config.managers_port | The port to use for transaction management (GTM or proxies) | 6666
 config.postgres_port | The internal postgres port | 5432
 config.postgres_user | The internal postgres user | postgres
-config.append.[STS] | List of {name: "", content: ""} to append to the end of the postgres config file for a specific StatefulSet (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+config.append.[STS] | List of `{name: "", content: ""}` to append to the end of the postgres config file for a specific StatefulSet, see `./yaml_structs/postgres-xl-cluster.yaml` for an example) | []
 wal.archive.enabled | Enable wal archiving of datanodes | false
 wal.archive.version | Use versions for WAL of datanodes | unversioned
 wal.archive.storage_path | The storage path for WAL of datanodes | /wal_archive
@@ -99,12 +96,12 @@ service.port | The external service port | 5432
 service.service_type | The external service type | ClusterIP
 on_load.enabled | If true enables loading scripts on startup and initialisation | true
 on_load.back_off_limit | The number of times the job will restart | 5
-on_load.resources.requests.memory | The on load pod memory request | 250Mi
-on_load.resources.requests.cpu | The on load pod cpu request (Must be a decimal) | 0.25
-on_load.resources.limits.memory | The on load pod memory limit | 250Mi
-on_load.resources.limits.cpu | The on load pod cpu limit (Must be a decimal) | 0.25
-on_load.startup | List of {name: "", content: ""} to be run in this pod on startup as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
-on_load.init | List of {name: "", content: ""} to be run in this pod on initialisation as bash or sql (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+on_load.resources.requests.memory | The on load job memory request | 250Mi
+on_load.resources.requests.cpu | The on load job cpu request (Must be a decimal) | 0.25
+on_load.resources.limits.memory | The on load job memory limit | 250Mi
+on_load.resources.limits.cpu | The on load job cpu limit (Must be a decimal) | 0.25
+on_load.startup | List of `{name: "", content: ""}` to be run in this pod on startup as bash or sql, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
+on_load.init | List of `{name: "", content: ""}` to be run in this pod on initialisation as bash or sql, see `./yaml_structs/postgres-xl-cluster.yaml` for an example) | []
 
 #### For any StatefulSet
 
@@ -112,10 +109,10 @@ name | description | default value
 --- | --- | ---
 [STS].count | The total number of replicas, does not apply to gtm | 1
 [STS].resources.requests.memory | The main pod memory request | 250Mi
-[STS].resources.requests.cpu | The main pod cpu request (Must be a decimal) | 0.25
+[STS].resources.requests.cpu | The main pod cpu request, must be a decimal | 0.25
 [STS].resources.limits.memory | The main pod memory limit | 250Mi
-[STS].resources.limits.cpu | The main pod cpu limit (Must be a decimal) | 0.25
-[STS].pvc.resources.requests.storage | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. (This does not apply to proxies) | null
+[STS].resources.limits.cpu | The main pod cpu limit, must be a decimal | 0.25
+[STS].pvc.resources.requests.storage | The persistence volume claim for data storage. Use this value to set the internal database storage. See Persistence for recommended values. This does not apply to proxies | null
 [STS].add_containers | YAML inject to add more containers
 [STS].volumes | YAML inject to add more volumes
 [STS].volume_mounts | YAML inject to add more volume mounts
@@ -184,16 +181,17 @@ In order to make a copy of the database one must copy all the data of each and e
 ### Create Cluster
 
 1. Open a new terminal as the operator must be running
-2. Change `CURRENT_CLUSTER_NAME` in `operations/create-postgres-xl-cluster.sh` to the required cluster name
 2. `cd operations`
+3. add required data to `custom-resources/postgres-xl-cluster.yaml` `spec.data` defaults will be used for values not added.
 3. `./setup-postgres-xl-cluster.sh`
+4. enter required cluster name to create or update
 
 ### Delete Cluster
 
 1. Open a new terminal as the operator must be running
-2. Change `CURRENT_CLUSTER_NAME` in `operations/create-postgres-xl-cluster.sh` to the required cluster name
 2. `cd operations`
 3. `./delete-postgres-xl-cluster.sh`
+4. `enter required cluster name to delete`
 
 ### List clusters
 

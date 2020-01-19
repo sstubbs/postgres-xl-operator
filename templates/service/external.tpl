@@ -4,7 +4,6 @@ metadata:
   name: {{ $app_name }}-svc
   labels:
     app.kubernetes.io/component: external
-    type: external
 {{- template "global_labels" . }}
 spec:
   type: {{ .cluster.values.service.service_type }}

@@ -83,7 +83,7 @@ config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG,
 config.managers_port | The port to use for transaction management (GTM or proxies) | 6666
 config.postgres_port | The internal postgres port | 5432
 config.postgres_user | The internal postgres user | postgres
-config.append.[STS] | List of `{name: "", content: ""}` to append to the end of the postgres config file for a specific StatefulSet, see `./yaml_structs/postgres-xl-cluster.yaml` for an example) | []
+config.append.[STS] | List of `{name: "", content: ""}` to append to the end of the postgres config file for a specific StatefulSet, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
 wal.archive.enabled | Enable wal archiving of datanodes | false
 wal.archive.version | Use versions for WAL of datanodes | unversioned
 wal.archive.storage_path | The storage path for WAL of datanodes | /wal_archive

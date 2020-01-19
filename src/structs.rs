@@ -1,4 +1,3 @@
-use gtmpl::Func;
 use serde::{Deserialize, Serialize};
 
 #[derive(RustEmbed)]
@@ -37,10 +36,10 @@ pub struct EmbeddedStatefulSetTemplates;
 #[derive(Gtmpl, Clone)]
 pub struct Chart {
     pub name: String,
-    pub cleaned_name: Func,
+    pub cleaned_name: String,
     pub version: String,
     pub release_name: String,
-    pub cleaned_release_name: Func,
+    pub cleaned_release_name: String,
     pub release_service: String,
     pub cluster: Cluster,
 }
@@ -49,9 +48,25 @@ pub struct Chart {
 #[derive(Gtmpl, Clone)]
 pub struct Cluster {
     pub name: String,
-    pub cleaned_name: Func,
+    pub cleaned_name: String,
+    pub global_labels: Vec<GlobalLabel>,
+    pub selector_labels: Vec<SelectorLabel>,
     pub values: Values,
     pub scripts: Vec<ClusterScript>,
+}
+
+// Labels
+#[derive(Gtmpl, Clone)]
+pub struct GlobalLabel {
+    pub name: String,
+    pub content: String,
+}
+
+// Selector Labels
+#[derive(Gtmpl, Clone)]
+pub struct SelectorLabel {
+    pub name: String,
+    pub content: String,
 }
 
 // Scripts

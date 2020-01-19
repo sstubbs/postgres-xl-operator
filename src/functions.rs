@@ -2,13 +2,22 @@ use super::{
     custom_resources::KubePostgresXlCluster,
     structs::{
         Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts,
-        EmbeddedYamlStructs, Values,
+        EmbeddedYamlStructs, GlobalLabel, SelectorLabel, Values,
     },
     vars::{CHART_NAME, CHART_VERSION, RELEASE_NAME, RELEASE_SERVICE},
 };
-use gtmpl::Value;
 use json_patch::merge;
 use sprig::SPRIG;
+
+// Create a default fully qualified kubernetes name, with max 50 chars,
+// thus allowing for 13 chars of internal naming.
+pub fn clean_value(value: &String) -> anyhow::Result<String> {
+    let mut new_value = value.clone();
+    new_value.truncate(45);
+    let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
+    let result = re.replace_all(&new_value, "-");
+    return Ok(result.into());
+}
 
 pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::Result<Chart> {
     // Get the yaml strings
@@ -38,39 +47,6 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
     let yaml_struct_merged_object = serde_yaml::from_str(&yaml_struct_merged_string_unwrapped);
 
     if yaml_struct_merged_object.is_ok() {
-        // Create cluster object
-        let yaml_struct_merged_object_unwrapped: Values = yaml_struct_merged_object?;
-
-        let name = &custom_resource.metadata.name;
-        // Create a default fully qualified kubernetes name, with max 50 chars,
-        // thus allowing for 13 chars of internal naming.
-        fn cleaned_name(args: &[Value]) -> Result<Value, String> {
-            if let Value::Object(ref o) = &args[0] {
-                if let Some(Value::String(ref n)) = o.get("name") {
-                    let mut name = n.to_owned();
-                    name.truncate(45);
-                    let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
-                    let result = re.replace_all(&name, "-");
-                    return Ok(result.into());
-                }
-            }
-            Err("Failed cleaning name".to_owned())
-        }
-
-        // Create a default fully qualified kubernetes name, with max 50 chars,
-        // thus allowing for 13 chars of internal naming.
-        fn cleaned_release_name(args: &[Value]) -> Result<Value, String> {
-            if let Value::Object(ref o) = &args[0] {
-                if let Some(Value::String(ref n)) = o.get("release_name") {
-                    let mut name = n.to_owned();
-                    name.truncate(45);
-                    let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
-                    let result = re.replace_all(&name, "-");
-                    return Ok(result.into());
-                }
-            }
-            Err("Failed cleaning name".to_owned())
-        }
 
         // Load scripts dir
         let mut scripts = Vec::new();
@@ -89,17 +65,52 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
             }
         }
 
+        let chart_name = std::env::var("CHART_NAME").unwrap_or(CHART_NAME.into());
+        let chart_cleaned_name = clean_value(&chart_name)?;
+        let chart_version = std::env::var("CHART_VERSION").unwrap_or(CHART_VERSION.into());
+        let release_name = std::env::var("RELEASE_NAME").unwrap_or(RELEASE_NAME.into());
+        let cleaned_release_name = clean_value(&release_name)?;
+        let release_service = std::env::var("RELEASE_SERVICE").unwrap_or(RELEASE_SERVICE.into());
+        let cluster_name = &custom_resource.metadata.name;
+        let cleaned_cluster_name = clean_value(&cluster_name)?;
+
+        let yaml_struct_merged_object_unwrapped: Values = yaml_struct_merged_object?;
+
         // Global context
         let global_context = Chart {
-            name: std::env::var("CHART_NAME").unwrap_or(CHART_NAME.into()),
-            cleaned_name,
-            version: std::env::var("CHART_VERSION").unwrap_or(CHART_VERSION.into()),
-            release_name: std::env::var("RELEASE_NAME").unwrap_or(RELEASE_NAME.into()),
-            cleaned_release_name,
-            release_service: std::env::var("RELEASE_SERVICE").unwrap_or(RELEASE_SERVICE.into()),
+            name: chart_name.to_owned(),
+            cleaned_name: chart_cleaned_name,
+            version: chart_version.to_owned(),
+            release_name,
+            cleaned_release_name: cleaned_release_name.to_owned(),
+            release_service: release_service.to_owned(),
             cluster: Cluster {
-                name: name.to_owned(),
-                cleaned_name,
+                name: cluster_name.to_owned(),
+                cleaned_name: cleaned_cluster_name.to_owned(),
+                global_labels: vec![
+                    GlobalLabel {
+                        name: "helm.sh/chart".to_owned(),
+                        content: format!("{}-{}", chart_name, chart_version),
+                    },
+                    GlobalLabel {
+                        name: "app.kubernetes.io/managed-by".to_owned(),
+                        content: release_service,
+                    },
+                    GlobalLabel {
+                        name: "app.kubernetes.io/version".to_owned(),
+                        content: yaml_struct_merged_object_unwrapped.to_owned().image.version,
+                    },
+                ],
+                selector_labels: vec![
+                    SelectorLabel {
+                        name: "app.kubernetes.io/instance".to_owned(),
+                        content: cleaned_release_name.to_owned(),
+                    },
+                    SelectorLabel {
+                        name: "app.kubernetes.io/name".to_owned(),
+                        content: cleaned_cluster_name,
+                    },
+                ],
                 values: yaml_struct_merged_object_unwrapped,
                 scripts,
             },

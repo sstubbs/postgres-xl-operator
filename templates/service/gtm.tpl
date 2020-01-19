@@ -15,6 +15,7 @@ spec:
     targetPort: {{ .cluster.values.config.managers_port }}
     name: {{ $component }}
   selector:
-    app.kubernetes.io/instance: {{ .cleaned_release_name }}
-    app.kubernetes.io/name: {{ .cluster.cleaned_name }}
     app.kubernetes.io/component: {{ $component }}
+{{ range .cluster.selector_labels -}}
+{{ .name | indent 4 }}: {{ .content }}
+{{ end }}

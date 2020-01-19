@@ -27,18 +27,20 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/instance: {{ .cleaned_release_name }}
-      app.kubernetes.io/name: {{ .cluster.cleaned_name }}
       app.kubernetes.io/component: {{ $component }}
+{{ range .cluster.selector_labels -}}
+{{ .name | indent 6 }}: {{ .content }}
+{{ end }}
 {{- if .cluster.values.gtm.inject_sts_yaml }}
 {{ .cluster.values.gtm.inject_sts_yaml | indent 2 }}
 {{- end }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: {{ .cleaned_release_name }}
-        app.kubernetes.io/name: {{ .cluster.cleaned_name }}
         app.kubernetes.io/component: {{ $component }}
+{{ range .cluster.selector_labels -}}
+{{ .name | indent 8 }}: {{ .content }}
+{{ end }}
     spec:
       securityContext:
         fsGroup: 3000

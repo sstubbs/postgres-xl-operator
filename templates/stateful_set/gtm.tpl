@@ -111,11 +111,11 @@ spec:
         - name: {{ $app_name }}-scripts
           configMap:
             name: {{ $app_name }}-scripts
-            defaultMode: 0777
+            defaultMode: 511
         - name: {{ $app_name }}-cfg
           configMap:
             name: {{ $app_name }}-cfg
-            defaultMode: 0777
+            defaultMode: 511
 {{- if .cluster.values.gtm.volumes }}
-{{ .cluster.values.gtm.add_containers | indent 8 }}
+{{ .cluster.values.gtm.volumes | indent 8 }}
 {{- end }}

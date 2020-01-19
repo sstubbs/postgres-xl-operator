@@ -65,7 +65,9 @@ Clusters are controlled via the `CLUSTER_RESOURCE` in `custom-resources/postgres
 The custom resource `metadata.name` is used for cluster names.
 for simplification this is populated from `CURRENT_CLUSTER_NAME` variable in operation bash scripts but can be manually changed.
 The name of clusters is `$RELEASE_NAME`-`metadata.name`
+
 `$CURRENT_CLUSTER_NAME` is set in the bash scripts in the operations directory which has a default value of `cluster1`
+
 `spec.data` accepts the following values:
 
 [STS] = `datanodes` or `coordinators` or `proxies` or `gtm`

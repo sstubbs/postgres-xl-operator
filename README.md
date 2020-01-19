@@ -25,7 +25,7 @@ See: [Postgres-XL documentation](https://www.postgres-xl.org/documentation/xc-ov
 
 To connect to the database, please connect to the db main service (which is the coordinator service), example:
 ```shell
-kubectl port-forward svc/[release-name]-postgres-xl-svc
+kubectl port-forward svc/[release-name]-[cluster-name]-svc
 ```
 
 ## Installation

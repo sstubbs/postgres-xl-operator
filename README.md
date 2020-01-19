@@ -110,7 +110,7 @@ on_load.init | List of {name: "", content: ""} to be run in this pod on initiali
 
 name | description | default value 
 --- | --- | ---
-[STS].count | The total number of replicas, dose not apply to gtm | 1
+[STS].count | The total number of replicas, does not apply to gtm | 1
 [STS].resources.requests.memory | The main pod memory request | 250Mi
 [STS].resources.requests.cpu | The main pod cpu request (Must be a decimal) | 0.25
 [STS].resources.limits.memory | The main pod memory limit | 250Mi

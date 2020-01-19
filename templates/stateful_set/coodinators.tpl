@@ -52,7 +52,7 @@ spec:
         image: {{ .cluster.values.image.name }}:{{ .cluster.values.image.version }}
         command:
           - bash
-          - /scripts/data_node_entrypoint
+          - /scripts/coordinator_entrypoint
         env:
           - name: POD_NAME
             valueFrom:

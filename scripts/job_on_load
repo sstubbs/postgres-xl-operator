@@ -12,8 +12,8 @@ log:info "Waiting for database to be ready..."
 assert $? "Aborted, timed out while waiting for database to be ready @" "$EXTERNAL_SERVICE:$PG_PORT" || exit $?
 
 function is_initialized() {
-  local dose_state_table_exist=""
-  dose_state_table_exist=$(psql -t -c "
+  local does_state_table_exist=""
+  does_state_table_exist=$(psql -t -c "
 SELECT EXISTS (
    SELECT 1
    FROM   information_schema.tables 
@@ -22,7 +22,7 @@ SELECT EXISTS (
    );
 " | tr -d '[[:space:]]')
 
-  if [ "$dose_state_table_exist" == "f" ]; then
+  if [ "$does_state_table_exist" == "f" ]; then
     return 0
   fi
 

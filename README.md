@@ -126,7 +126,7 @@ name | description | default value
 name | description | default value 
 --- | --- | ---
 homedir | The image home directory | /var/lib/postgresql 
-override_envs | List of {name: "", content: ""} to be included environment variables which are added after the chart core envs, and allows to override the chart (See ./yaml_structs/postgres-xl-cluster.yaml for an example) | []
+override_envs | List of `{name: "", content: ""}` to be included environment variables which are added after the chart core envs, and allows to override the chart, see `./yaml_structs/postgres-xl-cluster.yaml for an example` | []
 service.inject_spec_yaml | Injects YAML into the external service | null
 
 #### For any stateful set

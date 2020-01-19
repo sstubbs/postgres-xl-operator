@@ -47,7 +47,6 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
     let yaml_struct_merged_object = serde_yaml::from_str(&yaml_struct_merged_string_unwrapped);
 
     if yaml_struct_merged_object.is_ok() {
-
         // Load scripts dir
         let mut scripts = Vec::new();
 

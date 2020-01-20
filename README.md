@@ -193,7 +193,7 @@ In order to make a copy of the database one must copy all the data of each and e
 3. `./delete-postgres-xl-cluster.sh`
 4. `enter required cluster name to delete`
 
-### List clusters
+### List Clusters
 
 1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
 2. `cd operations`

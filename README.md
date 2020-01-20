@@ -63,7 +63,7 @@ This application must be running when performing any operations by running the f
 
 1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
 2. `cd operations`.
-3. copy one of the examples into a new file in `custom-resource` and edit `spec.data` as required.
+3. copy one of the examples into a new file in `custom-resource-examples/postgres-xl-cluster` and edit `spec.data` as required.
 4. `./setup-postgres-xl-cluster.sh`.
 5. follow on screen instructions.
 

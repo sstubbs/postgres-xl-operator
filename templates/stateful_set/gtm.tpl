@@ -64,6 +64,7 @@ spec:
                 fieldPath: status.podIP
           - name: NODE_TYPE
             value: gtm
+{{- template "global_secret" . }}
         envFrom:
         - configMapRef:
             name: {{ $app_name }}-envs

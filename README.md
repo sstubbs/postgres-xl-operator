@@ -88,8 +88,8 @@ wal.archive.enabled | Enable wal archiving of datanodes | false
 wal.archive.version | Use versions for WAL of datanodes | unversioned
 wal.archive.storage_path | The storage path for WAL of datanodes | /wal_archive
 wal.archive.pvc.resources.requests.storage | Enable PVC for wal archiving of datanodes | null
-security.passwords_secret_name | The kubernetes secret value set to be used for passwords. | null
-security.pg_password | The superuser postgres password | null
+security.passwords_secret_name | The kubernetes secret value set to be used for passwords | null
+security.pg_password | The kubernetes secret key for superuser postgres password | null
 security.postgres_auth_type | The authentication type used | md5
 service.enabled | If true enables the external load balancer service | true
 service.port | The external service port | 5432

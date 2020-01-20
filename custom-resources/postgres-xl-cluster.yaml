@@ -4,5 +4,6 @@ metadata:
   name: {{CURRENT_CLUSTER_NAME}}
 spec:
   data: |
-    proxies:
-      enabled: false
+    security:
+      passwords_secret_name: pgxl-passwords-collection
+      pg_password: pgpass

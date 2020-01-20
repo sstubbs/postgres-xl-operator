@@ -59,6 +59,27 @@ This application must be running when performing any operations by running the f
 
 ## Operations
 
+### Create Cluster
+
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
+2. `cd operations`.
+3. copy one of the examples into a new file in `custom-resource` and edit `spec.data` as required.
+4. `./setup-postgres-xl-cluster.sh`.
+5. follow on screen instructions.
+
+### Delete Cluster
+
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
+2. `cd operations`.
+3. `./delete-postgres-xl-cluster.sh`.
+4. Select required cluster name to delete.
+
+### List Clusters
+
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
+2. `cd operations`.
+3. `./list-postgres-xl-cluster.sh`.
+
 ### Cluster
 
 Clusters are controlled via the `CLUSTER_RESOURCE` in `custom-resources/postgres-xl-cluster.yaml` so it can be copied, altered and applied as required.
@@ -177,27 +198,6 @@ In order to make a copy of the database one must copy all the data of each and e
 1. You CANNOT decrease the number of executing datanodes and coordinators otherwise data will be lost. Scaling up may require the redistribution of tables, information about such operations can be found [here]().
 
 [ More about replication and high availability.](https://www.postgres-xl.org/documentation/different-replication-solutions.html)
-
-### Create Cluster
-
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. copy one of the examples into a new file in `custom-resource` and edit `spec.data` as required.
-4. `./setup-postgres-xl-cluster.sh`.
-5. follow on screen instructions.
-
-### Delete Cluster
-
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. `./delete-postgres-xl-cluster.sh`.
-4. Select required cluster name to delete.
-
-### List Clusters
-
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. `./list-postgres-xl-cluster.sh`.
 
 ### Extending The Operator
 - Adding a new parameter if required into a custom resource involves adding it to `yaml_structs/$resource_type` and mapping it to structs in `src/structs.rs`

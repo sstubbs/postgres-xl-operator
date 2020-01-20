@@ -3,7 +3,7 @@
 source ./run/vars.sh
 source ./run/functions.sh
 
-read -p "Enter cluster name: "  CURRENT_CLUSTER_NAME
+read -p "Enter cluster name: " CURRENT_CLUSTER_NAME
 export CURRENT_CLUSTER_NAME
 
 cd ../

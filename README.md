@@ -199,6 +199,10 @@ In order to make a copy of the database one must copy all the data of each and e
 2. `cd operations`
 3. `./list-postgres-xl-cluster.sh`
 
+### Extending The Operator
+- Adding a new parameter if required into a custom resource involves adding it to `yaml_structs/$resource_type` and mapping it to structs in `src/structs.rs`
+- Templates in the `templates` directory are created from the context by [ gtmpl-rust ](https://github.com/fiji-flo/gtmpl-rust) so any other required kubernetes resources can be added to those sub folders but only one YAML document per file.
+
 ### TODO: WAL restore using buckets @
 1. GCS
 2. AWS

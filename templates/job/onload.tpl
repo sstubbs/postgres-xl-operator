@@ -1,5 +1,6 @@
 {{- $component := "onload" -}}
 
+# Main condition.
 {{ if .cluster.values.on_load.enabled }}
 
 apiVersion: batch/v1
@@ -81,17 +82,17 @@ spec:
 {{ .cluster.values.on_load.add_containers | indent 6 }}
 {{- end }}
       volumes:
-        - name: {{$app_name}}-scripts
+        - name: {{ $app_name }}-scripts
           configMap:
-            name: {{$app_name}}-scripts
+            name: {{ $app_name }}-scripts
             defaultMode: 511
-        - name: {{$app_name}}-{{ $component }}
+        - name: {{ $app_name }}-{{ $component }}
           configMap:
-            name: {{$app_name}}-{{ $component }}
+            name: {{ $app_name }}-{{ $component }}
             defaultMode: 511
 {{- if .cluster.values.on_load.volumes }}
 {{ .cluster.values.on_load.volumes | indent 8 }}
 {{- end }}
 
-# end of main condition.
+# End of main condition.
 {{- end }}

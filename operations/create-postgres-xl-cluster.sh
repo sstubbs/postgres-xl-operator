@@ -10,9 +10,9 @@ read -p "Enter cluster name: " CURRENT_CLUSTER_NAME
 export CURRENT_CLUSTER_NAME
 
 printf "Please select example:\n"
-select example in ../custom-resource-examples/postgres-xl-cluster/*; do test -n "${example}" && break; echo ">>> Invalid Selection"; done
+select EXAMPLE in ../custom-resource-examples/postgres-xl-cluster/*; do test -n "${EXAMPLE}" && break; echo ">>> Invalid Selection"; done
 
-YAML_CUSTOM_RESOURCE=$(replace_with_env "$(cat "${example}")")
+YAML_CUSTOM_RESOURCE=$(replace_with_env "$(cat "${EXAMPLE}")")
 printf "%sCluster %s will be created with the following details: %s\n%s\n" "${bold}" "${CURRENT_CLUSTER_NAME}" "${normal}" "${YAML_CUSTOM_RESOURCE}"
 
 read -p "Continue (y/n)?" choice

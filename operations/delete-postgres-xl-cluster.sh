@@ -3,7 +3,8 @@
 source ./run/vars.sh
 source ./run/functions.sh
 
-read -p "Enter cluster name: " CURRENT_CLUSTER_NAME
-export CURRENT_CLUSTER_NAME
+CLUSTERS=$(kubectl get -n "${NAMESPACE}" -o name "${CLUSTER_RESOURCE_KIND_LOWER}.${CUSTOM_RESOURCE_GROUP}")
 
-kubectl delete -n "${NAMESPACE}" "${CLUSTER_RESOURCE_KIND_LOWER}.${CUSTOM_RESOURCE_GROUP}/${CURRENT_CLUSTER_NAME}"
+select CLUSTER in $CLUSTERS; do test -n "${CLUSTER}" && break; echo ">>> Invalid Selection"; done
+
+kubectl delete -n "${NAMESPACE}" "${cluster}"

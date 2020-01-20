@@ -5,6 +5,7 @@ metadata:
 spec:
   data: |
     on_load:
+      enabled: true
       startup:
         - name: create_database.sh
           content: |-

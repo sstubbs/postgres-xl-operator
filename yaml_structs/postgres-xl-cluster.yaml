@@ -127,6 +127,15 @@ on_load:
     #     CREATE SCHEMA test;
     #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
 
+  # addons
+  add_containers: ""
+  volumes: ""
+  volume_mounts: ""
+  # overrides
+  inject_main_container_yaml: ""
+  inject_spec_yaml: ""
+  inject_job_yaml: ""
+
 gtm:
   resources:
     requests:

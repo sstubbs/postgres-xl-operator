@@ -218,6 +218,12 @@ pub struct OnLoad {
     resources: OnLoadResource,
     startup: Vec<OnLoadStartup>,
     init: Vec<OnLoadInit>,
+    add_containers: String,
+    volumes: String,
+    volume_mounts: String,
+    inject_main_container_yaml: String,
+    inject_spec_yaml: String,
+    inject_job_yaml: String,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]

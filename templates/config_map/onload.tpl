@@ -1,5 +1,8 @@
 {{- $component := "onload" -}}
 
+# Main condition.
+{{ if .cluster.values.on_load.enabled }}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,3 +19,6 @@ data:
   init_{{ $i }}_{{ $v.name }}: |-
 {{ $v.content | indent 4 }}
 {{ end }}
+
+# End of main condition.
+{{- end }}

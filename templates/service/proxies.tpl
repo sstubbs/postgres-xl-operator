@@ -1,5 +1,8 @@
 {{- $component := "pxy" -}}
 
+# Main condition.
+{{ if .cluster.values.proxies.enabled }}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -19,3 +22,6 @@ spec:
 {{ range .cluster.selector_labels -}}
 {{ .name | indent 4 }}: {{ .content }}
 {{ end }}
+
+# End of main condition.
+{{- end }}

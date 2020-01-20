@@ -1,5 +1,8 @@
 {{- $component := "pxy" -}}
 
+# Main condition.
+{{ if .cluster.values.proxies.enabled }}
+
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -109,4 +112,7 @@ spec:
             defaultMode: 511
 {{- if .cluster.values.proxies.volumes }}
 {{ .cluster.values.proxies.volumes | indent 8 }}
+{{- end }}
+
+# End of main condition.
 {{- end }}

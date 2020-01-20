@@ -180,22 +180,22 @@ In order to make a copy of the database one must copy all the data of each and e
 
 ### Create Cluster
 
-1. Open a new terminal as the operator must be running
-2. `cd operations`
-3. add required data to `custom-resources/postgres-xl-cluster.yaml` `spec.data` defaults will be used for values not added.
-3. `./setup-postgres-xl-cluster.sh`
-4. enter required cluster name to create or update
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
+2. `cd operations`.
+3. copy one of the examples into a new file in `custom-resource` and edit `spec.data` as required.
+4. `./setup-postgres-xl-cluster.sh`.
+5. follow on screen instructions
 
 ### Delete Cluster
 
-1. Open a new terminal as the operator must be running
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
 2. `cd operations`
 3. `./delete-postgres-xl-cluster.sh`
 4. `enter required cluster name to delete`
 
 ### List clusters
 
-1. Open a new terminal as the operator must be running
+1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
 2. `cd operations`
 3. `./list-postgres-xl-cluster.sh`
 

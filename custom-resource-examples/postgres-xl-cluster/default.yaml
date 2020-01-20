@@ -3,4 +3,4 @@ kind: {{CLUSTER_RESOURCE_KIND}}
 metadata:
   name: {{CURRENT_CLUSTER_NAME}}
 spec:
-  data: |
+  data: ""

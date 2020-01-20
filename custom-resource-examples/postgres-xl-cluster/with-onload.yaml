@@ -9,8 +9,8 @@ spec:
       startup:
         - name: create_database.sh
           content: |-
-            psql -c "CREATE DATABASE tester;"
-            export PGDATABASE="tester"
+            psql -c "CREATE DATABASE startup_tester;"
+            export PGDATABASE="startup_tester"
         - name: create_base_tables.sql
           content: |-
             CREATE SCHEMA test;
@@ -18,9 +18,5 @@ spec:
       init:
         - name: create_database.sh
           content: |-
-            psql -c "CREATE DATABASE tester;"
-            export PGDATABASE="tester"
-        - name: create_base_tables.sql
-          content: |-
-            CREATE SCHEMA test;
-            CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
+            psql -c "CREATE DATABASE init_tester;"
+            export PGDATABASE="init_tester"

@@ -13,7 +13,7 @@ spec:
     targetPort: {{ .cluster.values.config.postgres_port }}
     name: pg
   selector:
-    app.kubernetes.io/component: coordinator
+    app.kubernetes.io/component: crd
 {{ range .cluster.selector_labels -}}
 {{ .name | indent 4 }}: {{ .content }}
 {{ end }}

@@ -152,7 +152,11 @@ pub async fn create_resource_object(
 
     debug!("{}", new_resource_yaml);
 
-    // Convert new template into serde object to post
-    let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
-    return Ok(new_resource_object);
+    if new_resource_yaml.contains("apiVersion") {
+        // Convert new template into serde object to post
+        let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
+        return Ok(new_resource_object);
+    } else {
+        return Err(anyhow!("Missing apiVersion in template so skipping"));
+    }
 }

@@ -39,54 +39,67 @@ pub async fn action(
                     &global_template,
                     &file_data_string.to_owned(),
                 )
-                .await?;
-                let pp = PostParams::default();
+                .await;
 
-                match resource_action {
-                    ResourceAction::Added => {
-                        match resource_client
-                            .create(&pp, serde_json::to_vec(&new_resource_object)?)
-                            .await
-                        {
-                            Ok(o) => {
-                                if new_resource_object["metadata"]["name"] == o.metadata.name {
-                                    info!("Created {}", o.metadata.name);
+                if new_resource_object.is_ok() {
+                    let new_resource_object_unwapped = new_resource_object.unwrap();
+
+                    let pp = PostParams::default();
+
+                    match resource_action {
+                        ResourceAction::Added => {
+                            match resource_client
+                                .create(&pp, serde_json::to_vec(&new_resource_object_unwapped)?)
+                                .await
+                            {
+                                Ok(o) => {
+                                    if new_resource_object_unwapped["metadata"]["name"]
+                                        == o.metadata.name
+                                    {
+                                        info!("Created {}", o.metadata.name);
+                                    }
                                 }
+                                Err(e) => error!("{:?}", e), // any other case is probably bad
                             }
-                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
-                    }
-                    ResourceAction::Modified => {
-                        let resource_name =
-                            &new_resource_object["metadata"]["name"].as_str().unwrap();
-                        match resource_client
-                            .replace(
-                                resource_name,
-                                &pp,
-                                serde_json::to_vec(&new_resource_object)?,
-                            )
-                            .await
-                        {
-                            Ok(o) => {
-                                if new_resource_object["metadata"]["name"] == o.metadata.name {
-                                    info!("Updated {}", o.metadata.name);
+                        ResourceAction::Modified => {
+                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
+                                .as_str()
+                                .unwrap();
+                            match resource_client
+                                .replace(
+                                    resource_name,
+                                    &pp,
+                                    serde_json::to_vec(&new_resource_object_unwapped)?,
+                                )
+                                .await
+                            {
+                                Ok(o) => {
+                                    if new_resource_object_unwapped["metadata"]["name"]
+                                        == o.metadata.name
+                                    {
+                                        info!("Updated {}", o.metadata.name);
+                                    }
                                 }
+                                Err(e) => error!("{:?}", e), // any other case is probably bad
                             }
-                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
-                    }
-                    ResourceAction::Deleted => {
-                        let resource_name =
-                            &new_resource_object["metadata"]["name"].as_str().unwrap();
-                        match resource_client
-                            .delete(resource_name, &DeleteParams::default())
-                            .await
-                        {
-                            Ok(_o) => info!(
-                                "Deleted {}",
-                                new_resource_object["metadata"]["name"].as_str().unwrap()
-                            ),
-                            Err(e) => error!("{:?}", e), // any other case is probably bad
+                        ResourceAction::Deleted => {
+                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
+                                .as_str()
+                                .unwrap();
+                            match resource_client
+                                .delete(resource_name, &DeleteParams::default())
+                                .await
+                            {
+                                Ok(_o) => info!(
+                                    "Deleted {}",
+                                    new_resource_object_unwapped["metadata"]["name"]
+                                        .as_str()
+                                        .unwrap()
+                                ),
+                                Err(e) => error!("{:?}", e), // any other case is probably bad
+                            }
                         }
                     }
                 }

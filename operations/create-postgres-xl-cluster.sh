@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source ./run/vars.sh
-source ./run/functions.sh
+source ./common/vars.sh
+source ./common/functions.sh
 
 bold=$(tput bold)
 normal=$(tput sgr0)

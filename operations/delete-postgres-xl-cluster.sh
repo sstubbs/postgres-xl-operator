@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source ./run/vars.sh
-source ./run/functions.sh
+source ./common/vars.sh
+source ./common/functions.sh
 
 CLUSTERS=$(kubectl get -n "${NAMESPACE}" -o name "${CLUSTER_RESOURCE_KIND_LOWER}.${CUSTOM_RESOURCE_GROUP}")
 

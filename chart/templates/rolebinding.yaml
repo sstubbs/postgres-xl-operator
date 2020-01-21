@@ -1,0 +1,19 @@
+{{- if .Values.knativeDeploy }}
+{{- else }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "fullname" . }}-rolebinding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: {{ template "fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "fullname" . }}-sa
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ template "fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}

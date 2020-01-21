@@ -3,7 +3,7 @@
 export NAMESPACE="pgxl"
 export CUSTOM_RESOURCE_GROUP="postgres-xl-operator.vanqor.com"
 export CHART_NAME="postgres-xl-operator-chart"
-export CHART_VERSION="0.0.1"
+export CHART_VERSION="0.1.0"
 export RELEASE_NAME="pgxlo"
 export RELEASE_SERVICE="helm"
 export LOG_LEVEL="info"

@@ -44,7 +44,7 @@ name | description | default value
 NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
 CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
 CHART_NAME | This is the chart name which will be used in helm installations | postgres-xl-operator-chart
-CHART_VERSION | This is the chart version which will be used in helm installations | 0.0.1
+CHART_VERSION | This is the chart version which will be used in helm installations | 0.1.0
 RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
 RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
 LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will show the YAML of resources that will be generated at cluster creation time. | info

@@ -1,9 +1,6 @@
 apiVersion: v2
 name: postgres-xl-operator
 description: An operator for creating and removing Postgres XL clusters
-
 type: application
-
 version: 0.1.0
-
 appVersion: 0.1.0

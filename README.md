@@ -44,14 +44,33 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 
 ## Installation
 
-Currently this only works locally using the source but a binary will be provided and a helm chart will be created for setting it up in cluster.
+### Helm
+
+1. A Kubernetes cluster with helm 3 is required.
+2. Clone this repo
+3. Change the following variables in `operations/common/vars.sh` if required
+
+name | description | default value 
+--- | --- | ---
+NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
+CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
+CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
+CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
+CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
+CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
+
+4. `cd operations && ./create-namespace-crd.sh && cd ../`
+
+5. change `chart/values.yaml` as required
+
+6. `helm3 install pgxlo chart`
 
 ### Operator Running Locally From Source
 
 1. Setup a kubernetes cluster and make sure you can connect with kubectl as this uses your kube config for authorisation.
 2. Install rust.
 3. Clone this repo.
-4. Change `operations/run/vars.sh` if required. These are the global values applied to all clusters which are:
+4. Change `operations/common/vars.sh` if required. These are the global values applied to all clusters which are:
 
 name | description | default value 
 --- | --- | ---

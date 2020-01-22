@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgres-xl-operator.fullname" . }}-cfg
+  labels:
+    {{- include "postgres-xl-operator.labels" . | nindent 4 }}
+data:
+  NAMESPACE: {{ .Release.Namespace }}
+  CUSTOM_RESOURCE_GROUP: {{ .Values.customResourceGroup }}
+  CHART_NAME: {{ .Chart.Name }}
+  CHART_VERSION: {{ .Chart.Version }}
+  RELEASE_NAME: {{ .Release.Name }}
+  RELEASE_SERVICE: {{ .Release.Service }}
+  LOG_LEVEL: {{ .Values.logLevel }}
+  KUBE_CONFIG_TYPE: {{ .Values.kubeConfigType }}
+  CLUSTER_RESOURCE_PLURAL: {{ .Values.clusterResourcePlural }}

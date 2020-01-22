@@ -1,9 +1,9 @@
 pub static NAMESPACE: &str = "pgxl";
 pub static CUSTOM_RESOURCE_GROUP: &str = "postgres-xl-operator.vanqor.com";
-pub static CHART_NAME: &str = "postgres-xl-operator-chart";
+pub static CHART_NAME: &str = "postgres-xl-operator";
 pub static CHART_VERSION: &str = "0.1.0";
 pub static RELEASE_NAME: &str = "pgxlo";
-pub static RELEASE_SERVICE: &str = "helm";
+pub static RELEASE_SERVICE: &str = "Helm";
 pub static LOG_LEVEL: &str = "info";
 pub static KUBE_CONFIG_TYPE: &str = "incluster";
 //pub static CLUSTER_RESOURCE_SINGULAR: &str = "postgres-xl-cluster";

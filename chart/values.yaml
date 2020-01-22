@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+customResourceGroup: postgres-xl-operator.vanqor.com
+logLevel: info
+kubeConfigType: incluster
+clusterResourcePlural: postgres-xl-clusters
+
 image:
   repository: sstubbs/postgres-xl-operator
   pullPolicy: Always

@@ -1,19 +1,14 @@
-{{- if .Values.knativeDeploy }}
-{{- else }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ template "fullname" . }}-rolebinding
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "postgres-xl-operator.serviceAccountName" . }}-role
   labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    app: {{ template "fullname" . }}
+  {{ include "postgres-xl-operator.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "fullname" . }}-sa
+    name: {{ include "postgres-xl-operator.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ template "fullname" . }}-role
+  name: {{ include "postgres-xl-operator.serviceAccountName" . }}-role
   apiGroup: rbac.authorization.k8s.io
-{{ end }}

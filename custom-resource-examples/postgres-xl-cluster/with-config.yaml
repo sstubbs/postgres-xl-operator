@@ -1,0 +1,18 @@
+apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
+kind: {{CLUSTER_RESOURCE_KIND}}
+metadata:
+  name: {{CURRENT_CLUSTER_NAME}}
+spec:
+  data: |
+    config:
+      append:
+        coordinator:
+          - name: max_connections
+            content: 200
+          - name: enable_seqscan
+            content: on
+        datanode:
+          - name: max_connections
+            content: 300
+          - name: enable_seqscan
+            content: on

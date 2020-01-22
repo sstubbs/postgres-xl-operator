@@ -17,20 +17,18 @@ spec:
         name: datastore
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        pvc:
-          resources:
-            requests:
-              storage: {{ .cluster.values.datanodes.pvc.resources.requests.storage }}
+        resources:
+          requests:
+            storage: {{ .cluster.values.datanodes.pvc.resources.requests.storage }}
 {{- end }}
 {{- if and .cluster.values.wal.archive.enable .cluster.values.wal.archive.pvc.resources.requests.storage }}
     - metadata:
         name: wal-archive
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        pvc:
-          resources:
-            requests:
-              storage: {{ .cluster.values.datanodes.pvc.resources.requests.storage }}
+        resources:
+          requests:
+            storage: {{ .cluster.values.datanodes.pvc.resources.requests.storage }}
 {{- end }}
 {{- if .cluster.values.datanodes.add_volume_claims }}
 {{ .cluster.values.datanodes.add_volume_claims | indent 4 }}

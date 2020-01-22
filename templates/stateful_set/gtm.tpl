@@ -17,10 +17,9 @@ spec:
         name: datastore
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        pvc:
-          resources:
-            requests:
-              storage: {{ .cluster.values.gtm.pvc.resources.requests.storage }}
+        resources:
+          requests:
+            storage: {{ .cluster.values.gtm.pvc.resources.requests.storage }}
 {{- end }}
 {{- if .cluster.values.gtm.add_volume_claims }}
 {{ .cluster.values.gtm.add_volume_claims | indent 4 }}

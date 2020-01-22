@@ -1,0 +1,26 @@
+apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
+kind: {{CLUSTER_RESOURCE_KIND}}
+metadata:
+  name: {{CURRENT_CLUSTER_NAME}}
+spec:
+  data: |
+    gtm:
+      pvc:
+        resources:
+          requests:
+            storage: 100Mi
+
+    coordinators:
+      count: 1
+      pvc:
+        resources:
+          requests:
+            storage: 100Mi
+
+    # this is the costly bit.
+    datanodes:
+      count: 1
+      pvc:
+        resources:
+          requests:
+            storage: "4Gi"

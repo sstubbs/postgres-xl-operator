@@ -32,6 +32,20 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 
 Currently this only works locally using the source but a binary will be provided and a helm chart will be created for setting it up in cluster.
 
+### Quick Start
+
+#### Install The Operator
+
+1. A Kubernetes cluster with helm 3 is required.
+2. Clone this repo
+3. `cd operations && ./create-namespace-crd.sh && cd ../`
+4. `helm3 install pgxlo chart`
+
+#### Creating a cluster
+
+1. `cd operations && ./create-postgres-xl-cluster.sh`
+2. Follow instructions
+
 ### Operator Running Locally From Source
 
 1. Setup a kubernetes cluster and make sure you can connect with kubectl as this uses your kube config for authorisation.

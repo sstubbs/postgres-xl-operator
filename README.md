@@ -28,23 +28,23 @@ To connect to the database, please connect to the db main service (which is the 
 kubectl port-forward svc/[release-name]-[cluster-name]-svc
 ```
 
-## Installation
+## Quick Start
 
-Currently this only works locally using the source but a binary will be provided and a helm chart will be created for setting it up in cluster.
-
-### Quick Start
-
-#### Install The Operator
+### Install The Operator
 
 1. A Kubernetes cluster with helm 3 is required.
 2. Clone this repo
 3. `cd operations && ./create-namespace-crd.sh && cd ../`
 4. `helm3 install pgxlo chart`
 
-#### Creating a cluster
+### Creating a cluster
 
 1. `cd operations && ./create-postgres-xl-cluster.sh`
 2. Follow instructions
+
+## Installation
+
+Currently this only works locally using the source but a binary will be provided and a helm chart will be created for setting it up in cluster.
 
 ### Operator Running Locally From Source
 

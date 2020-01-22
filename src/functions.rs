@@ -4,10 +4,23 @@ use super::{
         Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts,
         EmbeddedYamlStructs, GlobalLabel, SelectorLabel, Values,
     },
-    vars::{CHART_NAME, CHART_VERSION, RELEASE_NAME, RELEASE_SERVICE},
+    vars::{CHART_NAME, CHART_VERSION, KUBE_CONFIG_TYPE, RELEASE_NAME, RELEASE_SERVICE},
 };
 use json_patch::merge;
+use kube::config;
 use sprig::SPRIG;
+
+pub async fn get_kube_config() -> anyhow::Result<config::Configuration> {
+    let kube_config_type = std::env::var("KUBE_CONFIG_TYPE").unwrap_or(KUBE_CONFIG_TYPE.into());
+
+    if kube_config_type == "kubeconfig" {
+        let config = config::load_kube_config().await?;
+        return Ok(config);
+    } else {
+        let config = config::incluster_config()?;
+        return Ok(config);
+    }
+}
 
 // Create a default fully qualified kubernetes name, with max 50 chars,
 // thus allowing for 13 chars of internal naming.

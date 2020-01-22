@@ -5,6 +5,7 @@ pub static CHART_VERSION: &str = "0.1.0";
 pub static RELEASE_NAME: &str = "pgxlo";
 pub static RELEASE_SERVICE: &str = "helm";
 pub static LOG_LEVEL: &str = "info,kube=trace";
+pub static KUBE_CONFIG_TYPE: &str = "incluster";
 //pub static CLUSTER_RESOURCE_SINGULAR: &str = "postgres-xl-cluster";
 pub static CLUSTER_RESOURCE_PLURAL: &str = "postgres-xl-clusters";
 //pub static CLUSTER_RESOURCE_KIND: &str = "PostgresXlCluster";

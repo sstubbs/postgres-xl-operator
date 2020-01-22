@@ -1,16 +1,16 @@
 use super::{
     controller_config_map, controller_deployment, controller_job, controller_service,
     controller_stateful_set, custom_resources, enums::ResourceAction, vars,
+    functions::{get_kube_config}
 };
 use futures::StreamExt;
 use kube::{
     api::{Informer, RawApi, WatchEvent},
     client::APIClient,
-    config,
 };
 
 pub async fn watch() -> anyhow::Result<()> {
-    let config = config::load_kube_config().await?;
+    let config = get_kube_config().await?;
     let client = APIClient::new(config);
     let namespace = std::env::var("NAMESPACE").unwrap_or(vars::NAMESPACE.into());
     let custom_resource_group =

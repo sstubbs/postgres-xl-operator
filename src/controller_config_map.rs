@@ -1,14 +1,13 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     enums::ResourceAction,
-    functions::{create_context, create_global_template},
+    functions::{create_context, create_global_template, get_kube_config},
     structs::EmbeddedConfigMapTemplates,
     vars::NAMESPACE,
 };
 use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
-    config,
 };
 
 pub async fn action(
@@ -21,7 +20,7 @@ pub async fn action(
         let context_unwrapped = context?;
         let global_template = create_global_template().await?;
 
-        let config = config::load_kube_config().await?;
+        let config = get_kube_config().await?;
         let client = APIClient::new(config);
         let namespace = std::env::var("NAMESPACE").unwrap_or(NAMESPACE.into());
         let resource_client = Api::v1ConfigMap(client).within(&namespace);

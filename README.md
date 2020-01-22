@@ -34,7 +34,7 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 
 1. A Kubernetes cluster with helm 3 is required.
 2. Clone this repo
-3. `cd operations && ./create-namespace-crd.sh && cd ../`
+3. `cd operations && ./create-crd.sh && cd ../`
 4. `helm3 install pgxlo chart`
 
 ### Creating a cluster

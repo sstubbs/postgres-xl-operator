@@ -52,14 +52,13 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 
 name | description | default value 
 --- | --- | ---
-NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
 CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
 CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
 CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
 CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
 CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
 
-4. `cd operations && ./create-namespace-crd.sh && cd ../`
+4. `cd operations && ./create-crd.sh && cd ../`
 
 5. change `chart/values.yaml` as required
 

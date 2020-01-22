@@ -3,6 +3,6 @@
 source ./common/vars.sh
 source ./common/functions.sh
 
-./create-namespace-crd.sh
+./create-crd.sh
 
 cargo run

@@ -1,7 +1,7 @@
 use super::{
     controller_config_map, controller_deployment, controller_job, controller_service,
-    controller_stateful_set, custom_resources, enums::ResourceAction, vars,
-    functions::{get_kube_config}
+    controller_stateful_set, custom_resources, enums::ResourceAction, functions::get_kube_config,
+    vars,
 };
 use futures::StreamExt;
 use kube::{

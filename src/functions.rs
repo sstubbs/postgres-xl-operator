@@ -70,7 +70,7 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
                 let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
                 let script_object = ClusterScript {
-                    name: filename.to_owned().replace("/","."),
+                    name: filename.to_owned().replace("/", "."),
                     content: file_data_string.to_owned(),
                 };
                 scripts.push(script_object);

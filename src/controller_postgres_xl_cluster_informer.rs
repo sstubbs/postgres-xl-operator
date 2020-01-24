@@ -1,7 +1,9 @@
 use super::{
     controller_config_map, controller_deployment, controller_job, controller_service,
-    controller_stateful_set, custom_resources, enums::ResourceAction, functions::get_kube_config,
-    vars::{NAMESPACE, CUSTOM_RESOURCE_GROUP, CLUSTER_RESOURCE_PLURAL},
+    controller_stateful_set, custom_resources,
+    enums::ResourceAction,
+    functions::get_kube_config,
+    vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
 };
 use futures::StreamExt;
 use kube::{

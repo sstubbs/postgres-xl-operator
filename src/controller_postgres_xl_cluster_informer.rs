@@ -1,7 +1,7 @@
 use super::{
     controller_config_map, controller_deployment, controller_job, controller_service,
     controller_stateful_set, custom_resources, enums::ResourceAction, functions::get_kube_config,
-    vars,
+    vars::{NAMESPACE, CUSTOM_RESOURCE_GROUP, CLUSTER_RESOURCE_PLURAL},
 };
 use futures::StreamExt;
 use kube::{
@@ -12,12 +12,12 @@ use kube::{
 pub async fn watch() -> anyhow::Result<()> {
     let config = get_kube_config().await?;
     let client = APIClient::new(config);
-    let namespace = std::env::var("NAMESPACE").unwrap_or(vars::NAMESPACE.into());
+    let namespace = std::env::var("NAMESPACE").unwrap_or(NAMESPACE.into());
     let custom_resource_group =
-        std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or(vars::CUSTOM_RESOURCE_GROUP.into());
+        std::env::var("CUSTOM_RESOURCE_GROUP").unwrap_or(CUSTOM_RESOURCE_GROUP.into());
 
     let resource = RawApi::customResource(
-        &std::env::var("CLUSTER_RESOURCE_PLURAL").unwrap_or(vars::CLUSTER_RESOURCE_PLURAL.into()),
+        &std::env::var("CLUSTER_RESOURCE_PLURAL").unwrap_or(CLUSTER_RESOURCE_PLURAL.into()),
     )
     .group(&custom_resource_group)
     .within(&namespace);

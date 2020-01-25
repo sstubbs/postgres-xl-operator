@@ -31,19 +31,45 @@ pub async fn action_create_slave(
 
         let context_unwrapped = context.unwrap();
 
-        if context_unwrapped.to_owned().cluster.values.replication.enabled
-            && context_unwrapped.to_owned().cluster.values.replication.master_name != ""
-            && context_unwrapped.to_owned().cluster.values.replication.slave_name != ""
-            && context_unwrapped.to_owned().cluster.values.replication.slave_name
+        if context_unwrapped
+            .to_owned()
+            .cluster
+            .values
+            .replication
+            .enabled
+            && context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .master_name
+                != ""
+            && context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .slave_name
+                != ""
+            && context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .slave_name
                 != context_unwrapped.to_owned().cluster.cleaned_name
         {
+            let pp = PostParams::default();
+
             match resource_action {
                 ResourceAction::Added => {
-                    let pp = PostParams::default();
-
                     let mut post_object = custom_resource.to_owned();
-                    post_object.metadata.name =
-                        context_unwrapped.to_owned().cluster.values.replication.slave_name;
+                    post_object.metadata.name = context_unwrapped
+                        .to_owned()
+                        .cluster
+                        .values
+                        .replication
+                        .slave_name;
                     post_object.metadata.resourceVersion = Some("".to_owned());
 
                     match resource_client

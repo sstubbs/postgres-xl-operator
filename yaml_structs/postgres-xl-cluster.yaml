@@ -7,12 +7,11 @@ image:
   # The default postgres-xl image version to use in all pods.
   version: XL_10_R1_1-6-g68c378f-4-g7a65119
 
+# If these are set another cluster will be created replicating from the current one.
 replication:
   enabled: false
-  master_cluster_name: ""
-# This is the custom resource name of another cluster that this will be a slave of for failover.
-# It will have one gtm, one coordinator and the same amount of datanodes as the master which will all be replicated slaves.
-# If unset this will be a master. If this value is updated to "" like above it will become a master.
+  master_name: ""
+  slave_name: ""
 
 envs: []
   # This is the env set that appends to all pods.

@@ -1,6 +1,6 @@
 use super::{
-    controller_config_map, controller_deployment, controller_job, controller_service,
-    controller_stateful_set, custom_resources,
+    controller_config_map, controller_deployment, controller_job, controller_postgres_xl_cluster,
+    controller_service, controller_stateful_set, custom_resources,
     enums::ResourceAction,
     functions::get_kube_config,
     vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
@@ -41,6 +41,11 @@ pub async fn handle_events(
 ) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Added,
+            )
+            .await?;
             controller_config_map::action(&custom_resource, &ResourceAction::Added).await?;
             controller_deployment::action(&custom_resource, &ResourceAction::Added).await?;
             controller_job::action(&custom_resource, &ResourceAction::Added).await?;

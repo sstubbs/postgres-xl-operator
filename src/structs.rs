@@ -79,8 +79,8 @@ pub struct ClusterScript {
 // Global
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Values {
-    pub image: Image,
     pub replication: Replication,
+    pub image: Image,
     pub envs: Vec<Envs>,
     pub extra_labels: Vec<ExtraLabels>,
     pub homedir: String,
@@ -96,18 +96,19 @@ pub struct Values {
     pub datanodes: Datanode,
 }
 
+// Replication
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Replication {
+    pub enabled: bool,
+    pub master_name: String,
+    pub slave_name: String,
+}
+
 // Image
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Image {
     pub name: String,
     pub version: String,
-}
-
-// Image
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Replication {
-    pub enabled: bool,
-    pub master_cluster_name: String,
 }
 
 // Envs

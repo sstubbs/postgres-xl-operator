@@ -53,6 +53,11 @@ pub async fn handle_events(
             controller_stateful_set::action(&custom_resource, &ResourceAction::Added).await?;
         }
         WatchEvent::Modified(custom_resource) => {
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Modified,
+            )
+                .await?;
             controller_config_map::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_deployment::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_job::action(&custom_resource, &ResourceAction::Modified).await?;
@@ -60,6 +65,11 @@ pub async fn handle_events(
             controller_stateful_set::action(&custom_resource, &ResourceAction::Modified).await?;
         }
         WatchEvent::Deleted(custom_resource) => {
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Deleted,
+            )
+                .await?;
             controller_config_map::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_deployment::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_job::action(&custom_resource, &ResourceAction::Deleted).await?;

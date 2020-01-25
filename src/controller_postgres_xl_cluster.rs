@@ -1,8 +1,7 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     enums::ResourceAction,
-    functions::{create_context, create_global_template, get_kube_config},
-    structs::EmbeddedConfigMapTemplates,
+    functions::{create_context, get_kube_config},
     vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
 };
 use kube::{
@@ -59,19 +58,19 @@ pub async fn action_create_slave(
                 .slave_name
                 != context_unwrapped.to_owned().cluster.cleaned_name
         {
+            let mut post_object = custom_resource.to_owned();
+            post_object.metadata.name = context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .slave_name;
+            post_object.metadata.resourceVersion = Some("".to_owned());
+
             let pp = PostParams::default();
 
             match resource_action {
                 ResourceAction::Added => {
-                    let mut post_object = custom_resource.to_owned();
-                    post_object.metadata.name = context_unwrapped
-                        .to_owned()
-                        .cluster
-                        .values
-                        .replication
-                        .slave_name;
-                    post_object.metadata.resourceVersion = Some("".to_owned());
-
                     match resource_client
                         .create(&pp, serde_json::to_vec(&post_object)?)
                         .await
@@ -86,8 +85,39 @@ pub async fn action_create_slave(
                         Err(e) => error!("{:?}", e), // any other case is probably bad
                     }
                 }
-                ResourceAction::Modified => {}
-                ResourceAction::Deleted => {}
+                ResourceAction::Modified => {
+                    match resource_client
+                        .replace(
+                            &post_object.metadata.name,
+                            &pp,
+                            serde_json::to_vec(&post_object)?,
+                        )
+                        .await
+                    {
+                        Ok(o) => {
+                            if context_unwrapped.cluster.values.replication.slave_name
+                                == o.metadata.name
+                            {
+                                info!("Updated Slave {}", o.metadata.name);
+                            }
+                        }
+                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                    }
+                }
+                ResourceAction::Deleted => {
+                    match resource_client
+                        .delete(&post_object.metadata.name, &DeleteParams::default())
+                        .await
+                    {
+                        Ok(_o) => {
+                            info!(
+                                "Deleted Slave {}",
+                                context_unwrapped.cluster.values.replication.slave_name
+                            );
+                        }
+                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                    }
+                }
             }
         }
     } else {

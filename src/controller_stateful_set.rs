@@ -65,11 +65,28 @@ pub async fn action(
                             let resource_name = &new_resource_object_unwapped["metadata"]["name"]
                                 .as_str()
                                 .unwrap();
+
+                            let old_resource = resource_client
+                                .get(
+                                    &new_resource_object_unwapped["metadata"]["name"]
+                                        .as_str()
+                                        .unwrap(),
+                                )
+                                .await?;
+
+                            let mut mut_new_resource_object_unwapped =
+                                new_resource_object_unwapped.to_owned();
+                            mut_new_resource_object_unwapped["metadata"]["resourceVersion"] =
+                                serde_yaml::from_str(&format!(
+                                    "\"{}\"",
+                                    &old_resource.metadata.resourceVersion.unwrap().as_str()
+                                ))?;
+
                             match resource_client
                                 .replace(
                                     resource_name,
                                     &pp,
-                                    serde_json::to_vec(&new_resource_object_unwapped)?,
+                                    serde_json::to_vec(&mut_new_resource_object_unwapped)?,
                                 )
                                 .await
                             {

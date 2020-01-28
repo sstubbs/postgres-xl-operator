@@ -57,7 +57,7 @@ pub async fn handle_events(
                 &custom_resource,
                 &ResourceAction::Modified,
             )
-                .await?;
+            .await?;
             controller_config_map::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_deployment::action(&custom_resource, &ResourceAction::Modified).await?;
             controller_job::action(&custom_resource, &ResourceAction::Modified).await?;
@@ -69,7 +69,7 @@ pub async fn handle_events(
                 &custom_resource,
                 &ResourceAction::Deleted,
             )
-                .await?;
+            .await?;
             controller_config_map::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_deployment::action(&custom_resource, &ResourceAction::Deleted).await?;
             controller_job::action(&custom_resource, &ResourceAction::Deleted).await?;

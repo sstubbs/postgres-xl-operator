@@ -86,11 +86,17 @@ pub async fn action_create_slave(
                     }
                 }
                 ResourceAction::Modified => {
+                    let old_resource = resource_client.get(&post_object.metadata.name).await?;
+
+                    let mut mut_post_object = post_object.to_owned();
+                    mut_post_object.metadata.resourceVersion =
+                        old_resource.metadata.resourceVersion;
+
                     match resource_client
                         .replace(
                             &post_object.metadata.name,
                             &pp,
-                            serde_json::to_vec(&post_object)?,
+                            serde_json::to_vec(&mut_post_object)?,
                         )
                         .await
                     {

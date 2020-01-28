@@ -25,7 +25,7 @@ pub async fn get_kube_config() -> anyhow::Result<config::Configuration> {
 // Create a default fully qualified kubernetes name, with max 50 chars,
 // thus allowing for 13 chars of internal naming.
 pub fn clean_value(value: &String) -> anyhow::Result<String> {
-    let mut new_value = value.clone();
+    let mut new_value = value.to_owned();
     new_value.truncate(45);
     let re = regex::Regex::new(r"[^a-z0-9]+").unwrap();
     let result = re.replace_all(&new_value, "-");
@@ -40,7 +40,7 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
     let mut yaml_struct_object_unwrapped = serde_yaml::from_str(&yaml_struct_string)?;
 
     if custom_resource.spec.data.is_some() {
-        let yaml_added_string = &custom_resource.spec.data.clone().unwrap();
+        let yaml_added_string = &custom_resource.spec.data.to_owned().unwrap();
 
         // Convert added into serde values
         let yaml_added_object = serde_yaml::from_str(&yaml_added_string);
@@ -153,7 +153,7 @@ pub async fn create_resource_object(
     global_template: &String,
     file_data_string: &String,
 ) -> anyhow::Result<serde_yaml::Value> {
-    let mut main_template = global_template.clone();
+    let mut main_template = global_template.to_owned();
     main_template.push_str(&file_data_string);
 
     // Render template with gotmpl

@@ -4,6 +4,10 @@ metadata:
   name: {{CURRENT_CLUSTER_NAME}}
 spec:
   data: |
+    coordinators:
+      count: 1
+    datanodes:
+      count: 1
     replication:
       enabled: true
       master_name: {{CURRENT_CLUSTER_NAME}}

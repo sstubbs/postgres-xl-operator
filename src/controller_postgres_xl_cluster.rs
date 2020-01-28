@@ -91,6 +91,8 @@ pub async fn action_create_slave(
                     let mut mut_post_object = post_object.to_owned();
                     mut_post_object.metadata.resourceVersion =
                         old_resource.metadata.resourceVersion;
+                    mut_post_object.metadata.uid =
+                        old_resource.metadata.uid;
 
                     match resource_client
                         .replace(

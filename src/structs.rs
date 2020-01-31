@@ -101,7 +101,7 @@ pub struct Values {
 pub struct Replication {
     pub enabled: bool,
     pub master_name: String,
-    pub slave_name: String,
+    pub standby_name: String,
 }
 
 // Image

@@ -48,14 +48,14 @@ pub async fn action_create_slave(
                 .cluster
                 .values
                 .replication
-                .slave_name
+                .standby_name
                 != ""
             && context_unwrapped
                 .to_owned()
                 .cluster
                 .values
                 .replication
-                .slave_name
+                .standby_name
                 != context_unwrapped.to_owned().cluster.cleaned_name
         {
             let mut post_object = custom_resource.to_owned();
@@ -64,7 +64,7 @@ pub async fn action_create_slave(
                 .cluster
                 .values
                 .replication
-                .slave_name;
+                .standby_name;
             post_object.metadata.resourceVersion = Some("".to_owned());
 
             let pp = PostParams::default();
@@ -76,7 +76,7 @@ pub async fn action_create_slave(
                         .await
                     {
                         Ok(o) => {
-                            if context_unwrapped.cluster.values.replication.slave_name
+                            if context_unwrapped.cluster.values.replication.standby_name
                                 == o.metadata.name
                             {
                                 info!("Created Slave {}", o.metadata.name);
@@ -103,7 +103,7 @@ pub async fn action_create_slave(
                         .await
                     {
                         Ok(o) => {
-                            if context_unwrapped.cluster.values.replication.slave_name
+                            if context_unwrapped.cluster.values.replication.standby_name
                                 == o.metadata.name
                             {
                                 info!("Updated Slave {}", o.metadata.name);
@@ -120,7 +120,7 @@ pub async fn action_create_slave(
                         Ok(_o) => {
                             info!(
                                 "Deleted Slave {}",
-                                context_unwrapped.cluster.values.replication.slave_name
+                                context_unwrapped.cluster.values.replication.standby_name
                             );
                         }
                         Err(e) => error!("{:?}", e), // any other case is probably bad

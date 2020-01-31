@@ -11,7 +11,7 @@ image:
 replication:
   enabled: false
   master_name: ""
-  slave_name: ""
+  standby_name: ""
 
 envs: []
   # This is the env set that appends to all pods.

@@ -11,4 +11,4 @@ spec:
     replication:
       enabled: true
       master_name: {{CURRENT_CLUSTER_NAME}}
-      slave_name: slave1
+      standby_name: slave1

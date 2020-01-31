@@ -1,7 +1,7 @@
 apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
 kind: {{CLUSTER_RESOURCE_KIND}}
 metadata:
-  name: {{CURRENT_CLUSTER_NAME}}
+  name: {{CURRENT_CLUSTER_NAME}}-1
 spec:
   data: |
     coordinators:
@@ -10,5 +10,4 @@ spec:
       count: 1
     replication:
       enabled: true
-      master_name: {{CURRENT_CLUSTER_NAME}}
-      standby_name: slave1
+      standby_name: {{CURRENT_CLUSTER_NAME}}-2

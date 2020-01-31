@@ -41,36 +41,31 @@ pub async fn action_create_slave(
                 .cluster
                 .values
                 .replication
-                .master_name
-                != ""
-            && context_unwrapped
-                .to_owned()
-                .cluster
-                .values
-                .replication
                 .standby_name
                 != ""
-            && context_unwrapped
-                .to_owned()
-                .cluster
-                .values
-                .replication
-                .standby_name
-                != context_unwrapped.to_owned().cluster.cleaned_name
         {
+            let pp = PostParams::default();
+
             let mut post_object = custom_resource.to_owned();
+
             post_object.metadata.name = context_unwrapped
                 .to_owned()
                 .cluster
                 .values
                 .replication
                 .standby_name;
-            post_object.metadata.resourceVersion = Some("".to_owned());
-
-            let pp = PostParams::default();
 
             match resource_action {
                 ResourceAction::Added => {
+
+                    post_object.metadata.resourceVersion = Some("".to_owned());
+
+                    let mut current_data: serde_yaml::Value = serde_yaml::from_str(&custom_resource.to_owned().spec.data.unwrap())?;
+
+                    current_data["replication"]["master_name"] = serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
+                    current_data["replication"]["standby_name"] = serde_yaml::from_str("\"\"")?;
+                    post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
+
                     match resource_client
                         .create(&pp, serde_json::to_vec(&post_object)?)
                         .await
@@ -79,7 +74,7 @@ pub async fn action_create_slave(
                             if context_unwrapped.cluster.values.replication.standby_name
                                 == o.metadata.name
                             {
-                                info!("Created Slave {}", o.metadata.name);
+                                info!("Created Standby {}", o.metadata.name);
                             }
                         }
                         Err(e) => error!("{:?}", e), // any other case is probably bad
@@ -88,17 +83,14 @@ pub async fn action_create_slave(
                 ResourceAction::Modified => {
                     let old_resource = resource_client.get(&post_object.metadata.name).await?;
 
-                    let mut mut_post_object = post_object.to_owned();
-                    mut_post_object.metadata.resourceVersion =
-                        old_resource.metadata.resourceVersion;
-                    mut_post_object.metadata.uid =
-                        old_resource.metadata.uid;
+                    post_object.metadata.resourceVersion = old_resource.metadata.resourceVersion;
+                    post_object.metadata.uid = old_resource.metadata.uid;
 
                     match resource_client
                         .replace(
                             &post_object.metadata.name,
                             &pp,
-                            serde_json::to_vec(&mut_post_object)?,
+                            serde_json::to_vec(&post_object)?,
                         )
                         .await
                     {
@@ -106,7 +98,7 @@ pub async fn action_create_slave(
                             if context_unwrapped.cluster.values.replication.standby_name
                                 == o.metadata.name
                             {
-                                info!("Updated Slave {}", o.metadata.name);
+                                info!("Updated Standby {}", o.metadata.name);
                             }
                         }
                         Err(e) => error!("{:?}", e), // any other case is probably bad
@@ -119,7 +111,7 @@ pub async fn action_create_slave(
                     {
                         Ok(_o) => {
                             info!(
-                                "Deleted Slave {}",
+                                "Deleted Standby {}",
                                 context_unwrapped.cluster.values.replication.standby_name
                             );
                         }

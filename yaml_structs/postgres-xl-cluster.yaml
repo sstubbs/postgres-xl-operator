@@ -7,10 +7,11 @@ image:
   # The default postgres-xl image version to use in all pods.
   version: XL_10_R1_1-6-g68c378f-4-g7a65119
 
-# If these are set another cluster will be created replicating from the current one.
 replication:
   enabled: false
+  # Do not set master_name as this is automatically set.
   master_name: ""
+  # Set this to the name of the standby you want to create that is replicated from this created, modified and deleted when this is and replicated from it.
   standby_name: ""
 
 envs: []

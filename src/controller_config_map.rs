@@ -5,16 +5,20 @@ use super::{
     structs::EmbeddedConfigMapTemplates,
     vars::NAMESPACE,
 };
+use base64::encode;
 use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
 };
+use ring::digest;
 
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
     resource_action: &ResourceAction,
-) -> anyhow::Result<()> {
-    let context = create_context(&custom_resource).await;
+    config_map_sha: String,
+) -> anyhow::Result<String> {
+    let context = create_context(&custom_resource, config_map_sha).await;
+    let mut config_map_concatenated = "".to_owned();
 
     if context.is_ok() {
         let context_unwrapped = context?;
@@ -43,6 +47,12 @@ pub async fn action(
                 if new_resource_object.is_ok() {
                     let new_resource_object_unwapped = new_resource_object.unwrap();
 
+                    // append to config string to generate hash
+                    let config_string = serde_yaml::to_string(&new_resource_object_unwapped)?;
+                    config_map_concatenated =
+                        format!("{}{}", &config_map_concatenated, config_string);
+
+                    // Generate and post data
                     let pp = PostParams::default();
 
                     match resource_action {
@@ -124,6 +134,6 @@ pub async fn action(
     } else {
         error!("{}", context.err().unwrap())
     }
-
-    Ok(())
+    let config_map_sha = digest::digest(&digest::SHA256, config_map_concatenated.as_bytes());
+    Ok(encode(config_map_sha.as_ref()))
 }

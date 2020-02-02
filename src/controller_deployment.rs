@@ -13,8 +13,9 @@ use kube::{
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
     resource_action: &ResourceAction,
+    config_map_sha: String,
 ) -> anyhow::Result<()> {
-    let context = create_context(&custom_resource).await;
+    let context = create_context(&custom_resource, config_map_sha).await;
 
     if context.is_ok() {
         let context_unwrapped = context?;

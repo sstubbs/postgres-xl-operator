@@ -12,8 +12,9 @@ use kube::{
 pub async fn action_create_slave(
     custom_resource: &KubePostgresXlCluster,
     resource_action: &ResourceAction,
+    config_map_sha: String,
 ) -> anyhow::Result<()> {
-    let context = create_context(&custom_resource).await;
+    let context = create_context(&custom_resource, config_map_sha).await;
 
     if context.is_ok() {
         let config = get_kube_config().await?;
@@ -57,12 +58,13 @@ pub async fn action_create_slave(
 
             match resource_action {
                 ResourceAction::Added => {
-
                     post_object.metadata.resourceVersion = Some("".to_owned());
 
-                    let mut current_data: serde_yaml::Value = serde_yaml::from_str(&custom_resource.to_owned().spec.data.unwrap())?;
+                    let mut current_data: serde_yaml::Value =
+                        serde_yaml::from_str(&custom_resource.to_owned().spec.data.unwrap())?;
 
-                    current_data["replication"]["master_name"] = serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
+                    current_data["replication"]["master_name"] =
+                        serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
                     current_data["replication"]["standby_name"] = serde_yaml::from_str("\"\"")?;
                     post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
 

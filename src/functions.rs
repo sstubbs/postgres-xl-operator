@@ -32,7 +32,10 @@ pub fn clean_value(value: &String) -> anyhow::Result<String> {
     return Ok(result.into());
 }
 
-pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::Result<Chart> {
+pub async fn create_context(
+    custom_resource: &KubePostgresXlCluster,
+    config_map_sha: String,
+) -> anyhow::Result<Chart> {
     // Get the yaml strings
     let yaml_struct_file = EmbeddedYamlStructs::get("postgres-xl-cluster.yaml").unwrap();
     let yaml_struct_string = std::str::from_utf8(yaml_struct_file.as_ref())?;
@@ -125,6 +128,7 @@ pub async fn create_context(custom_resource: &KubePostgresXlCluster) -> anyhow::
                 ],
                 values: yaml_struct_merged_object_unwrapped,
                 scripts,
+                config_map_sha,
             },
         };
         return Ok(global_context);

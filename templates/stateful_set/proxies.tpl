@@ -30,6 +30,8 @@ spec:
 {{ range .cluster.selector_labels -}}
 {{ .name | indent 8 }}: {{ .content }}
 {{ end }}
+      annotations:
+        configHash: {{ .cluster.config_map_sha }}
     spec:
 {{- if .cluster.values.proxies.inject_spec_yaml }}
 {{ .cluster.values.proxies.inject_spec_yaml | indent 6 }}

@@ -53,6 +53,7 @@ pub struct Cluster {
     pub selector_labels: Vec<SelectorLabel>,
     pub values: Values,
     pub scripts: Vec<ClusterScript>,
+    pub config_map_sha: String,
 }
 
 // Labels

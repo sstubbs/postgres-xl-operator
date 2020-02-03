@@ -61,11 +61,3 @@ fi
 # waiting for GTM.
 "$cur_path/wait_for_connection" "$PG_GTM_HOST" "$PG_GTM_PORT"
 assert $? "Error while waiting for connection. Deployment not ready." || exit $?
-
-# add a replication entry for standby to access datanode
-REPLICATION_ENTRY=$(tail -n 1 "$PGDATA/pg_hba.conf" | sed 's/host all/host replication/g')
-echo "$REPLICATION_ENTRY" >> "$PGDATA/pg_hba.conf"
-
-# if its currently a standby convert it back to master
-rm -rf "$PGDATA/recovery.conf"
-sed -i '/hot_standby = on/d' "$PGDATA/postgresql.conf"

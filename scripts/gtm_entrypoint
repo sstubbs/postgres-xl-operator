@@ -46,6 +46,9 @@ else
   echo
 fi
 
+# replication section
+source "$cur_path/initialize_standby_gtm" || exit $?
+
 backup_data_state &
 log:info "Started gtm recovery process"
 

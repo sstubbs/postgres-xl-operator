@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+MASTER_SERVICE="$MASTER_NAME-dn-$((POD_CLUSTER_INDEX-1)).$MASTER_NAME-svc-gtm"

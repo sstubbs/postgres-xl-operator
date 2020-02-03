@@ -23,4 +23,4 @@ spec:
       pvc:
         resources:
           requests:
-            storage: "4Gi"
+            storage: 4Gi

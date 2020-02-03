@@ -2,18 +2,20 @@
 # Datanode initialization script
 cur_path="$(dirname ${BASH_SOURCE[0]})"
 source "$cur_path/common.sh"
-log:info "Starting postgres as datanode"
 
 source "$cur_path/initialize_env_dependencies" || exit $?
 
-# connecting to cluster
-source "$cur_path/configure_postgres_service_connections"
-
-# initialize the database.
-source "$cur_path/initialize_postgres_db" || exit $?
-
-# start the node register in the bg.
-"$cur_path/register_node" &
+if [ -z "$MASTER_NAME" ]; then
+  log:info "Starting postgres as master datanode"
+  # initialize the database.
+  source "$cur_path/initialize_postgres_db" || exit $?
+  # start the node register in the bg.
+  "$cur_path/register_node" &
+else
+  log:info "Starting postgres as standby datanode"
+  # initialize the database.
+  source "$cur_path/initialize_standby_datanode" || exit $?
+fi
 
 # starting postgres
 postgres \

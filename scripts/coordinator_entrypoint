@@ -7,9 +7,6 @@ log:info "Starting postgres as coordinator"
 # initialize dependecies.
 source "$cur_path/initialize_env_dependencies" || exit $?
 
-# connecting to cluster.
-source "$cur_path/configure_postgres_service_connections"
-
 # initialize the database.
 source "$cur_path/initialize_postgres_db" || exit $?
 

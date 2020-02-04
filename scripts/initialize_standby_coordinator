@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MASTER_SERVICE="$MASTER_NAME-dn-$POD_INDEX.$MASTER_NAME-svc-dn"
+MASTER_SERVICE="$MASTER_NAME-crd-$POD_INDEX.$MASTER_NAME-svc-crd"
 
 # waiting for master datanode.
 "$cur_path/wait_for_connection" "$MASTER_SERVICE" "$PG_PORT"

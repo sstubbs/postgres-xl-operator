@@ -15,4 +15,5 @@ else
 fi
 
 echo "host all all all $PG_AUTH_METHOD" >> "${PGDATA}/pg_hba.conf"
+echo "host replication all all $PG_AUTH_METHOD" >> "${PGDATA}/pg_hba.conf"
 

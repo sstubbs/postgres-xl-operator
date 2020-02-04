@@ -44,6 +44,10 @@ else
   log:info "Database configuration found, init skipped."
 fi
 
+# if its currently a standby convert it back to master
+rm -rf "$PGDATA/recovery.conf"
+sed -i '/hot_standby = on/d' "$PGDATA/postgresql.conf"
+
 # required for postgrs permissions.
 # the loaded values are actually set by kuberntes. :(
 log:info "Set data folder permissions 0700"

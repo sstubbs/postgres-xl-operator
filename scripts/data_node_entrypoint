@@ -3,21 +3,13 @@
 cur_path="$(dirname ${BASH_SOURCE[0]})"
 source "$cur_path/common.sh"
 
+# initialize dependecies.
 source "$cur_path/initialize_env_dependencies" || exit $?
 
 if [ -z "$MASTER_NAME" ]; then
   log:info "Starting postgres as master datanode"
   # initialize the database.
   source "$cur_path/initialize_postgres_db" || exit $?
-
-  # replication section
-  # add a replication entry for standby to access datanode
-  REPLICATION_ENTRY=$(tail -n 1 "$PGDATA/pg_hba.conf" | sed 's/host all/host replication/g')
-  echo "$REPLICATION_ENTRY" >> "$PGDATA/pg_hba.conf"
-  # if its currently a standby convert it back to master
-  rm -rf "$PGDATA/recovery.conf"
-  sed -i '/hot_standby = on/d' "$PGDATA/postgresql.conf"
-
   # start the node register in the bg.
   "$cur_path/register_node" &
 else

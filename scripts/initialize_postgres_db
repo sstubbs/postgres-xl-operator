@@ -51,7 +51,7 @@ sed -i '/hot_standby = on/d' "$PGDATA/postgresql.conf"
 # required for postgrs permissions.
 # the loaded values are actually set by kuberntes. :(
 log:info "Set data folder permissions 0700"
-chmod -R 0700 ${PGDATA}
+chmod -R 0700 "$PGDATA"
 assert $? "Failed to change data folder permissions" || exit $?
 
 # check for proxy.

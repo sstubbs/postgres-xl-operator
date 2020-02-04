@@ -67,10 +67,10 @@ pub async fn action_create_slave(
                         serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
                     current_data["replication"]["standby_name"] = serde_yaml::from_str("\"\"")?;
 
-                    // gtm proxies and coordinators are not needed for standby
+                    // no gtm proxies and only one coordinator are needed for standby
                     current_data["proxies"]["enabled"] = serde_yaml::from_str("false")?;
                     current_data["proxies"]["count"] = serde_yaml::from_str("0")?;
-                    current_data["coordinators"]["count"] = serde_yaml::from_str("0")?;
+                    current_data["coordinators"]["count"] = serde_yaml::from_str("1")?;
 
                     post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
 

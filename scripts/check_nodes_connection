@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks if all datanodes are alive and conneced to the network.
 # thid file will only run on coordinators.
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
 # check all datanodes are connected.

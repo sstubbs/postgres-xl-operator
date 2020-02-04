@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
 # check all proxies are connected.

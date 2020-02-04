@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # proxy startup bash script
 
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 log:info "Starting node as transaction manager proxy"
 

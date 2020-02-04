@@ -3,7 +3,7 @@
 # since we are in kuberntes, the assumption is the current
 # network is a trusted network.
 
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
 export PG_AUTH_METHOD="trust"

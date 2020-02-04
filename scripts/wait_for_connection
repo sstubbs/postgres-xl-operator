@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Helper method, wait for connection.
 # Usage: wait_for_connection [hostname] [port]
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
 HOST=$1

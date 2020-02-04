@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 
 service_active_file=$(realpath ~/service_activation_time)
 

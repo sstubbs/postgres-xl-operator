@@ -54,7 +54,7 @@ log:info "Set data folder permissions 0700"
 chmod -R 0700 "$PGDATA"
 assert $? "Failed to change data folder permissions" || exit $?
 
-# cleanup pid if it stille exists
+# cleanup pid if it still exists
 rm -rf "$PGDATA/postmaster.pid"
 
 # check for proxy.

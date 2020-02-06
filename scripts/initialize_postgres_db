@@ -10,18 +10,28 @@ fi
 
 if [ ! -f "${PGDATA}/postgresql.conf" ]; then
 
-  if ((POD_INDEX > 0)) && [ "${NODE_TYPE}" == "coordinator" ]; then
-    # safer to always restore coordinators from first one otherwise if they new they can be inconsistent
-    log:info "Database configuration not found, restoring from first coordinator"
-    # waiting for first coordinator.
-    "$cur_path/wait_for_connection" "local-alias-crd-0" "$PG_PORT"
-    assert $? "Error while waiting for connection. Deployment not ready." || exit $?
-    pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-crd-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
-    sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
-    # Create the initial node as this is not using initdb which does this
-    sql_script="CREATE NODE CN_$POD_INDEX WITH (TYPE = '$NODE_TYPE', HOST = 'local-alias-crd-$POD_INDEX', PORT = $PG_PORT);"
-    log:script "$sql_script"
-    psql -c "$sql_script"
+  if ((POD_INDEX > 0)); then
+
+    # restore nodes from first one otherwise when creating new nodes they will not have required data
+    case "$NODE_TYPE" in
+    datanode)
+      log:info "Database configuration not found, restoring from first datanode"
+      # waiting for first datanode.
+      "$cur_path/wait_for_connection" "local-alias-dn-0" "$PG_PORT"
+      assert $? "Error while waiting for connection. Deployment not ready." || exit $?
+      pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-dn-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
+      sed -i "s|pgxc_node_name = 'DN_0'|pgxc_node_name = 'DN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
+      ;;
+    coordinator)
+      log:info "Database configuration not found, restoring from first coordinator"
+      # waiting for first coordinator.
+      "$cur_path/wait_for_connection" "local-alias-crd-0" "$PG_PORT"
+      assert $? "Error while waiting for connection. Deployment not ready." || exit $?
+      pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-crd-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
+      sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
+      ;;
+    esac
+
   else
     # if it's the first coordinator or any datanode then init
     log:info "Database configuration not found, calling initdb"

@@ -9,32 +9,48 @@ if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
 fi
 
 if [ ! -f "${PGDATA}/postgresql.conf" ]; then
-  log:info "Database configuration not found, calling initdb"
 
-  PG_PW_FILE=""
-
-  if [ -z "$PGPASSWORD" ]; then
-    log:warning "Database superuser password not found, DB is insecure."
-    initdb \
-      -D "${PGDATA}" \
-      -U "${PGUSER}" \
-      --nodename="${PG_NODE}"
-      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+  if ((POD_INDEX > 0)) && [ "${NODE_TYPE}" == "coordinator" ]; then
+    # safer to always restore coordinators from first one otherwise if they new they can be inconsistent
+    log:info "Database configuration not found, restoring from first coordinator"
+    # waiting for first coordinator.
+    "$cur_path/wait_for_connection" "local-alias-crd-0" "$PG_PORT"
+    assert $? "Error while waiting for connection. Deployment not ready." || exit $?
+    pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-crd-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
+    sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
+    # Create the initial node as this is not using initdb which does this
+    sql_script="CREATE NODE CN_$POD_INDEX WITH (TYPE = '$NODE_TYPE', HOST = 'local-alias-crd-$POD_INDEX', PORT = $PG_PORT);"
+    log:script "$sql_script"
+    psql -c "$sql_script"
   else
-    log:info "Database superuser password found, initializing db with password."
-    PG_PW_FILE="/tmp/$(mktemp pgpass-XXXXX.pwd)"
-    echo "${PGPASSWORD}" > "$PG_PW_FILE"
+    # if it's the first coordinator or any datanode then init
+    log:info "Database configuration not found, calling initdb"
 
-    initdb \
-      -A "${AUTH_TYPE}"\
-      -D "${PGDATA}" \
-      -U "${PGUSER}" \
-      --nodename="${PG_NODE}" \
-      --pwfile="${PG_PW_FILE}"
-    assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    PG_PW_FILE=""
+
+    if [ -z "$PGPASSWORD" ]; then
+      log:warning "Database superuser password not found, DB is insecure."
+      initdb \
+        -D "${PGDATA}" \
+        -U "${PGUSER}" \
+        --nodename="${PG_NODE}"
+      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    else
+      log:info "Database superuser password found, initializing db with password."
+      PG_PW_FILE="/tmp/$(mktemp pgpass-XXXXX.pwd)"
+      echo "${PGPASSWORD}" >"$PG_PW_FILE"
+
+      initdb \
+        -A "${AUTH_TYPE}" \
+        -D "${PGDATA}" \
+        -U "${PGUSER}" \
+        --nodename="${PG_NODE}" \
+        --pwfile="${PG_PW_FILE}"
+      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    fi
+
+    export PG_PW_FILE
   fi
-
-  export PG_PW_FILE
 
   source "$cur_path/initialize_networks" || exit $?
   source "$cur_path/initialize_node_config" || exit $?

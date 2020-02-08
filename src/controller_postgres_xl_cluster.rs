@@ -56,23 +56,23 @@ pub async fn action_create_slave(
                 .replication
                 .standby_name;
 
+            let mut current_data: serde_yaml::Value =
+                serde_yaml::from_str(&custom_resource.to_owned().spec.data.unwrap())?;
+
+            current_data["replication"]["master_name"] =
+                serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
+            current_data["replication"]["standby_name"] = serde_yaml::from_str("\"\"")?;
+
+            // no gtm proxies and only one coordinator are needed for standby
+            current_data["proxies"]["enabled"] = serde_yaml::from_str("false")?;
+            current_data["proxies"]["count"] = serde_yaml::from_str("0")?;
+            current_data["coordinators"]["count"] = serde_yaml::from_str("1")?;
+
+            post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
+
             match resource_action {
                 ResourceAction::Added => {
                     post_object.metadata.resourceVersion = Some("".to_owned());
-
-                    let mut current_data: serde_yaml::Value =
-                        serde_yaml::from_str(&custom_resource.to_owned().spec.data.unwrap())?;
-
-                    current_data["replication"]["master_name"] =
-                        serde_yaml::from_str(&custom_resource.to_owned().metadata.name)?;
-                    current_data["replication"]["standby_name"] = serde_yaml::from_str("\"\"")?;
-
-                    // no gtm proxies and only one coordinator are needed for standby
-                    current_data["proxies"]["enabled"] = serde_yaml::from_str("false")?;
-                    current_data["proxies"]["count"] = serde_yaml::from_str("0")?;
-                    current_data["coordinators"]["count"] = serde_yaml::from_str("1")?;
-
-                    post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
 
                     match resource_client
                         .create(&pp, serde_json::to_vec(&post_object)?)

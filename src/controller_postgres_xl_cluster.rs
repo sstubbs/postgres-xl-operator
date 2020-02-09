@@ -118,14 +118,51 @@ pub async fn action_create_slave(
                         .await
                     {
                         Ok(_o) => {
-                            info!(
-                                "Deleted Standby {}",
-                                context_unwrapped.cluster.values.replication.standby_name
-                            );
+                            info!("Deleted Standby {}", &post_object.metadata.name);
                         }
                         Err(e) => error!("{:?}", e), // any other case is probably bad
                     }
                 }
+            }
+        } else if !context_unwrapped
+            .to_owned()
+            .cluster
+            .values
+            .replication
+            .enabled
+            && context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .standby_name
+                != ""
+        {
+            // If standby_name retained but replication disabled we will delete the standby. PVC will be retained though for promotion or recreating it.
+            let pp = PostParams::default();
+
+            let mut post_object = custom_resource.to_owned();
+
+            post_object.metadata.name = context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .replication
+                .standby_name;
+
+            match resource_action {
+                ResourceAction::Modified => {
+                    match resource_client
+                        .delete(&post_object.metadata.name, &DeleteParams::default())
+                        .await
+                    {
+                        Ok(_o) => {
+                            info!("Deleted Standby {}", &post_object.metadata.name);
+                        }
+                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                    }
+                }
+                _ => {}
             }
         }
     } else {

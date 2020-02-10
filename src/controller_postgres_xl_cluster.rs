@@ -139,8 +139,6 @@ pub async fn action_create_slave(
                 != ""
         {
             // If standby_name retained but replication disabled we will delete the standby. PVC will be retained though for promotion or recreating it.
-            let pp = PostParams::default();
-
             let mut post_object = custom_resource.to_owned();
 
             post_object.metadata.name = context_unwrapped

@@ -89,27 +89,49 @@ pub async fn action_create_slave(
                     }
                 }
                 ResourceAction::Modified => {
-                    let old_resource = resource_client.get(&post_object.metadata.name).await?;
+                    let old_resource = resource_client.get(&post_object.metadata.name).await;
 
-                    post_object.metadata.resourceVersion = old_resource.metadata.resourceVersion;
-                    post_object.metadata.uid = old_resource.metadata.uid;
+                    if old_resource.is_ok() {
+                        // if there is an old standby replace it
+                        let old_resource_unwrapped = old_resource.unwrap();
+                        post_object.metadata.resourceVersion =
+                            old_resource_unwrapped.metadata.resourceVersion;
+                        post_object.metadata.uid = old_resource_unwrapped.metadata.uid;
 
-                    match resource_client
-                        .replace(
-                            &post_object.metadata.name,
-                            &pp,
-                            serde_json::to_vec(&post_object)?,
-                        )
-                        .await
-                    {
-                        Ok(o) => {
-                            if context_unwrapped.cluster.values.replication.standby_name
-                                == o.metadata.name
-                            {
-                                info!("Updated Standby {}", o.metadata.name);
+                        match resource_client
+                            .replace(
+                                &post_object.metadata.name,
+                                &pp,
+                                serde_json::to_vec(&post_object)?,
+                            )
+                            .await
+                        {
+                            Ok(o) => {
+                                if context_unwrapped.cluster.values.replication.standby_name
+                                    == o.metadata.name
+                                {
+                                    info!("Updated Standby {}", o.metadata.name);
+                                }
                             }
+                            Err(e) => error!("{:?}", e), // any other case is probably bad
                         }
-                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                    } else {
+                        // Otherwise create it
+                        post_object.metadata.resourceVersion = Some("".to_owned());
+
+                        match resource_client
+                            .create(&pp, serde_json::to_vec(&post_object)?)
+                            .await
+                        {
+                            Ok(o) => {
+                                if context_unwrapped.cluster.values.replication.standby_name
+                                    == o.metadata.name
+                                {
+                                    info!("Created Standby {}", o.metadata.name);
+                                }
+                            }
+                            Err(e) => error!("{:?}", e), // any other case is probably bad
+                        }
                     }
                 }
                 ResourceAction::Deleted => {

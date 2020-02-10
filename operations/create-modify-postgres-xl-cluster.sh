@@ -13,7 +13,7 @@ printf "Please select example:\n"
 select EXAMPLE in ../custom-resource-examples/postgres-xl-cluster/*; do test -n "${EXAMPLE}" && break; echo ">>> Invalid Selection"; done
 
 YAML_CUSTOM_RESOURCE=$(replace_with_env "$(cat "${EXAMPLE}")")
-printf "%sCluster %s will be created with the following details: %s\n%s\n" "${bold}" "${CURRENT_CLUSTER_NAME}" "${normal}" "${YAML_CUSTOM_RESOURCE}"
+printf "%sCluster %s will be created/modified with the following details: %s\n%s\n" "${bold}" "${CURRENT_CLUSTER_NAME}" "${normal}" "${YAML_CUSTOM_RESOURCE}"
 
 read -p "Continue (y/n)?" choice
 case "$choice" in

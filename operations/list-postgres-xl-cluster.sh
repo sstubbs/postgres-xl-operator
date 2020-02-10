@@ -3,4 +3,4 @@
 source ./common/vars.sh
 source ./common/functions.sh
 
-kubectl get -n "${NAMESPACE}" -o name "${CLUSTER_RESOURCE_KIND_LOWER}.${CUSTOM_RESOURCE_GROUP}"
+kubectl get -n "${NAMESPACE}" -o name "${CLUSTER_RESOURCE_KIND_LOWER}.${CUSTOM_RESOURCE_GROUP}" | cut -d "/" -f 2

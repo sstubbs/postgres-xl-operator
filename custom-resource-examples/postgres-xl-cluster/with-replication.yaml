@@ -4,10 +4,27 @@ metadata:
   name: {{CURRENT_CLUSTER_NAME}}-0
 spec:
   data: |
+    gtm:
+      pvc:
+        resources:
+          requests:
+            storage: 100Mi
+
     coordinators:
       count: 1
+      pvc:
+        resources:
+          requests:
+            storage: 100Mi
+
+    # this is the costly bit.
     datanodes:
       count: 1
+      pvc:
+        resources:
+          requests:
+            storage: 4Gi
+
     replication:
       enabled: true
       standby_name: {{CURRENT_CLUSTER_NAME}}-1

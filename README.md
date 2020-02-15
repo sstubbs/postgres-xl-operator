@@ -2,26 +2,22 @@
 
 [Postgres-XL](https://www.postgres-xl.org/) is an all-purpose fully ACID open source multi node scalable SQL database solution, based on [PostgreSQL](https://www.postgresql.org/).
 
-This operator allows for creating multiple multi container, multi process, distributed databases using Postgres-XL. It is based upon the wonderful chart [postgres-xl-helm](https://github.com/LamaAni/postgres-xl-helm) and docker image [postgres-xl-docker](https://github.com/pavouk-0/postgres-xl-docker) image.
+This operator allows for creating multiple multi container, multi process, distributed databases using Postgres-XL. It is based upon the chart [postgres-xl-helm](https://github.com/LamaAni/postgres-xl-helm) and docker image [postgres-xl-docker](https://github.com/pavouk-0/postgres-xl-docker) image.
 
 For a graph description of the connections structure see [here](https://www.2ndquadrant.com/wp-content/uploads/2019/04/Postgres-XL-Display.png.webp).
 
 #### Important Note
 
-If using clusters created by the operator, please make sure you read the sections about persistence, backup and restore. 
-
-## BETA
-
-This operator is in beta. Any contributions are welcome.
+If using clusters created by the operator, please make sure you read the sections about persistence, backup and restore.
 
 ## Components Overview
 
 See: [Postgres-XL documentation](https://www.postgres-xl.org/documentation/xc-overview-components.html)
 
 1. [ Global Transaction Manager (GTM) ](https://www.postgres-xl.org/documentation/app-gtm.html) - Single pod StatefulSet - provides transaction management for the entire cluster. The data stored in the GTM is part of the database persistence and should be backed up.
-1. [ Coordinator ](https://www.postgres-xl.org/documentation/runtime-config.html) - Multi-pod StatefulSet - Database external connections entry point (i.e. where I connect my client to). These pods provide transparent concurrency and integrity of transactions globally. Applications can choose any Coordinator to connect to, they work together. Any Coordinator provides the same view of the database, with the same data, as if it was one PostgreSQL database. The data stored in the coordinator is part of the DB data and should be backed up.
-1. [ Datanode ](https://www.postgres-xl.org/documentation/runtime-config.html) - Multi-pod StatefulSet - All table data is stored here. A table may be replicated or distributed between datanodes. Since query work is done on the datanodes, the scale and capacity of the db will be determined by the number of datanodes. The data stored in the datanode is part of the DB data and should be backed up.
-1. [ GTM Proxy (optional) ](https://www.postgres-xl.org/documentation/app-gtm-proxy.html) - A helper transaction manager. Gtm proxy groups connections and interactions between gtm and other Postgres-XL components to reduce both the number of interactions and the size of messages. Performance tests have shown greater performance with high concurrency workloads as a result.
+2. [ Coordinator ](https://www.postgres-xl.org/documentation/runtime-config.html) - Multi-pod StatefulSet - Database external connections entry point (i.e. where I connect my client to). These pods provide transparent concurrency and integrity of transactions globally. Applications can choose any Coordinator to connect to, they work together. Any Coordinator provides the same view of the database, with the same data, as if it was one PostgreSQL database. The data stored in the coordinator is part of the DB data and should be backed up.
+3. [ Datanode ](https://www.postgres-xl.org/documentation/runtime-config.html) - Multi-pod StatefulSet - All table data is stored here. A table may be replicated or distributed between datanodes. Since query work is done on the datanodes, the scale and capacity of the db will be determined by the number of datanodes. The data stored in the datanode is part of the DB data and should be backed up.
+4. [ GTM Proxy (optional) ](https://www.postgres-xl.org/documentation/app-gtm-proxy.html) - A helper transaction manager. Gtm proxy groups connections and interactions between gtm and other Postgres-XL components to reduce both the number of interactions and the size of messages. Performance tests have shown greater performance with high concurrency workloads as a result.
 
 To connect to the database, please connect to the db main service (which is the coordinator service), example:
 ```shell
@@ -33,13 +29,14 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 ### Install The Operator
 
 1. A Kubernetes cluster with helm 3 is required.
-2. Clone this repo
-3. `cd operations && ./create-crd.sh && cd ../`
-4. `helm3 install pgxlo chart`
+2. `kubectl create namespace <namespace name>` 
+3. Clone this repo
+4. `cd operations && ./crd-create.sh && cd ../`
+5. `helm3 install pgxlo chart --namespace <namespace name>`
 
 ### Creating a cluster
 
-1. `cd operations && ./create-postgres-xl-cluster.sh`
+1. `cd operations && ./postgres-xl-cluster-create-modify.sh`
 2. Follow instructions
 
 ## Installation
@@ -47,8 +44,9 @@ kubectl port-forward svc/[release-name]-[cluster-name]-svc
 ### Helm
 
 1. A Kubernetes cluster with helm 3 is required.
-2. Clone this repo
-3. Change the following variables in `operations/common/vars.sh` if required
+2. `kubectl create namespace <namespace name>`
+3. Clone this repo
+4. Change the following variables in `operations/common/vars.sh` if required
 
 name | description | default value 
 --- | --- | ---
@@ -58,59 +56,31 @@ CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-cluster
 CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
 CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
 
-4. `cd operations && ./create-crd.sh && cd ../`
+5. `cd operations && ./crd-create.sh && cd ../`
 
-5. change `chart/values.yaml` as required
+6. change `chart/values.yaml` as required
 
-6. `helm3 install pgxlo chart`
-
-### Operator Running Locally From Source
-
-1. Setup a kubernetes cluster and make sure you can connect with kubectl as this uses your kube config for authorisation.
-2. Install rust.
-3. Clone this repo.
-4. Change `operations/common/vars.sh` if required. These are the global values applied to all clusters which are:
-
-name | description | default value 
---- | --- | ---
-NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
-CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
-CHART_NAME | This is the chart name which will be used in helm installations | postgres-xl-operator
-CHART_VERSION | This is the chart version which will be used in helm installations | 0.1.0
-RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
-RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
-LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will show the YAML of resources that will be generated at cluster creation time. | info
-CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
-CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
-CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
-CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
-
-This application must be running when performing any operations by running the following:
-1. `cd operations`
-1. `./run.sh`
+7. `helm3 install pgxlo chart --namespace <namespace name>`
 
 ## Operations
 
-### Create Cluster
+### Create / Modify Cluster
 
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. copy one of the examples into a new file in `custom-resource-examples/postgres-xl-cluster` and edit `spec.data` as required.
-4. `./setup-postgres-xl-cluster.sh`.
-5. follow on screen instructions.
+1. `cd operations`.
+2. copy one of the examples into a new file in `custom-resource-examples/postgres-xl-cluster` and edit `spec.data` as required.
+3. `./postgres-xl-cluster-create-modify.sh`.
+4. follow on screen instructions.
 
 ### Delete Cluster
 
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. `./delete-postgres-xl-cluster.sh`.
-4. Select required cluster name to delete.
+1. `cd operations`.
+2. `./postgres-xl-cluster-delete.sh`.
+3. Select required cluster name to delete.
 
 ### List Clusters
 
-1. Open a new terminal as the operator must be running in another. This isn't needed if it's installed and running in cluster with helm.
-2. `cd operations`.
-3. `./list-postgres-xl-cluster.sh`.
+1. `cd operations`.
+2. `./postgres-xl-cluster-list.sh`.
 
 ### Cluster
 
@@ -231,21 +201,13 @@ In order to make a copy of the database one must copy all the data of each and e
 
 [ More about replication and high availability.](https://www.postgres-xl.org/documentation/different-replication-solutions.html)
 
-### Extending The Operator
-- Adding a new parameter if required into a custom resource involves adding it to `yaml_structs/$resource_type` and mapping it to structs in `src/structs.rs`
-- Templates in the `templates` directory are created from the context by [ gtmpl-rust ](https://github.com/fiji-flo/gtmpl-rust) so any other required kubernetes resources can be added to those sub folders but only one YAML document per file.
-
-### TODO: WAL restore using buckets @
-1. GCS
-2. AWS
-
-# Health check and status
+## Health check and status
 
 For the current beta phase, a pod will be considered healthy if it can pass,
 1. pg_isready.
 2. Connect to the gtm, datanodes (all), and coordinators (all).
 
-# Some other notes
+## Some other notes
 
 [Postgres-XL FAQ](https://www.postgres-xl.org/faq/)
 
@@ -253,11 +215,42 @@ Benchmarks:
 1. https://www.2ndquadrant.com/en/blog/postgres-xl-scalability-for-loading-data/
 1. https://www.2ndquadrant.com/en/blog/benchmarking-postgres-xl/
 
-# Caveats
+## Caveats
 
 The data in the DB will persist only when all datanodes, coordinators and gtm disks are safely restored. This helm 
 chart does not deal with partial restores.
 
-# Licence
+## Licence
 
 It is free software, released under the MIT licence, and may be redistributed under the terms specified in `LICENSE`.
+
+## Extending
+
+### Operator Running Locally From Source
+
+1. Setup a kubernetes cluster and make sure you can connect with kubectl as this uses your kube config for authorisation.
+2. Install rust.
+3. Clone this repo.
+4. Change `operations/common/vars.sh` if required. These are the global values applied to all clusters which are:
+
+name | description | default value 
+--- | --- | ---
+NAMESPACE | The namespace that this operator will run in if using helm and create clusters in | pgxl
+CUSTOM_RESOURCE_GROUP | This is the group of the custom resource definitions and custom resources | postgres-xl-operator.vanqor.com
+CHART_NAME | This is the chart name which will be used in helm installations | postgres-xl-operator
+CHART_VERSION | This is the chart version which will be used in helm installations | 0.1.0
+RELEASE_NAME | This is the installed release name which will be used in helm installations | pgxlo
+RELEASE_SERVICE | This is the service used to install the operator currently only helm is planned | helm
+LOG_LEVEL | This is the log_level of the operator. Current values are `info` and `debug`. Debug will show the YAML of resources that will be generated at cluster creation time. | info
+CLUSTER_RESOURCE_SINGULAR | The cluster resource singular name | postgres-xl-cluster
+CLUSTER_RESOURCE_PLURAL | The cluster resource plural name | postgres-xl-clusters
+CLUSTER_RESOURCE_KIND | The cluster resource kind | PostgresXlCluster
+CLUSTER_RESOURCE_KIND_LOWER | The cluster resource kind lowercase | postgresxlcluster
+
+This application must be running when performing any operations by running the following:
+1. `cd operations`
+2. `./run.sh`
+
+### Extending The Operator
+- Adding a new parameter if required into a custom resource involves adding it to `yaml_structs/$resource_type` and mapping it to structs in `src/structs.rs`
+- Templates in the `templates` directory are created from the context by [ gtmpl-rust ](https://github.com/fiji-flo/gtmpl-rust) so any other required kubernetes resources can be added to those sub folders but only one YAML document per file.

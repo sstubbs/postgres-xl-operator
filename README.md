@@ -100,7 +100,7 @@ name | description | default value
 --- | --- | ---
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
-replication.enabled | If this is set to true and standby name is present a standby cluster is created/modified/deleted with the main cluster and replicated from it. If it is modified to false and the standby_name is still set the standby will be unlinked from the current master. Used for fail-over | false
+replication.enabled | If this is set to true and standby name is present a standby cluster is created/modified/deleted with the main cluster and replicated from it. If it is modified to false and the standby_name is still set the standby will be unlinked from the current master. Used for fail-over | null
 replication.master_name | This is automatically set on standby clusters so does not to be set in the values | null
 replication.standby_name | If this is set to the name of a new cluster and replication is true a standby cluster is created/modified/deleted with the main cluster and replicated from it | false
 envs | List of `{name: "", content: ""}` to be included environment variables to add to all pods, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []

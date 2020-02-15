@@ -100,6 +100,9 @@ name | description | default value
 --- | --- | ---
 image.name | The image to use | pavouk0/postgres-xl
 image.version | The version of the image to use | XL_10_R1_1-6-g68c378f-4-g7a65119
+replication.enabled | If this is set to true and standby name is present a standby cluster is created/modified/deleted with the main cluster and replicated from it. If it is modified to false and the standby_name is still set the standby will be unlinked from the current master. Used for fail-over | false
+replication.master_name | This is automatically set on standby clusters so does not to be set in the values | null
+replication.standby_name | If this is set to the name of a new cluster and replication is true a standby cluster is created/modified/deleted with the main cluster and replicated from it | false
 envs | List of `{name: "", content: ""}` to be included environment variables to add to all pods, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
 extra_labels | List of `{name: "", content: ""}` to be included as labels, see `./yaml_structs/postgres-xl-cluster.yaml` for an example | []
 config.log_level | The log level to use,  accepts : ERROR, WARNING, INFO, DEBUG, DEBUG1-DEBUG5 | WARNING
@@ -197,15 +200,28 @@ Information about StorageClasses can be found [here](https://kubernetes.io/docs/
 In order to make a copy of the database one must copy all the data of each and every coordinator and datanode. This means that, when relying on this type of persistence one must:
 
 1. Create a backup solution using a specified [ persistent storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/), and allow the backend to keep copies of the data between restarts. 
-1. You CANNOT decrease the number of executing datanodes and coordinators otherwise data will be lost. Scaling up may require the redistribution of tables, information about such operations can be found [here]().
+2. You cannot decrease the number of executing datanodes as data may be lost. Scaling up requires the redistribution of tables, information about such operations can be found [here]().
+3. Coordinators must not be scaled to less than 1 as one replica is used to rebuild others when scaled up.
+
+#### Replication and high availability
+
+Enabling replication will create a replicated copy of the gtm, all datanodes and one coordinator. To fail-over this standby cluster can be promoted to a master cluster by running the following:
+1. `cd operations && ./postgres-xl-cluster-unlink-standby-promote.sh`
+2. Follow instructions
 
 [ More about replication and high availability.](https://www.postgres-xl.org/documentation/different-replication-solutions.html)
 
 ## Health check and status
 
-For the current beta phase, a pod will be considered healthy if it can pass,
+### Pods
+
+a pod will be considered healthy if it can pass,
 1. pg_isready.
 2. Connect to the gtm, datanodes (all), and coordinators (all).
+
+### Cluster
+
+1. Periodic sql can be run by the controller to verify cluster is working correctly.
 
 ## Some other notes
 

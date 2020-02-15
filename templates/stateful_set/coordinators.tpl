@@ -40,6 +40,8 @@ spec:
 {{ range .cluster.selector_labels -}}
 {{ .name | indent 8 }}: {{ .content }}
 {{ end }}
+      annotations:
+        configHash: {{ .cluster.config_map_sha }}
     spec:
       securityContext:
         fsGroup: 3000

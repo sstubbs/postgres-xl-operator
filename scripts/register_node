@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Script to register the nodes in postgres
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
 source "$cur_path/initialize_env_dependencies"
@@ -40,10 +40,8 @@ function register_node() {
 
   wait_for_postgres || return $?
 
-  local cmd="CREATE"
   local host_ip="$POD_IP"
   if [ "$node_full_name" = "$POD_NAME" ]; then
-    cmd="ALTER"
     log:info "Registering self.."
   else
     while true; do
@@ -58,10 +56,13 @@ function register_node() {
   fi
   log:info "Resolved $node_host -> $host_ip, registering node on local as $type:"
 
-  local sql_script="$cmd NODE $node_name WITH (TYPE = '$type', HOST = '$node_host', PORT = $PG_PORT);"
-  log:script "$sql_script"
-  psql -c "$sql_script"
-  assert_warn $? "Failed executing sql script. Is node already defined? Node register skipped."
+  local create_script="CREATE NODE $node_name WITH (TYPE = '$type', HOST = '$node_host', PORT = $PG_PORT);"
+  log:script "$create_script"
+  psql -c "$create_script" || true
+  local alter_script="ALTER NODE $node_name WITH (TYPE = '$type', HOST = '$node_host', PORT = $PG_PORT);"
+  log:script "$alter_script"
+  psql -c "$alter_script" || true
+#  assert_warn $? "Failed executing sql script. Is node already defined? Node register skipped."
 }
 
 function main(){

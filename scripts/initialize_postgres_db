@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Initialize the postgres database.
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 log:info "Initializing database on node $PG_NODE"
 
@@ -9,32 +9,58 @@ if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
 fi
 
 if [ ! -f "${PGDATA}/postgresql.conf" ]; then
-  log:info "Database configuration not found, calling initdb"
 
-  PG_PW_FILE=""
+  if ((POD_INDEX > 0)); then
 
-  if [ -z "$PGPASSWORD" ]; then
-    log:warning "Database superuser password not found, DB is insecure."
-    initdb \
-      -D "${PGDATA}" \
-      -U "${PGUSER}" \
-      --nodename="${PG_NODE}"
-      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    # restore nodes from first one otherwise when creating new nodes they will not have required data
+    case "$NODE_TYPE" in
+    datanode)
+      log:info "Database configuration not found, restoring from first datanode"
+      # waiting for first datanode.
+      "$cur_path/wait_for_connection" "local-alias-dn-0" "$PG_PORT"
+      assert $? "Error while waiting for connection. Deployment not ready." || exit $?
+      pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-dn-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
+      sed -i "s|pgxc_node_name = 'DN_0'|pgxc_node_name = 'DN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
+      ;;
+    coordinator)
+      log:info "Database configuration not found, restoring from first coordinator"
+      # waiting for first coordinator.
+      "$cur_path/wait_for_connection" "local-alias-crd-0" "$PG_PORT"
+      assert $? "Error while waiting for connection. Deployment not ready." || exit $?
+      pg_basebackup -d "postgresql://$PGUSER:$PGPASSWORD@local-alias-crd-0:$PG_PORT" -D "$PGDATA" -P --wal-method=stream
+      sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "$PGDATA/postgresql.conf"
+      ;;
+    esac
+
   else
-    log:info "Database superuser password found, initializing db with password."
-    PG_PW_FILE="/tmp/$(mktemp pgpass-XXXXX.pwd)"
-    echo "${PGPASSWORD}" > "$PG_PW_FILE"
+    # if it's the first coordinator or any datanode then init
+    log:info "Database configuration not found, calling initdb"
 
-    initdb \
-      -A "${AUTH_TYPE}"\
-      -D "${PGDATA}" \
-      -U "${PGUSER}" \
-      --nodename="${PG_NODE}" \
-      --pwfile="${PG_PW_FILE}"
-    assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    PG_PW_FILE=""
+
+    if [ -z "$PGPASSWORD" ]; then
+      log:warning "Database superuser password not found, DB is insecure."
+      initdb \
+        -D "${PGDATA}" \
+        -U "${PGUSER}" \
+        --nodename="${PG_NODE}"
+      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    else
+      log:info "Database superuser password found, initializing db with password."
+      PG_PW_FILE="/tmp/$(mktemp pgpass-XXXXX.pwd)"
+      echo "${PGPASSWORD}" >"$PG_PW_FILE"
+
+      initdb \
+        -A "${AUTH_TYPE}" \
+        -D "${PGDATA}" \
+        -U "${PGUSER}" \
+        --nodename="${PG_NODE}" \
+        --pwfile="${PG_PW_FILE}"
+      assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
+    fi
+
+    export PG_PW_FILE
   fi
-
-  export PG_PW_FILE
 
   source "$cur_path/initialize_networks" || exit $?
   source "$cur_path/initialize_node_config" || exit $?
@@ -44,11 +70,18 @@ else
   log:info "Database configuration found, init skipped."
 fi
 
-# required for postgrs permissions.
+# if its currently a standby convert it back to master
+rm -rf "$PGDATA/recovery.conf"
+sed -i '/hot_standby = on/d' "$PGDATA/postgresql.conf"
+
+# required for postgres permissions.
 # the loaded values are actually set by kuberntes. :(
 log:info "Set data folder permissions 0700"
-chmod -R 0700 ${PGDATA}
+chmod -R 0700 "$PGDATA"
 assert $? "Failed to change data folder permissions" || exit $?
+
+# cleanup pid if it still exists
+rm -rf "$PGDATA/postmaster.pid"
 
 # check for proxy.
 if [ "$PROXY_ENABLED" = "true" ]; then

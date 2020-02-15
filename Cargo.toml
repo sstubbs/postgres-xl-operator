@@ -28,4 +28,6 @@ sprig = { git = "https://github.com/sstubbs/sprig-rust", branch = "initial_math"
 regex = "1.3.3"
 # Embed all resources
 rust-embed = { version = "5.2.0", features = ["debug-embed"] }
-
+# Hashing
+ring = "0.16.10"
+base64 = "0.11.0"

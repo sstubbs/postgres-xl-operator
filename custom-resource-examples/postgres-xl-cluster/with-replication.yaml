@@ -1,7 +1,7 @@
 apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
 kind: {{CLUSTER_RESOURCE_KIND}}
 metadata:
-  name: {{CURRENT_CLUSTER_NAME}}
+  name: {{CURRENT_CLUSTER_NAME}}-a
 spec:
   data: |
     gtm:
@@ -24,3 +24,7 @@ spec:
         resources:
           requests:
             storage: 4Gi
+
+    replication:
+      enabled: true
+      standby_name: {{CURRENT_CLUSTER_NAME}}-b

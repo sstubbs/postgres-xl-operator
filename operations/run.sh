@@ -3,7 +3,7 @@
 source ./common/vars.sh
 source ./common/functions.sh
 
-./create-crd.sh
+./crd-create.sh
 
 cargo clean --package postgres-xl-operator
 

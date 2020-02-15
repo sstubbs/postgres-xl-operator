@@ -53,6 +53,7 @@ pub struct Cluster {
     pub selector_labels: Vec<SelectorLabel>,
     pub values: Values,
     pub scripts: Vec<ClusterScript>,
+    pub config_map_sha: String,
 }
 
 // Labels
@@ -79,6 +80,7 @@ pub struct ClusterScript {
 // Global
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Values {
+    pub replication: Replication,
     pub image: Image,
     pub envs: Vec<Envs>,
     pub extra_labels: Vec<ExtraLabels>,
@@ -93,6 +95,14 @@ pub struct Values {
     pub proxies: Proxy,
     pub coordinators: Coordinator,
     pub datanodes: Datanode,
+}
+
+// Replication
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Replication {
+    pub enabled: bool,
+    pub master_name: String,
+    pub standby_name: String,
 }
 
 // Image

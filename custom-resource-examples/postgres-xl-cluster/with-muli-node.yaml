@@ -1,0 +1,10 @@
+apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
+kind: {{CLUSTER_RESOURCE_KIND}}
+metadata:
+  name: {{CURRENT_CLUSTER_NAME}}
+spec:
+  data: |
+    coordinators:
+      count: 2
+    datanodes:
+      count: 3

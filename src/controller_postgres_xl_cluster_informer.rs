@@ -1,6 +1,6 @@
 use super::{
-    controller_config_map, controller_deployment, controller_job, controller_service,
-    controller_stateful_set, custom_resources,
+    controller_config_map, controller_deployment, controller_job, controller_postgres_xl_cluster,
+    controller_service, controller_stateful_set, custom_resources,
     enums::ResourceAction,
     functions::get_kube_config,
     vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
@@ -41,25 +41,118 @@ pub async fn handle_events(
 ) -> anyhow::Result<()> {
     match ev {
         WatchEvent::Added(custom_resource) => {
-            controller_config_map::action(&custom_resource, &ResourceAction::Added).await?;
-            controller_deployment::action(&custom_resource, &ResourceAction::Added).await?;
-            controller_job::action(&custom_resource, &ResourceAction::Added).await?;
-            controller_service::action(&custom_resource, &ResourceAction::Added).await?;
-            controller_stateful_set::action(&custom_resource, &ResourceAction::Added).await?;
+            let config_map_sha = controller_config_map::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                "".to_owned(),
+            )
+            .await?;
+            controller_deployment::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_stateful_set::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_job::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_service::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+            .await?;
         }
         WatchEvent::Modified(custom_resource) => {
-            controller_config_map::action(&custom_resource, &ResourceAction::Modified).await?;
-            controller_deployment::action(&custom_resource, &ResourceAction::Modified).await?;
-            controller_job::action(&custom_resource, &ResourceAction::Modified).await?;
-            controller_service::action(&custom_resource, &ResourceAction::Modified).await?;
-            controller_stateful_set::action(&custom_resource, &ResourceAction::Modified).await?;
+            let config_map_sha = controller_config_map::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                "".to_owned(),
+            )
+            .await?;
+            controller_deployment::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_stateful_set::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_job::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_service::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+            .await?;
         }
         WatchEvent::Deleted(custom_resource) => {
-            controller_config_map::action(&custom_resource, &ResourceAction::Deleted).await?;
-            controller_deployment::action(&custom_resource, &ResourceAction::Deleted).await?;
-            controller_job::action(&custom_resource, &ResourceAction::Deleted).await?;
-            controller_service::action(&custom_resource, &ResourceAction::Deleted).await?;
-            controller_stateful_set::action(&custom_resource, &ResourceAction::Deleted).await?;
+            let config_map_sha = controller_config_map::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                "".to_owned(),
+            )
+            .await?;
+            controller_deployment::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_stateful_set::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_job::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_service::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+            .await?;
+            controller_postgres_xl_cluster::action_create_slave(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+            .await?;
         }
         _ => info!("no controller created for event."),
     }

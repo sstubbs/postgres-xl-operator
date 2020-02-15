@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Initialize the node configuration.
-cur_path="$(dirname ${BASH_SOURCE[0]})"
+cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 log:info "Initializing node configuration for $NODE_TYPE @ $PG_NODE"
 

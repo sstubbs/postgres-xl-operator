@@ -80,8 +80,9 @@ pub struct ClusterScript {
 // Global
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Values {
-    pub replication: Replication,
     pub image: Image,
+    pub replication: Replication,
+    pub health_check: HealthCheck,
     pub envs: Vec<Envs>,
     pub extra_labels: Vec<ExtraLabels>,
     pub homedir: String,
@@ -97,6 +98,13 @@ pub struct Values {
     pub datanodes: Datanode,
 }
 
+// Image
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Image {
+    pub name: String,
+    pub version: String,
+}
+
 // Replication
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Replication {
@@ -105,11 +113,11 @@ pub struct Replication {
     pub standby_name: String,
 }
 
-// Image
+// Health Check
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Image {
-    pub name: String,
-    pub version: String,
+pub struct HealthCheck {
+    pub enabled: bool,
+    pub database_name: String,
 }
 
 // Envs
@@ -138,7 +146,7 @@ pub struct OverrideEnvs {
 pub struct Config {
     log_level: String,
     managers_port: u16,
-    postgres_port: u16,
+    pub postgres_port: u16,
     postgres_user: String,
     append: ConfigAppend,
 }

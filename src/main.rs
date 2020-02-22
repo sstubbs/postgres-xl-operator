@@ -9,6 +9,10 @@ extern crate rust_embed;
 extern crate anyhow;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate serde_json;
+#[macro_use]
+extern crate diesel_migrations;
 
 mod controller_config_map;
 mod controller_deployment;
@@ -20,6 +24,7 @@ mod controller_stateful_set;
 mod custom_resources;
 mod enums;
 mod functions;
+mod health_checks;
 mod structs;
 mod vars;
 
@@ -30,6 +35,7 @@ async fn main() -> anyhow::Result<()> {
         std::env::var("LOG_LEVEL").unwrap_or(vars::LOG_LEVEL.into()),
     );
     env_logger::init();
+    task::spawn(health_checks::watch());
     task::spawn(controller_postgres_xl_cluster_informer::watch()).await??;
     Ok(())
 }

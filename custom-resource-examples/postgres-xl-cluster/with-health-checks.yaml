@@ -1,0 +1,10 @@
+apiVersion: {{CUSTOM_RESOURCE_GROUP}}/v1
+kind: {{CLUSTER_RESOURCE_KIND}}
+metadata:
+  name: {{CURRENT_CLUSTER_NAME}}
+spec:
+  data: |
+    health_check:
+      enabled: true
+      # This is the the health check database that will be automatically created.
+      database_name: "health_checks"

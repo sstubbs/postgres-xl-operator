@@ -68,6 +68,9 @@ pub async fn action_create_slave(
             current_data["proxies"]["count"] = serde_yaml::from_str("0")?;
             current_data["coordinators"]["count"] = serde_yaml::from_str("1")?;
 
+            // Health checks do not work for standby so disable them
+            current_data["health_checks"]["enabled"] = serde_yaml::from_str("false")?;
+
             post_object.spec.data = Some(serde_yaml::to_string(&current_data)?);
 
             match resource_action {

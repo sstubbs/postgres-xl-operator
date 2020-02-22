@@ -10,3 +10,4 @@ pub static KUBE_CONFIG_TYPE: &str = "incluster";
 pub static CLUSTER_RESOURCE_PLURAL: &str = "postgres-xl-clusters";
 //pub static CLUSTER_RESOURCE_KIND: &str = "PostgresXlCluster";
 //pub static CLUSTER_RESOURCE_KIND_LOWER: &str = "postgresxlcluster";
+pub static HEALTH_CHECK_INTERVAL: &str = "300";

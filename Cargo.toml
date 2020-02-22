@@ -31,3 +31,6 @@ rust-embed = { version = "5.2.0", features = ["debug-embed"] }
 # Hashing
 ring = "0.16.10"
 base64 = "0.11.0"
+# Postgres
+diesel = { version = "1.4.3", features = ["postgres"] }
+diesel_migrations = "1.4.0"

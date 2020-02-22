@@ -6,6 +6,7 @@ customResourceGroup: postgres-xl-operator.vanqor.com
 logLevel: info
 kubeConfigType: incluster
 clusterResourcePlural: postgres-xl-clusters
+healthCheckInterval: 300
 
 image:
   repository: sstubbs/postgres-xl-operator

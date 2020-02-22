@@ -14,3 +14,4 @@ data:
   LOG_LEVEL: {{ .Values.logLevel }}
   KUBE_CONFIG_TYPE: {{ .Values.kubeConfigType }}
   CLUSTER_RESOURCE_PLURAL: {{ .Values.clusterResourcePlural }}
+  HEALTH_CHECK_INTERVAL: {{ .Values.healthCheckInterval }}

@@ -215,8 +215,8 @@ pub struct WalArchivePvcResourceRequestStorage {
 // Security
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Security {
-    passwords_secret_name: String,
-    pg_password: String,
+    pub passwords_secret_name: String,
+    pub pg_password: String,
     postgres_auth_type: String,
 }
 

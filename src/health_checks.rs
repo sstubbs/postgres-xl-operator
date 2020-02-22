@@ -47,32 +47,57 @@ pub async fn watch() -> anyhow::Result<()> {
             if context.cluster.values.health_check.enabled
                 && context.cluster.values.health_check.database_name != ""
             {
+                let mut password = "".to_owned();
+
+                if &context.cluster.values.security.passwords_secret_name != ""
+                    && &context.cluster.values.security.pg_password != ""
+                {
+                    let secret = secret_client
+                        .get(&context.cluster.values.security.passwords_secret_name)
+                        .await;
+                    if secret.is_ok() {
+                        let secret_unwrapped = secret.unwrap();
+                        let password_bytes = secret_unwrapped
+                            .data
+                            .get(&context.cluster.values.security.pg_password)
+                            .unwrap();
+                        password = std::str::from_utf8(&password_bytes.0).unwrap().to_owned();
+                    }
+                }
 
                 let service_name = format!(
                     "{}-{}-svc-crd",
                     context.cleaned_release_name, context.cluster.cleaned_name
                 );
 
+                let database_url = format!(
+                    "postgres://postgres:{}@{}:{}",
+                    password, service_name, context.cluster.values.config.postgres_port
+                );
+
                 if !cluster.metadata.labels.contains_key("health_check") {
                     // Create health check database
-                    let database_url = format!(
-                        "postgres://postgres@{}:{}",
-                        service_name, context.cluster.values.config.postgres_port
-                    );
                     let database_connection = PgConnection::establish(&database_url)
                         .expect(&format!("Error connecting to {}", database_url));
-                    let create_health_check_database =
-                        sql_query(format!("CREATE DATABASE {}", context.cluster.values.health_check.database_name))
-                            .execute(&database_connection);
+                    let create_health_check_database = sql_query(format!(
+                        "CREATE DATABASE {}",
+                        context.cluster.values.health_check.database_name
+                    ))
+                    .execute(&database_connection);
                     if create_health_check_database.is_ok() {
-                        info!("database {} created", context.cluster.values.health_check.database_name)
+                        info!(
+                            "database {} created",
+                            context.cluster.values.health_check.database_name
+                        )
                     } else {
                         error!("{:?}", create_health_check_database.err())
                     }
 
                     // Run health check database migrations
-                    let health_check_database_url =
-                        format!("{}/{}", database_url, context.cluster.values.health_check.database_name);
+                    let health_check_database_url = format!(
+                        "{}/{}",
+                        database_url, context.cluster.values.health_check.database_name
+                    );
                     let health_check_database_connection =
                         PgConnection::establish(&health_check_database_url).expect(&format!(
                             "Error connecting to {}",
@@ -101,6 +126,18 @@ pub async fn watch() -> anyhow::Result<()> {
                             serde_json::to_vec(&patch)?,
                         )
                         .await?;
+                } else {
+//                    // Do the health check
+//                    let health_check_database_url = format!(
+//                        "{}/{}",
+//                        database_url, context.cluster.values.health_check.database_name
+//                    );
+//
+//                    let health_check_database_connection =
+//                        PgConnection::establish(&health_check_database_url).expect(&format!(
+//                            "Error connecting to {}",
+//                            health_check_database_url
+//                        ));
                 }
             }
         }

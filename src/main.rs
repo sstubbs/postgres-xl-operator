@@ -12,6 +12,8 @@ extern crate log;
 #[macro_use]
 extern crate serde_json;
 #[macro_use]
+extern crate diesel;
+#[macro_use]
 extern crate diesel_migrations;
 
 mod controller_config_map;
@@ -25,6 +27,8 @@ mod custom_resources;
 mod enums;
 mod functions;
 mod health_checks;
+mod models;
+mod schema;
 mod structs;
 mod vars;
 

@@ -1,9 +1,10 @@
 use super::custom_resources::KubePostgresXlCluster;
 use super::functions::{create_context, get_kube_config};
+use super::schema::ping::dsl::*;
 use super::vars::{
     CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_INTERVAL, NAMESPACE,
 };
-use diesel::{sql_query, Connection, PgConnection, RunQueryDsl};
+use diesel::{insert_into, sql_query, Connection, PgConnection, RunQueryDsl};
 use kube::api::{Api, ListParams, PatchParams};
 use kube::client::APIClient;
 use std::time::Duration;
@@ -76,38 +77,49 @@ pub async fn watch() -> anyhow::Result<()> {
                     password, service_name, context.cluster.values.config.postgres_port
                 );
 
+                let health_check_database_url = format!(
+                    "{}/{}",
+                    database_url, context.cluster.values.health_check.database_name
+                );
+
+                let patch_params = PatchParams::default();
+
                 if !cluster.metadata.labels.contains_key("health_check") {
                     // Create health check database
-                    let database_connection = PgConnection::establish(&database_url)
-                        .expect(&format!("Error connecting to {}", database_url));
-                    let create_health_check_database = sql_query(format!(
-                        "CREATE DATABASE {}",
-                        context.cluster.values.health_check.database_name
-                    ))
-                    .execute(&database_connection);
-                    if create_health_check_database.is_ok() {
-                        info!(
-                            "database {} created",
+                    let database_connection = PgConnection::establish(&database_url);
+                    if database_connection.is_ok() {
+                        let database_connection_unwrapped = database_connection.unwrap();
+                        let create_health_check_database = sql_query(format!(
+                            "CREATE DATABASE {}",
                             context.cluster.values.health_check.database_name
-                        )
+                        ))
+                        .execute(&database_connection_unwrapped);
+                        if create_health_check_database.is_ok() {
+                            info!(
+                                "database {} created",
+                                context.cluster.values.health_check.database_name
+                            )
+                        } else {
+                            error!("{}", create_health_check_database.err().unwrap())
+                        }
                     } else {
-                        error!("{:?}", create_health_check_database.err())
+                        error!("{}", database_connection.err().unwrap())
                     }
 
                     // Run health check database migrations
-                    let health_check_database_url = format!(
-                        "{}/{}",
-                        database_url, context.cluster.values.health_check.database_name
-                    );
                     let health_check_database_connection =
-                        PgConnection::establish(&health_check_database_url).expect(&format!(
-                            "Error connecting to {}",
-                            health_check_database_url
-                        ));
-                    embedded_migrations::run_with_output(
-                        &health_check_database_connection,
-                        &mut std::io::stdout(),
-                    )?;
+                        PgConnection::establish(&health_check_database_url);
+
+                    if health_check_database_connection.is_ok() {
+                        let health_check_database_connection_unwrapped =
+                            health_check_database_connection.unwrap();
+                        embedded_migrations::run_with_output(
+                            &health_check_database_connection_unwrapped,
+                            &mut std::io::stdout(),
+                        )?;
+                    } else {
+                        error!("{}", health_check_database_connection.err().unwrap())
+                    }
 
                     // set health_check label to initialised
                     let patch = json!({
@@ -118,8 +130,6 @@ pub async fn watch() -> anyhow::Result<()> {
                         },
                     });
 
-                    let patch_params = PatchParams::default();
-
                     let _p_patched = resource_client
                         .patch(
                             &cluster.metadata.name,
@@ -128,17 +138,56 @@ pub async fn watch() -> anyhow::Result<()> {
                         )
                         .await?;
                 } else {
-//                    // Do the health check
-//                    let health_check_database_url = format!(
-//                        "{}/{}",
-//                        database_url, context.cluster.values.health_check.database_name
-//                    );
-//
-//                    let health_check_database_connection =
-//                        PgConnection::establish(&health_check_database_url).expect(&format!(
-//                            "Error connecting to {}",
-//                            health_check_database_url
-//                        ));
+                    // Do the health check
+                    let health_check_database_connection =
+                        PgConnection::establish(&health_check_database_url);
+                    let patch;
+                    if health_check_database_connection.is_ok() {
+                        let health_check_database_connection_unwrapped =
+                            health_check_database_connection.unwrap();
+                        let health_check = insert_into(ping)
+                            .default_values()
+                            .execute(&health_check_database_connection_unwrapped);
+
+                        // patch the label depending on the result
+                        if health_check.is_ok() {
+                            // set health_check label to healthy
+                            patch = json!({
+                                "metadata": {
+                                    "labels": {
+                                        "health_check": "healthy",
+                                    },
+                                },
+                            });
+                        } else {
+                            error!("{}", health_check.err().unwrap());
+                            // set health_check label to unhealthy
+                            patch = json!({
+                                "metadata": {
+                                    "labels": {
+                                        "health_check": "unhealthy",
+                                    },
+                                },
+                            });
+                        }
+                    } else {
+                        error!("{}", health_check_database_connection.err().unwrap());
+                        // set health_check label to unhealthy
+                        patch = json!({
+                            "metadata": {
+                                "labels": {
+                                    "health_check": "unhealthy",
+                                },
+                            },
+                        });
+                    }
+                    resource_client
+                        .patch(
+                            &cluster.metadata.name,
+                            &patch_params,
+                            serde_json::to_vec(&patch)?,
+                        )
+                        .await?;
                 }
             }
         }

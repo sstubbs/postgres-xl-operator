@@ -47,6 +47,7 @@ pub async fn watch() -> anyhow::Result<()> {
             if context.cluster.values.health_check.enabled
                 && context.cluster.values.health_check.database_name != ""
             {
+                // If secret is being used get the password for tge database_url
                 let mut password = "".to_owned();
 
                 if &context.cluster.values.security.passwords_secret_name != ""
@@ -108,7 +109,7 @@ pub async fn watch() -> anyhow::Result<()> {
                         &mut std::io::stdout(),
                     )?;
 
-                    // set as initialised
+                    // set health_check label to initialised
                     let patch = json!({
                         "metadata": {
                             "labels": {

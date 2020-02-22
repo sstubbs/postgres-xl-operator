@@ -53,7 +53,7 @@ pub async fn watch() -> anyhow::Result<()> {
                     context.cleaned_release_name, context.cluster.cleaned_name
                 );
 
-                if !cluster.metadata.labels.contains_key("healthcheck") {
+                if !cluster.metadata.labels.contains_key("health_check") {
                     // Create health check database
                     let database_url = format!(
                         "postgres://postgres@{}:{}",
@@ -87,7 +87,7 @@ pub async fn watch() -> anyhow::Result<()> {
                     let patch = json!({
                         "metadata": {
                             "labels": {
-                                "healthcheck": "initialised",
+                                "health_check": "initialised",
                             },
                         },
                     });

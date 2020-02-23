@@ -3,9 +3,9 @@
 
 image:
   # The default postgres-xl image to use in all pods.
-  name: pavouk0/postgres-xl
+  name: sstubbs/postgres-xl
   # The default postgres-xl image version to use in all pods.
-  version: XL_10_R1_1-6-g68c378f-4-g7a65119
+  version: XL_10_STABLE-31dfe47342eabe8ad72c000a103e54a94b49c912
 
 replication:
   enabled: false

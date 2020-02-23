@@ -117,26 +117,26 @@ pub async fn watch() -> anyhow::Result<()> {
                             &health_check_database_connection_unwrapped,
                             &mut std::io::stdout(),
                         )?;
+
+                        // set health_check label to initialised
+                        let patch = json!({
+                            "metadata": {
+                                "labels": {
+                                    "health_check": "initialised",
+                                },
+                            },
+                        });
+
+                        let _p_patched = resource_client
+                            .patch(
+                                &cluster.metadata.name,
+                                &patch_params,
+                                serde_json::to_vec(&patch)?,
+                            )
+                            .await?;
                     } else {
                         error!("{}", health_check_database_connection.err().unwrap())
                     }
-
-                    // set health_check label to initialised
-                    let patch = json!({
-                        "metadata": {
-                            "labels": {
-                                "health_check": "initialised",
-                            },
-                        },
-                    });
-
-                    let _p_patched = resource_client
-                        .patch(
-                            &cluster.metadata.name,
-                            &patch_params,
-                            serde_json::to_vec(&patch)?,
-                        )
-                        .await?;
                 } else {
                     // Do the health check
                     let health_check_database_connection =

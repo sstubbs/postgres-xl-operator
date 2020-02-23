@@ -17,7 +17,7 @@ replication:
 health_check:
   enabled: false
   # This is the the health check database that will be automatically created.
-  database_name: "health_checks"
+  database_name: "health_check"
 
 envs: []
   # This is the env set that appends to all pods.

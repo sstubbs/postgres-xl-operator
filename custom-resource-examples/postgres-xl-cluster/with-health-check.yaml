@@ -7,4 +7,4 @@ spec:
     health_check:
       enabled: true
       # This is the the health check database that will be automatically created.
-      database_name: "health_checks"
+      database_name: "health_check"

@@ -19,15 +19,12 @@ data:
   PGUSER: "{{ .cluster.values.config.postgres_user }}"
 
   # the user authentication type
-  AUTH_TYPE: "{{ .cluster.values.security.postgres_auth_type }}"
+  AUTH_TYPE: "{{ .cluster.values.security.password.auth_type }}"
 
 {{- if .cluster.values.replication.master_name -}}
   # if this is a standby it will have a master
   MASTER_NAME: "{{ printf "%s-%s" .cleaned_release_name .cluster.values.replication.master_name }}"
 {{ end }}
-
-  # the wal archive directory. Can be overriden.
-  WAL_ARCHIVE_PATH: "{{ .cluster.values.homedir }}/wal_archive/{{ .cluster.values.wal.archive.version }}"
 
 {{- if .cluster.values.envs -}}
   # Added envs. These will not affect the db operation.

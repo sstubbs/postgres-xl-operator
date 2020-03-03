@@ -14,13 +14,3 @@
 {{- end }}
 {{- end -}}
 
-{{ define "global_secret" }}
-{{ if and .cluster.values.security.passwords_secret_name .cluster.values.security.pg_password }}
-          - name: PGPASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: {{ .cluster.values.security.pg_password }}
-                name: {{ .cluster.values.security.passwords_secret_name }}
-{{- end -}}
-{{- end -}}
-

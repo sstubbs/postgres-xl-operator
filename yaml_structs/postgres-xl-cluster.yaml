@@ -1,45 +1,26 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your crd.
 
-image:
-  # The default postgres-xl image to use in all pods.
-  name: pavouk0/postgres-xl
-  # The default postgres-xl image version to use in all pods.
-  version: XL_10_R1_1-6-g68c378f-4-g7a65119
-
-replication:
-  enabled: false
-  # Do not set master_name as this is automatically set.
-  master_name: ""
-  # Set this to the name of the standby you want to create that is replicated from this created, modified and deleted when this is and replicated from it.
-  standby_name: ""
-
-health_check:
-  enabled: false
-  # This is the the health check database that will be automatically created.
-  database_name: "health_check"
-
-envs: []
-  # This is the env set that appends to all pods.
-  # will not affect the db configuration.
-  # - name: TEST_ENV_VARIABLE
-  #   content: "testing 123"
-extra_labels: []
-  # add extra labels to all pods.
-  # - name: test_label
-  #   content: test_label
-
-# the home directory depends on the image and will determine the
-# data storage location. the use postgres must have access to this directory.
-homedir: /var/lib/postgresql
-override_envs: []
-  # The env set that appends to all pods.
-  # may affect the db configuration.
-  # - name: TEST_ENV_VARIABLE
-  #   content: "testing 123"
-
 # general config.
 config:
+  # Append to the various config files.
+  append:
+    # append to all coordinators.
+    # - name: max_connections
+    #   content: 100
+    coordinator: []
+    # append to all datanodes.
+    # - name: max_connections
+    #   content: 100
+    datanode: []
+    # append to gtm.
+    # - name: max_connections
+    #   content: 100
+    gtm: []
+    # append to all proxies.
+    # - name: max_connections
+    #   content: 100
+    proxy: []
   # The log level to use, accepts : ERROR, WARNING, INFO, DEBUG, DEBUG (1-5).
   log_level: warning
   # the port for managers (GTM and proxy).
@@ -48,58 +29,39 @@ config:
   postgres_port: 5432
   # the root user.
   postgres_user: postgres
-  # Append to the various config files.
-  append:
-    gtm: []
-    # append to gtm.
-    # - name: max_connections
-    #   content: 100
-    proxy: []
-    # append to all proxies.
-    # - name: max_connections
-    #   content: 100
-    datanode: []
-    # append to all datanodes.
-    # - name: max_connections
-    #   content: 100
-    coordinator: []
-    # append to all coordinators.
-    # - name: max_connections
-    #   content: 100
 
-# applies only to datanodes. Coordinators
-# are not stored, and are only considered part
-# of the cluster configuration.
-wal:
-  archive:
-    # enable wal archiving.
-    enable: false
-    # default value for versions.
-    # TODO: add WAL auto versioning on datanode init
-    # will allow restore points.
-    version: unversioned
-    # will default to storage.
-    storage_path: /wal_archive
-    # if does not exist will default to empty folder.
-    pvc:
-      resources:
-        requests:
-          storage: ""
+# Enables a Pgbouncer container in the coordinator pods connected by unix socket.
+connection_pool:
+  enabled: false
+  user: connection_pool
 
-security:
-  # If exists will load all passwords from secrets.
-  passwords_secret_name: ""
-  # If passwords_secret_name exists, is the name of the secret
-  # key. Otherwise the password.
-  pg_password: ""
-  # Set the password authentication method.
-  postgres_auth_type: md5
-  
-# the coordinators external service.
-service:
-  enabled: true
-  port: 5432
-  service_type: ClusterIP
+envs: []
+  # This is the env set that appends to all pods.
+  # will not affect the db configuration.
+  # - name: TEST_ENV_VARIABLE
+  #   content: "testing 123"
+
+extra_labels: []
+  # add extra labels to all pods.
+  # - name: test_label
+  #   content: test_label
+
+# the home directory depends on the image and will determine the
+# data storage location. the use postgres must have access to this directory.
+homedir: /var/lib/postgresql
+
+health_check:
+  enabled: false
+  # This is the the health check database that will be automatically created.
+  database: "health_check"
+  # This is the the health check user that will be automatically created.
+  user: health_check
+
+image:
+  # The default postgres-xl image to use in all pods.
+  name: sstubbs/postgres-xl
+  # The default postgres-xl image version to use in all pods.
+  version: 0.4.0
 
 # Configuration for a job that is called when the database
 # has finished loading.
@@ -126,7 +88,7 @@ on_load:
     # - name: create_base_tables.sql
     #   content: |-
     #     CREATE SCHEMA test;
-    #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
+  #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
 
   # array of init scripts to be called only when the
   # the database is first initialized.
@@ -138,7 +100,7 @@ on_load:
     # - name: create_base_tables.sql
     #   content: |-
     #     CREATE SCHEMA test;
-    #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
+  #     CREATE TABLE test.lama as (SELECT 'the brown rabbit' as col_1);
 
   # addons
   add_containers: ""
@@ -149,6 +111,66 @@ on_load:
   inject_spec_yaml: ""
   inject_job_yaml: ""
 
+override_envs: []
+  # The env set that appends to all pods.
+  # may affect the db configuration.
+  # - name: TEST_ENV_VARIABLE
+  #   content: "testing 123"
+
+replication:
+  enabled: false
+  # Do not set master_name as this is automatically set.
+  master_name: ""
+  # Set this to the name of the standby you want to create that is replicated from this created, modified and deleted when this is and replicated from it.
+  standby_name: ""
+
+security:
+
+  password:
+    # Set the password authentication type.
+    auth_type: md5
+
+    # This is the method of how the root password is obtained. Accepts none, operator, secret, mount.
+    # none: no password is enabled
+    # operator: the operator generates and rotates the secret based on rotation_schedule.
+    # secret: mounts a secret i.e. for cert manager or other external created secrets.
+    # mount: this is purely a mount path i.e. for when vault sidecar injection is used. Mount is not implemented yet.
+    method: none
+    # The directory where the secret is mounted in the container.
+    mount_path: /pgpass
+    # The name of the secret. This will be appended to cluster identifier if operator method is used otherwise it will be the name of an external generated secret.
+    secret_name: pgpass
+    # The list of extra user keys within the secret that the operator must maintain if using the operator method.
+    # postgres_user is automatically added.
+    # health_check.user is automatically added if health check is enabled.
+    # connection_pool.user is automatically added if connection pool is enabled.
+    extra_username: []
+
+  tls:
+    # This is the method of how the cert/key is obtained. Accepts none, operator, secret, mount.
+    # none: no tls is enabled
+    # operator: the operator generates and rotates the secret based on rotation_schedule.
+    # secret: mounts a secret i.e. for cert manager or other external created secrets.
+    # mount: this is purely a mount path i.e. for when vault sidecar injection is used. Mount is not implemented yet.
+    method: none
+    # The directory where the secret is mounted in the container.
+    mount_path: /tls
+    # The name of the secret. This will be appended to cluster identifier if operator method is used otherwise it will be the name of an external generated secret.
+    secret_name: tls
+    # The secret key for ca cert
+    secret_ca: ca.crt
+    # The secret key for cert
+    secret_crt: tls.crt
+    # The secret key for private key
+    secret_key: tls.key
+
+# the coordinators external service.
+service:
+  enabled: true
+  port: 5432
+  service_type: ClusterIP
+
+# Stateful sets
 gtm:
   resources:
     requests:

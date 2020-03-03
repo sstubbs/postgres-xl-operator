@@ -33,12 +33,6 @@ data:
   config_append_datanode: |
     # applies only on startup.
     log_min_messages = {{ lower .cluster.values.config.log_level }}
-{{- if .cluster.values.wal.archive.enable }}
-    # archive the data
-    archive_mode = on
-    # archive command.
-    archive_command = '/scripts/wal_archive %p %f'
-{{- end }}
 {{- if .cluster.values.config.append.datanode }}
 {{ range .cluster.values.config.append.datanode -}}
 {{ .name | indent 4 }} = {{ .content }}

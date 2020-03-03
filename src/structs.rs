@@ -9,11 +9,15 @@ pub struct EmbeddedScripts;
 pub struct EmbeddedYamlStructs;
 
 #[derive(RustEmbed)]
-#[folder = "templates/_global/"]
+#[folder = "templates/1_global/"]
 pub struct EmbeddedGlobalTemplates;
 
 #[derive(RustEmbed)]
-#[folder = "templates/config_map/"]
+#[folder = "templates/2_secret/"]
+pub struct EmbeddedSecretTemplates;
+
+#[derive(RustEmbed)]
+#[folder = "templates/3_config_map/"]
 pub struct EmbeddedConfigMapTemplates;
 
 #[derive(RustEmbed)]
@@ -35,25 +39,34 @@ pub struct EmbeddedStatefulSetTemplates;
 // Chart
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Chart {
+    pub cluster: Cluster,
     pub name: String,
     pub cleaned_name: String,
-    pub version: String,
     pub release_name: String,
     pub cleaned_release_name: String,
     pub release_service: String,
-    pub cluster: Cluster,
+    pub version: String,
 }
 
 // Cluster
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Cluster {
+    pub config_map_sha: String,
+    pub global_labels: Vec<GlobalLabel>,
+    pub generated_passwords: Vec<GeneratedPassword>,
     pub name: String,
     pub cleaned_name: String,
-    pub global_labels: Vec<GlobalLabel>,
+    pub scripts: Vec<Script>,
     pub selector_labels: Vec<SelectorLabel>,
     pub values: Values,
-    pub scripts: Vec<ClusterScript>,
-    pub config_map_sha: String,
+}
+
+// Generated Passwords
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GeneratedPassword {
+    pub secret_name: String,
+    pub secret_key: String,
+    pub secret_value: String,
 }
 
 // Labels
@@ -72,7 +85,7 @@ pub struct SelectorLabel {
 
 // Scripts
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ClusterScript {
+pub struct Script {
     pub name: String,
     pub content: String,
 }
@@ -80,44 +93,71 @@ pub struct ClusterScript {
 // Global
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Values {
-    pub image: Image,
-    pub replication: Replication,
-    pub health_check: HealthCheck,
+    pub config: Config,
+    pub connection_pool: ConnectionPool,
     pub envs: Vec<Envs>,
     pub extra_labels: Vec<ExtraLabels>,
     pub homedir: String,
+    pub health_check: HealthCheck,
+    pub image: Image,
+    pub on_load: OnLoad,
     pub override_envs: Vec<OverrideEnvs>,
-    pub config: Config,
-    pub wal: Wal,
+    pub replication: Replication,
     pub security: Security,
     pub service: Service,
-    pub on_load: OnLoad,
     pub gtm: Gtm,
     pub proxies: Proxy,
     pub coordinators: Coordinator,
     pub datanodes: Datanode,
 }
 
-// Image
+// Config
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Image {
-    pub name: String,
-    pub version: String,
+pub struct Config {
+    append: ConfigAppend,
+    log_level: String,
+    managers_port: u16,
+    pub postgres_port: u16,
+    pub postgres_user: String,
 }
 
-// Replication
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Replication {
-    pub enabled: bool,
-    pub master_name: String,
-    pub standby_name: String,
+pub struct ConfigAppend {
+    coordinator: Vec<ConfigAppendCoordinator>,
+    datanode: Vec<ConfigAppendDatanode>,
+    gtm: Vec<ConfigAppendGtm>,
+    proxy: Vec<ConfigAppendProxy>,
 }
 
-// Health Check
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HealthCheck {
+pub struct ConfigAppendCoordinator {
+    name: String,
+    content: String,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendDatanode {
+    name: String,
+    content: String,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendGtm {
+    name: String,
+    content: String,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ConfigAppendProxy {
+    name: String,
+    content: String,
+}
+
+// Connection Pool
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ConnectionPool {
     pub enabled: bool,
-    pub database_name: String,
+    pub user: String,
 }
 
 // Envs
@@ -134,98 +174,19 @@ pub struct ExtraLabels {
     pub content: String,
 }
 
-// Envs
+// Health Check
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct OverrideEnvs {
+pub struct HealthCheck {
+    pub enabled: bool,
+    pub database: String,
+    pub user: String,
+}
+
+// Image
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Image {
     pub name: String,
-    pub content: String,
-}
-
-// Config
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Config {
-    log_level: String,
-    managers_port: u16,
-    pub postgres_port: u16,
-    postgres_user: String,
-    append: ConfigAppend,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ConfigAppend {
-    gtm: Vec<ConfigAppendGtm>,
-    proxy: Vec<ConfigAppendProxy>,
-    datanode: Vec<ConfigAppendDatanode>,
-    coordinator: Vec<ConfigAppendCoordinator>,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ConfigAppendGtm {
-    name: String,
-    content: String,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ConfigAppendProxy {
-    name: String,
-    content: String,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ConfigAppendDatanode {
-    name: String,
-    content: String,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ConfigAppendCoordinator {
-    name: String,
-    content: String,
-}
-
-// WAL
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Wal {
-    archive: WalArchive,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WalArchive {
-    enable: bool,
-    version: String,
-    storage_path: String,
-    pvc: WalArchivePvcResource,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WalArchivePvcResource {
-    resources: WalArchivePvcResourceRequest,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WalArchivePvcResourceRequest {
-    requests: WalArchivePvcResourceRequestStorage,
-}
-
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WalArchivePvcResourceRequestStorage {
-    storage: String,
-}
-
-// Security
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Security {
-    pub passwords_secret_name: String,
-    pub pg_password: String,
-    postgres_auth_type: String,
-}
-
-// Service
-#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Service {
-    enabled: bool,
-    port: u16,
-    service_type: String,
+    pub version: String,
 }
 
 // On Load
@@ -274,6 +235,56 @@ pub struct OnLoadInit {
     content: String,
 }
 
+// Override Envs
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct OverrideEnvs {
+    pub name: String,
+    pub content: String,
+}
+
+// Replication
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Replication {
+    pub enabled: bool,
+    pub master_name: String,
+    pub standby_name: String,
+}
+
+// Security
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Security {
+    pub password: SecurityPassword,
+    pub tls: SecurityTls,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SecurityPassword {
+    pub auth_type: String,
+    pub method: String,
+    pub mount_path: String,
+    pub secret_name: String,
+    pub extra_username: Vec<String>,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SecurityTls {
+    pub method: String,
+    pub mount_path: String,
+    pub secret_name: String,
+    pub secret_ca: String,
+    pub secret_crt: String,
+    pub secret_key: String,
+}
+
+// Service
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Service {
+    enabled: bool,
+    port: u16,
+    service_type: String,
+}
+
+// Stateful Sets
 // GTM
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Gtm {
@@ -450,3 +461,4 @@ pub struct DatanodePvcResourceRequest {
 pub struct DatanodePvcResourceRequestStorage {
     storage: String,
 }
+// End Stateful Sets

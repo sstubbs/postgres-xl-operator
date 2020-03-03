@@ -21,6 +21,7 @@ mod controller_deployment;
 mod controller_job;
 mod controller_postgres_xl_cluster;
 mod controller_postgres_xl_cluster_informer;
+mod controller_secret;
 mod controller_service;
 mod controller_stateful_set;
 mod custom_resources;

@@ -1,13 +1,16 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     structs::{
-        Chart, Cluster, ClusterScript, EmbeddedGlobalTemplates, EmbeddedScripts,
-        EmbeddedYamlStructs, GlobalLabel, SelectorLabel, Values,
+        Chart, Cluster, EmbeddedGlobalTemplates, EmbeddedScripts, EmbeddedYamlStructs, GlobalLabel,
+        Script, SelectorLabel, Values,
     },
     vars::{CHART_NAME, CHART_VERSION, KUBE_CONFIG_TYPE, RELEASE_NAME, RELEASE_SERVICE},
 };
+use base64::encode;
 use json_patch::merge;
 use kube::config;
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 use sprig::SPRIG;
 
 pub async fn get_kube_config() -> anyhow::Result<config::Configuration> {
@@ -72,7 +75,7 @@ pub async fn create_context(
                 let file_data = EmbeddedScripts::get(filename).unwrap();
                 let file_data_string = std::str::from_utf8(file_data.as_ref())?;
 
-                let script_object = ClusterScript {
+                let script_object = Script {
                     name: filename.to_owned().replace("/", "."),
                     content: file_data_string.to_owned(),
                 };
@@ -100,8 +103,7 @@ pub async fn create_context(
             cleaned_release_name: cleaned_release_name.to_owned(),
             release_service: release_service.to_owned(),
             cluster: Cluster {
-                name: cluster_name.to_owned(),
-                cleaned_name: cleaned_cluster_name.to_owned(),
+                config_map_sha,
                 global_labels: vec![
                     GlobalLabel {
                         name: "helm.sh/chart".to_owned(),
@@ -116,6 +118,10 @@ pub async fn create_context(
                         content: yaml_struct_merged_object_unwrapped.to_owned().image.version,
                     },
                 ],
+                generated_passwords: vec![],
+                name: cluster_name.to_owned(),
+                cleaned_name: cleaned_cluster_name.to_owned(),
+                scripts,
                 selector_labels: vec![
                     SelectorLabel {
                         name: "app.kubernetes.io/instance".to_owned(),
@@ -127,8 +133,6 @@ pub async fn create_context(
                     },
                 ],
                 values: yaml_struct_merged_object_unwrapped,
-                scripts,
-                config_map_sha,
             },
         };
         return Ok(global_context);
@@ -169,11 +173,17 @@ pub async fn create_resource_object(
 
     debug!("{}", new_resource_yaml);
 
-    if new_resource_yaml.contains("apiVersion") {
+    return if new_resource_yaml.contains("apiVersion") {
         // Convert new template into serde object to post
         let new_resource_object: serde_yaml::Value = serde_yaml::from_str(&new_resource_yaml)?;
-        return Ok(new_resource_object);
+        Ok(new_resource_object)
     } else {
-        return Err(anyhow!("Missing apiVersion in template so skipping"));
-    }
+        Err(anyhow!("Missing apiVersion in template so skipping"))
+    };
+}
+
+pub async fn generate_base64_password() -> anyhow::Result<String> {
+    let random_string: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
+    let encoded_random_string = encode(&random_string);
+    return Ok(encoded_random_string);
 }

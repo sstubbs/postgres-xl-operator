@@ -66,7 +66,6 @@ spec:
                 fieldPath: status.podIP
           - name: PGHOST
             value: "{{ $app_name }}-svc"
-{{- template "global_secret" . }}
         volumeMounts:
           - name: {{ $app_name }}-{{ $component }}
             mountPath: /load_scripts

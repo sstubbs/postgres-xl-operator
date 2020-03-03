@@ -46,22 +46,22 @@ pub async fn watch() -> anyhow::Result<()> {
 
             // Check if health check is enabled
             if context.cluster.values.health_check.enabled
-                && context.cluster.values.health_check.database_name != ""
+                && context.cluster.values.health_check.database != ""
             {
                 // If secret is being used get the password for tge database_url
                 let mut password = "".to_owned();
 
-                if &context.cluster.values.security.passwords_secret_name != ""
-                    && &context.cluster.values.security.pg_password != ""
+                if &context.cluster.values.security.password.secret_name != ""
+                    && &context.cluster.values.health_check.user != ""
                 {
                     let secret = secret_client
-                        .get(&context.cluster.values.security.passwords_secret_name)
+                        .get(&context.cluster.values.security.password.secret_name)
                         .await;
                     if secret.is_ok() {
                         let secret_unwrapped = secret.unwrap();
                         let password_bytes = secret_unwrapped
                             .data
-                            .get(&context.cluster.values.security.pg_password)
+                            .get(&context.cluster.values.health_check.user)
                             .unwrap();
                         password = std::str::from_utf8(&password_bytes.0).unwrap().to_owned();
                     }
@@ -79,7 +79,7 @@ pub async fn watch() -> anyhow::Result<()> {
 
                 let health_check_database_url = format!(
                     "{}/{}",
-                    database_url, context.cluster.values.health_check.database_name
+                    database_url, context.cluster.values.health_check.database
                 );
 
                 let patch_params = PatchParams::default();
@@ -91,13 +91,13 @@ pub async fn watch() -> anyhow::Result<()> {
                         let database_connection_unwrapped = database_connection.unwrap();
                         let create_health_check_database = sql_query(format!(
                             "CREATE DATABASE {}",
-                            context.cluster.values.health_check.database_name
+                            context.cluster.values.health_check.database
                         ))
                         .execute(&database_connection_unwrapped);
                         if create_health_check_database.is_ok() {
                             info!(
                                 "database {} created",
-                                context.cluster.values.health_check.database_name
+                                context.cluster.values.health_check.database
                             )
                         } else {
                             error!("{}", create_health_check_database.err().unwrap())

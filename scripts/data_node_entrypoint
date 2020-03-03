@@ -3,6 +3,11 @@
 cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
 
+if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
+    PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
+    export PGPASSWORD
+fi
+
 # initialize dependecies.
 source "$cur_path/initialize_env_dependencies" || exit $?
 

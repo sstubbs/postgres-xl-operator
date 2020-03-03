@@ -87,6 +87,8 @@ spec:
             mountPath: /scripts
           - name: {{ $app_name }}-cfg
             mountPath: /config
+          - name: {{ .cluster.values.security.password.secret_name }}
+            mountPath: {{ .cluster.values.security.password.mount_path }}
           - name: datastore
             mountPath: {{ .cluster.values.homedir }}/storage
 {{- if .cluster.values.proxies.volume_mounts }}
@@ -108,6 +110,10 @@ spec:
         - name: {{ $app_name }}-cfg
           configMap:
             name: {{ $app_name }}-cfg
+            defaultMode: 511
+        - name: {{ .cluster.values.security.password.secret_name }}
+          secret:
+            secretName: {{ $app_name }}-{{ .cluster.values.security.password.secret_name }}
             defaultMode: 511
 {{- if .cluster.values.proxies.volumes }}
 {{ .cluster.values.proxies.volumes | indent 8 }}

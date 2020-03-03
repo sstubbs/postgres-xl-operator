@@ -18,6 +18,12 @@ data:
   # db user.
   PGUSER: "{{ .cluster.values.config.postgres_user }}"
 
+  # The mount path to the secret for passwords
+  PASSWORD_SECRET_MOUNT_PATH: "{{ .cluster.values.security.password.mount_path }}"
+
+  # The mount path to the secret for tls certs
+  TLS_SECRET_MOUNT_PATH: "{{ .cluster.values.security.tls.mount_path }}"
+
   # the user authentication type
   AUTH_TYPE: "{{ .cluster.values.security.password.auth_type }}"
 

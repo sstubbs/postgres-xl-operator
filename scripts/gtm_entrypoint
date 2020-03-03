@@ -2,6 +2,12 @@
 # bash script for GTM
 cur_path="$(dirname "${BASH_SOURCE[0]}")"
 source "$cur_path/common.sh"
+
+if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
+    PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
+    export PGPASSWORD
+fi
+
 log:info "Starting as global transaction manager (GTM)"
 
 # init and load methods.

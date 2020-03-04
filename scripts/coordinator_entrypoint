@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Coordinator initialization script
-cur_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$cur_path/common.sh"
+CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
     PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
@@ -9,18 +9,18 @@ if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
 fi
 
 # initialize dependecies.
-source "$cur_path/initialize_env_dependencies" || exit $?
+source "${CUR_PATH}/initialize_env_dependencies" || exit $?
 
-if [ -z "$MASTER_NAME" ]; then
+if [ -z "${MASTER_NAME}" ]; then
   log:info "Starting postgres as master coordinator"
   # initialize the database.
-  source "$cur_path/initialize_postgres_db" || exit $?
+  source "${CUR_PATH}/initialize_postgres_db" || exit $?
   # start the node register in the bg.
-  "$cur_path/register_node" &
+  "${CUR_PATH}/register_node" &
 else
   log:info "Starting postgres as standby coordinator"
   # initialize the database.
-  source "$cur_path/initialize_standby_coordinator" || exit $?
+  source "${CUR_PATH}/initialize_standby_coordinator" || exit $?
 fi
 
 # starting postgres.

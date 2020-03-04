@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-cur_path="$(dirname "${BASH_SOURCE[0]}")"
+CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 
-service_active_file=$(realpath ~/service_activation_time)
+SERVICE_ACTIVE_FILE=$(realpath ~/service_activation_time)
 
-if [ ! -f "$service_active_file" ]; then
+if [ ! -f "${SERVICE_ACTIVE_FILE}" ]; then
     # dont check, not started yet.
     exit 0
 fi
 
-source "$cur_path/check_postgres_is_alive" || exit $?
+source "${CUR_PATH}/check_postgres_is_alive" || exit $?

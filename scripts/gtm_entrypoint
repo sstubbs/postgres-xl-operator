@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bash script for GTM
-cur_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$cur_path/common.sh"
+CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
     PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
@@ -11,8 +11,8 @@ fi
 log:info "Starting as global transaction manager (GTM)"
 
 # init and load methods.
-source "$cur_path/initialize_env_dependencies"
-source "$cur_path/methods_recovery"
+source "${CUR_PATH}/initialize_env_dependencies"
+source "${CUR_PATH}/methods_recovery"
 
 # validating data directory.
 log:info "Creating data directory if does not exist"
@@ -36,8 +36,8 @@ if [ -z "$control_info" ]; then
 
   initgtm -D "${PGDATA}" -Z gtm
 
-  source "$cur_path/initialize_networks" || exit $?
-  source "$cur_path/initialize_node_config" || exit $?
+  source "${CUR_PATH}/initialize_networks" || exit $?
+  source "${CUR_PATH}/initialize_node_config" || exit $?
 
 else
   log:info "GTM configuration found, init skipped."
@@ -53,7 +53,7 @@ else
 fi
 
 # replication section
-source "$cur_path/initialize_standby_gtm" || exit $?
+source "${CUR_PATH}/initialize_standby_gtm" || exit $?
 
 backup_data_state &
 log:info "Started gtm recovery process"

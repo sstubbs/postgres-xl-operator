@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Checks if all datanodes are alive and conneced to the network.
 # thid file will only run on coordinators.
-cur_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$cur_path/common.sh"
+CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${CUR_PATH}/common.sh"
 
 # check all datanodes are connected.
-for i in $(seq 0 $DATANODE_COUNT); do 
-  if [ $i -eq $DATANODE_COUNT ]; then break; fi
-  node_full_name="${DATANODE_BASENAME}-${i}"
-  node_host="${node_full_name}.${DATANODE_SERVICE}"
+for i in $(seq 0 ${DATANODE_COUNT}); do
+  if [ $i -eq ${DATANODE_COUNT} ]; then break; fi
+  NODE_FULL_NAME="${DATANODE_BASENAME}-${i}"
+  NODE_HOST="${NODE_FULL_NAME}.${DATANODE_SERVICE}"
 
-  pg_isready -h "$node_host" -p "$PG_PORT" &> /dev/null
-  assert $? "$LOGGING_PREFIX Cluster not ready, failed to connect to datanode at $node_host" >> /dev/stderr || exit $?
+  pg_isready -h "${NODE_HOST}" -p "${PG_PORT}" &> /dev/null
+  assert $? "${LOGGING_PREFIX} Cluster not ready, failed to connect to datanode at ${NODE_HOST}" >> /dev/stderr || exit $?
 done

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-cur_path="$(dirname "${BASH_SOURCE[0]}")"
-source "$cur_path/common.sh"
+CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
     PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
@@ -9,16 +9,16 @@ if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
 fi
 
 function log() {
-  echo "$LOGGING_PREFIX" "$@"
+  echo "${LOGGING_PREFIX}" "$@"
 }
 
 log:info "Waiting for database to be ready..."
-"$cur_path/wait_for_connection" "$EXTERNAL_SERVICE" "$PG_PORT"
-assert $? "Aborted, timed out while waiting for database to be ready @" "$EXTERNAL_SERVICE:$PG_PORT" || exit $?
+"${CUR_PATH}/wait_for_connection" "${EXTERNAL_SERVICE}" "${PG_PORT}"
+assert $? "Aborted, timed out while waiting for database to be ready @" "${EXTERNAL_SERVICE}:${PG_PORT}" || exit $?
 
 function is_initialized() {
-  local does_state_table_exist=""
-  does_state_table_exist=$(psql -t -c "
+  local DOES_STATE_TABLE_EXIST=""
+  DOES_STATE_TABLE_EXIST=$(psql -t -c "
 SELECT EXISTS (
    SELECT 1
    FROM   information_schema.tables 
@@ -27,7 +27,7 @@ SELECT EXISTS (
    );
 " | tr -d '[[:space:]]')
 
-  if [ "$does_state_table_exist" == "f" ]; then
+  if [ "${DOES_STATE_TABLE_EXIST}" == "f" ]; then
     return 0
   fi
 
@@ -43,37 +43,37 @@ CREATE TABLE postgres_xl_helm.state AS (SELECT 'initialized' as key, 'ok' as val
 }
 
 function run_scripts_that_match() {
-  local pattern="$1"
-  local src_path="$(realpath "$2")"
+  local PATTERN="$1"
+  local SRC_PATH="$(realpath "$2")"
 
-  log:info "Searching for and executing scripts that match pattern '$pattern' in folder '$src_path'"
-  local scripts=""
-  scripts="$(find "$src_path" -maxdepth 1 -name "$pattern" | sort)"
-  scripts=($scripts)
+  log:info "Searching for and executing scripts that match PATTERN '$PATTERN' in folder '$SRC_PATH'"
+  local LOAD_SCRIPTS=""
+  LOAD_SCRIPTS="$(find "$SRC_PATH" -maxdepth 1 -name "$PATTERN" | sort)"
+  LOAD_SCRIPTS=(${LOAD_SCRIPTS})
 
   local is_found=0
 
-  for fpath in "${scripts[@]}"; do
+  for FPATH in "${LOAD_SCRIPTS[@]}"; do
     is_found=1
     
-    local fname=$(basename "$fpath")
-    local fileext=${fname##*.}
+    local FNAME=$(basename "$FPATH")
+    local FILEEXT=${FNAME##*.}
 
-    case $fileext in
+    case ${FILEEXT} in
     sh)
-      log:info "Executing bash script $fpath:"
-      "$fpath"
-      assert $? "Failed when executing init script file $fpath. Exiting... " || return $?
+      log:info "Executing bash script $FPATH:"
+      "$FPATH"
+      assert $? "Failed when executing init script file $FPATH. Exiting... " || return $?
       ;;
     sql)
-      log:info "Calling psql to execute script in $fpath:"
-      local sql_script=""
-      sql_script=$(cat "$fpath")
-      psql -c "$sql_script"
-      assert $? "Failed when executing init script file $fpath. Exiting... " || return $?
+      log:info "Calling psql to execute script in $FPATH:"
+      local LOAD_SCRIPTS_SQL=""
+      LOAD_SCRIPTS_SQL=$(cat "$FPATH")
+      psql -c "$LOAD_SCRIPTS_SQL"
+      assert $? "Failed when executing init script file $FPATH. Exiting... " || return $?
       ;;
     *)
-      log:warning "Cannot invoke filename with extension $fileext, skipping. Allowed extensions [sql, sh]"
+      log:warning "Cannot invoke filename with extension ${FILEEXT}, skipping. Allowed extensions [sql, sh]"
       ;;
     esac
   done
@@ -86,7 +86,7 @@ function run_scripts_that_match() {
 }
 
 pg_isready
-assert $? "Database Port is ready but database is not (pg_isready failed) @" "$EXTERNAL_SERVICE:$PG_PORT" || exit $?
+assert $? "Database Port is ready but database is not (pg_isready failed) @" "${EXTERNAL_SERVICE}:${PG_PORT}" || exit $?
 
 is_initialized
 db_already_initialized=$?

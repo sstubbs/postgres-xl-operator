@@ -12,39 +12,39 @@
 
 # Methods and functions to be used in all other scripts.
 : ${LOGGING_SHOW_COLORS:="true"}
-: ${LOGGING_INFO_PREFEX_COLOR:="\e[0;32m"}
-: ${LOGGING_INFO_PREFEX:=":INFO"}
-: ${LOGGING_ERROR_PREFEX_COLOR:="\e[0;31m"}
-: ${LOGGING_ERROR_PREFEX:=":ERROR"}
-: ${LOGGING_WARNING_PREFEX_COLOR:="\e[0;33m"}
-: ${LOGGING_WARNING_PREFEX:=":WARNING"}
-: ${LOGGING_ARCHIVE_PREFEX_COLOR:="\e[0;34m"}
-: ${LOGGING_ARCHIVE_PREFEX:=":INFO"}
-: ${LOGGING_SCRIPT_PREFEX:=":INFO"}
-: ${LOGGING_SCRIPT_PREFEX_COLOR:="\e[0;36m"}
+: ${LOGGING_INFO_PREFIX_COLOR:="\e[0;32m"}
+: ${LOGGING_INFO_PREFIX:=":INFO"}
+: ${LOGGING_ERROR_PREFIX_COLOR:="\e[0;31m"}
+: ${LOGGING_ERROR_PREFIX:=":ERROR"}
+: ${LOGGING_WARNING_PREFIX_COLOR:="\e[0;33m"}
+: ${LOGGING_WARNING_PREFIX:=":WARNING"}
+: ${LOGGING_ARCHIVE_PREFIX_COLOR:="\e[0;34m"}
+: ${LOGGING_ARCHIVE_PREFIX:=":INFO"}
+: ${LOGGING_SCRIPT_PREFIX:=":INFO"}
+: ${LOGGING_SCRIPT_PREFIX_COLOR:="\e[0;36m"}
 : ${LOGGING_SCRIPT_TEXT_COLOR:="\e[0;35m"}
 
 # TODO: Apply common format for stackdriver.
 logging_core_print() {
-  local log_type="$1"
-  local reset_color="\e[0m"
+  local LOG_TYPE="$1"
+  local RESET_COLOR="\e[0m"
   # remove the first argument.
   shift
 
-  local log_type_prefex_env_name="LOGGING_${log_type}_PREFEX"
-  log_type_prefex="${!log_type_prefex_env_name}"
+  local LOG_TYPE_PREFIX_ENV_NAME="LOGGING_${LOG_TYPE}_PREFIX"
+  LOG_TYPE_PREFIX="${!LOG_TYPE_PREFIX_ENV_NAME}"
 
   if [ "$LOGGING_SHOW_COLORS" != "true" ]; then
-    echo "$LOGGING_PREFIX$log_type_prefex " "$@"
+    echo "${LOGGING_PREFIX}$LOG_TYPE_PREFIX " "$@"
   else
-    local log_prefex_color_env_name="LOGGING_${log_type}_PREFEX_COLOR"
-    local log_text_color_env_name="LOGGING_${log_type}_TEXT_COLOR"
-    log_prefex_color="${!log_prefex_color_env_name}"
-    log_text_color="${!log_text_color_env_name}"
+    local LOG_PREFIX_COLOR_ENV_NAME="LOGGING_${LOG_TYPE}_PREFIX_COLOR"
+    local LOG_TEXT_COLOR_ENV_NAME="LOGGING_${LOG_TYPE}_TEXT_COLOR"
+    LOG_PREFIX_COLOR="${!LOG_PREFIX_COLOR_ENV_NAME}"
+    LOG_TEXT_COLOR="${!LOG_TEXT_COLOR_ENV_NAME}"
 
-    if [ -z "$log_text_color" ]; then log_text_color="$reset_color"; fi
+    if [ -z "${LOG_TEXT_COLOR}" ]; then LOG_TEXT_COLOR="${RESET_COLOR}"; fi
 
-    echo -e "$log_prefex_color$LOGGING_PREFIX$log_type_prefex$log_text_color" "$@" "$reset_color"
+    echo -e "${LOG_PREFIX_COLOR}${LOGGING_PREFIX}$LOG_TYPE_PREFIX${LOG_TEXT_COLOR}" "$@" "${RESET_COLOR}"
   fi
 }
 
@@ -71,8 +71,8 @@ function log:archive() {
 
 function print_bash_error_stack(){
   for ((i=1;i<${#FUNCNAME[@]}-1;i++)); do
-      local fpath="$(realpath ${BASH_SOURCE[$i+1]})"
-      log:error "$i: $fpath:${BASH_LINENO[$i]} @ ${FUNCNAME[$i]}"
+      local FPATH="$(realpath ${BASH_SOURCE[$i+1]})"
+      log:error "$i: $FPATH:${BASH_LINENO[$i]} @ ${FUNCNAME[$i]}"
   done
 }
 

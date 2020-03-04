@@ -2,6 +2,7 @@
 # Helper method, wait for connection.
 # Usage: wait_for_connection [hostname] [port]
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 HOST=$1

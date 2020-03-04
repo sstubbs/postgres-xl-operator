@@ -2,6 +2,7 @@
 
 # loads as library.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 DATA_RECOVERY_PATH="${STORAGE_MOUNT_PATH}/recovery"

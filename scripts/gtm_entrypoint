@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # bash script for GTM
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
@@ -11,7 +12,9 @@ fi
 log:info "Starting as global transaction manager (GTM)"
 
 # init and load methods.
+# shellcheck source=./initialize_env_dependencies
 source "${CUR_PATH}/initialize_env_dependencies"
+# shellcheck source=./methods_recovery
 source "${CUR_PATH}/methods_recovery"
 
 # validating data directory.
@@ -36,7 +39,9 @@ if [ -z "$control_info" ]; then
 
   initgtm -D "${PGDATA}" -Z gtm
 
+  # shellcheck source=./initialize_networks
   source "${CUR_PATH}/initialize_networks" || exit $?
+  # shellcheck source=./initialize_node_config
   source "${CUR_PATH}/initialize_node_config" || exit $?
 
 else
@@ -53,6 +58,7 @@ else
 fi
 
 # replication section
+# shellcheck source=./initialize_standby_gtm
 source "${CUR_PATH}/initialize_standby_gtm" || exit $?
 
 backup_data_state &

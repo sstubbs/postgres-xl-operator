@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 
+# shellcheck source=./check_gtm_connection
 source "${CUR_PATH}/check_gtm_connection" || exit $?
+# shellcheck source=./check_nodes_connection
 source "${CUR_PATH}/check_nodes_connection" || exit $?

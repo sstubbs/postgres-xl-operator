@@ -2,6 +2,7 @@
 # Checks if all datanodes are alive and conneced to the network.
 # thid file will only run on coordinators.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 # check all datanodes are connected.

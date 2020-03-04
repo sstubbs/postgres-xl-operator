@@ -2,6 +2,7 @@
 # Check if postgres is alive.
 
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 pg_isready

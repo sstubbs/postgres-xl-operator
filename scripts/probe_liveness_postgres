@@ -8,4 +8,5 @@ if [ ! -f "${SERVICE_ACTIVE_FILE}" ]; then
     exit 0
 fi
 
+# shellcheck source=./check_postgres_is_alive
 source "${CUR_PATH}/check_postgres_is_alive" || exit $?

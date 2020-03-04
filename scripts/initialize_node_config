@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Initialize the node configuration.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 log:info "Initializing node configuration for ${NODE_TYPE} @ ${PG_NODE}"
 

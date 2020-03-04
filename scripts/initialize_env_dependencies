@@ -2,6 +2,7 @@
 # Initializes the env variables in the pod,
 # depending on pod type.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 POD_INDEX=$(echo "${POD_NAME}" | grep -Eo "[0-9]+\s*$")

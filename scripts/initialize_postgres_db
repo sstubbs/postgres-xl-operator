@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Initialize the postgres database.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
-source "$CUR_PATH/common.sh"
+# shellcheck source=./common.sh
+source "${CUR_PATH}/common.sh"
 log:info "Initializing database on node $PG_NODE"
 
 if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
@@ -17,7 +18,7 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
     datanode)
       log:info "Database configuration not found, restoring from first datanode"
       # waiting for first datanode.
-      "$CUR_PATH/wait_for_connection" "local-alias-dn-0" "${PG_PORT}"
+      "${CUR_PATH}/wait_for_connection" "local-alias-dn-0" "${PG_PORT}"
       assert $? "Error while waiting for connection. Deployment not ready." || exit $?
       pg_basebackup -d "postgresql://${PGUSER}:${PGPASSWORD}@local-alias-dn-0:${PG_PORT}" -D "${PGDATA}" -P --wal-method=stream
       sed -i "s|pgxc_node_name = 'DN_0'|pgxc_node_name = 'DN_$POD_INDEX'|" "${PGDATA}/postgresql.conf"
@@ -25,7 +26,7 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
     coordinator)
       log:info "Database configuration not found, restoring from first coordinator"
       # waiting for first coordinator.
-      "$CUR_PATH/wait_for_connection" "local-alias-crd-0" "${PG_PORT}"
+      "${CUR_PATH}/wait_for_connection" "local-alias-crd-0" "${PG_PORT}"
       assert $? "Error while waiting for connection. Deployment not ready." || exit $?
       pg_basebackup -d "postgresql://${PGUSER}:${PGPASSWORD}@local-alias-crd-0:${PG_PORT}" -D "${PGDATA}" -P --wal-method=stream
       sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "${PGDATA}/postgresql.conf"
@@ -60,8 +61,10 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
     export PG_PW_FILE
   fi
 
-  source "$CUR_PATH/initialize_networks" || exit $?
-  source "$CUR_PATH/initialize_node_config" || exit $?
+  # shellcheck source=./initialize_networks
+  source "${CUR_PATH}/initialize_networks" || exit $?
+  # shellcheck source=./initialize_node_config
+  source "${CUR_PATH}/initialize_node_config" || exit $?
 
   log:info "Database configuration initialized."
 else
@@ -90,5 +93,5 @@ else
 fi
 
 # waiting for GTM.
-"$CUR_PATH/wait_for_connection" "${PG_GTM_HOST}" "${PG_GTM_PORT}"
+"${CUR_PATH}/wait_for_connection" "${PG_GTM_HOST}" "${PG_GTM_PORT}"
 assert $? "Error while waiting for connection. Deployment not ready." || exit $?

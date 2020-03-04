@@ -2,6 +2,7 @@
 # proxy startup bash script
 
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
@@ -11,6 +12,7 @@ fi
 
 log:info "Starting node as transaction manager proxy"
 
+# shellcheck source=./initialize_env_dependencies
 source "${CUR_PATH}/initialize_env_dependencies"
 
 # initialize the gtm_proxy manager
@@ -18,7 +20,9 @@ initgtm -D "${PGDATA}" -Z gtm_proxy
 assert $? "Failed to initialize gtm proxy" || exit $?
 
 # config
+# shellcheck source=./initialize_networks
 source "${CUR_PATH}/initialize_networks" || exit $?
+# shellcheck source=./initialize_node_config
 source "${CUR_PATH}/initialize_node_config" || exit $?
 
 # start the proxy.

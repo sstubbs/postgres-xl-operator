@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Checks if the gtm is alive and connected.
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
 
 # first check that the gtm is alive.

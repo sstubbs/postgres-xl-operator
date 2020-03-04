@@ -64,7 +64,6 @@ pub struct Cluster {
 // Generated Passwords
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GeneratedPassword {
-    pub secret_name: String,
     pub secret_key: String,
     pub secret_value: String,
 }

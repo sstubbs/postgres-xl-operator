@@ -23,42 +23,28 @@ pub async fn action(
     if context.is_ok() {
         let mut context_unwrapped = context?.to_owned();
 
-        // Generate passwords
-        // Root
-        context_unwrapped
-            .cluster
-            .generated_passwords
-            .push(GeneratedPassword {
-                secret_name: context_unwrapped
-                    .to_owned()
-                    .cluster
-                    .values
-                    .security
-                    .password
-                    .secret_name,
-                secret_key: context_unwrapped
-                    .to_owned()
-                    .cluster
-                    .values
-                    .config
-                    .postgres_user,
-                secret_value: generate_base64_password().await?,
-            });
+        if context_unwrapped.cluster.values.security.password.method == "operator" || context_unwrapped.cluster.values.security.password.method == "mount" {
+            // Generate passwords
+            // Root
+            context_unwrapped
+                .cluster
+                .generated_passwords
+                .push(GeneratedPassword {
+                    secret_key: context_unwrapped
+                        .to_owned()
+                        .cluster
+                        .values
+                        .config
+                        .postgres_user,
+                    secret_value: generate_base64_password().await?,
+                });
 
-        if context_unwrapped.cluster.values.security.password.method == "operator" {
             if context_unwrapped.cluster.values.connection_pool.enabled {
                 // Connection Pool
                 context_unwrapped
                     .cluster
                     .generated_passwords
                     .push(GeneratedPassword {
-                        secret_name: context_unwrapped
-                            .to_owned()
-                            .cluster
-                            .values
-                            .security
-                            .password
-                            .secret_name,
                         secret_key: context_unwrapped
                             .to_owned()
                             .cluster
@@ -75,19 +61,30 @@ pub async fn action(
                     .cluster
                     .generated_passwords
                     .push(GeneratedPassword {
-                        secret_name: context_unwrapped
-                            .to_owned()
-                            .cluster
-                            .values
-                            .security
-                            .password
-                            .secret_name,
                         secret_key: context_unwrapped
                             .to_owned()
                             .cluster
                             .values
                             .health_check
                             .user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
+
+            for user in context_unwrapped
+                .to_owned()
+                .cluster
+                .values
+                .security
+                .password
+                .extra_username
+            {
+                // Extra users
+                context_unwrapped
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: user,
                         secret_value: generate_base64_password().await?,
                     });
             }

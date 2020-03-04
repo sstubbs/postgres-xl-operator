@@ -87,10 +87,12 @@ spec:
             mountPath: /scripts
           - name: {{ $app_name }}-cfg
             mountPath: /config
-          - name: {{ .cluster.values.security.password.secret_name }}
-            mountPath: {{ .cluster.values.security.password.mount_path }}
           - name: datastore
             mountPath: {{ .cluster.values.homedir }}/storage
+{{- if or (eq .cluster.values.security.password.method "operator") (eq .cluster.values.security.password.method "mount") }}
+          - name: {{ .cluster.values.security.password.secret_name }}
+            mountPath: {{ .cluster.values.security.password.mount_path }}
+{{- end }}
 {{- if .cluster.values.proxies.volume_mounts }}
 {{ .cluster.values.proxies.volume_mounts | indent 10 }}
 {{- end }}
@@ -111,10 +113,18 @@ spec:
           configMap:
             name: {{ $app_name }}-cfg
             defaultMode: 511
+{{- if eq .cluster.values.security.password.method "operator" }}
         - name: {{ .cluster.values.security.password.secret_name }}
           secret:
             secretName: {{ $app_name }}-{{ .cluster.values.security.password.secret_name }}
             defaultMode: 511
+{{- end }}
+{{- if eq .cluster.values.security.password.method "mount" }}
+        - name: {{ .cluster.values.security.password.secret_name }}
+          secret:
+            secretName: {{ .cluster.values.security.password.secret_name }}
+            defaultMode: 511
+{{- end }}
 {{- if .cluster.values.proxies.volumes }}
 {{ .cluster.values.proxies.volumes | indent 8 }}
 {{- end }}

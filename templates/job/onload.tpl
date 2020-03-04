@@ -71,8 +71,10 @@ spec:
             mountPath: /load_scripts
           - name: {{ $app_name }}-scripts
             mountPath: /scripts
+{{- if or (eq .cluster.values.security.password.method "operator") (eq .cluster.values.security.password.method "mount") }}
           - name: {{ .cluster.values.security.password.secret_name }}
             mountPath: {{ .cluster.values.security.password.mount_path }}
+{{- end }}
 {{- if .cluster.values.on_load.volume_mounts }}
 {{ .cluster.values.on_load.volume_mounts | indent 10 }}
 {{- end }}
@@ -91,10 +93,18 @@ spec:
           configMap:
             name: {{ $app_name }}-{{ $component }}
             defaultMode: 511
+{{- if eq .cluster.values.security.password.method "operator" }}
         - name: {{ .cluster.values.security.password.secret_name }}
           secret:
             secretName: {{ $app_name }}-{{ .cluster.values.security.password.secret_name }}
             defaultMode: 511
+{{- end }}
+{{- if eq .cluster.values.security.password.method "mount" }}
+        - name: {{ .cluster.values.security.password.secret_name }}
+          secret:
+            secretName: {{ .cluster.values.security.password.secret_name }}
+            defaultMode: 511
+{{- end }}
 {{- if .cluster.values.on_load.volumes }}
 {{ .cluster.values.on_load.volumes | indent 8 }}
 {{- end }}

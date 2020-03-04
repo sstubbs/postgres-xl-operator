@@ -47,9 +47,9 @@ function run_scripts_that_match() {
   local PATTERN="$1"
   local SRC_PATH="$(realpath "$2")"
 
-  log:info "Searching for and executing scripts that match PATTERN '$PATTERN' in folder '$SRC_PATH'"
+  log:info "Searching for and executing scripts that match PATTERN '$PATTERN' in folder '${SRC_PATH}'"
   local LOAD_SCRIPTS=""
-  LOAD_SCRIPTS="$(find "$SRC_PATH" -maxdepth 1 -name "$PATTERN" | sort)"
+  LOAD_SCRIPTS="$(find "${SRC_PATH}" -maxdepth 1 -name "$PATTERN" | sort)"
   LOAD_SCRIPTS=(${LOAD_SCRIPTS})
 
   local IS_FOUND="0"
@@ -57,21 +57,21 @@ function run_scripts_that_match() {
   for FPATH in "${LOAD_SCRIPTS[@]}"; do
     IS_FOUND="1"
     
-    local FNAME=$(basename "$FPATH")
+    local FNAME=$(basename "${FPATH}")
     local FILEEXT=${FNAME##*.}
 
     case ${FILEEXT} in
     sh)
-      log:info "Executing bash script $FPATH:"
-      "$FPATH"
-      assert $? "Failed when executing init script file $FPATH. Exiting... " || return $?
+      log:info "Executing bash script ${FPATH}:"
+      "${FPATH}"
+      assert $? "Failed when executing init script file ${FPATH}. Exiting... " || return $?
       ;;
     sql)
-      log:info "Calling psql to execute script in $FPATH:"
+      log:info "Calling psql to execute script in ${FPATH}:"
       local LOAD_SCRIPTS_SQL=""
-      LOAD_SCRIPTS_SQL=$(cat "$FPATH")
+      LOAD_SCRIPTS_SQL=$(cat "${FPATH}")
       psql -c "$LOAD_SCRIPTS_SQL"
-      assert $? "Failed when executing init script file $FPATH. Exiting... " || return $?
+      assert $? "Failed when executing init script file ${FPATH}. Exiting... " || return $?
       ;;
     *)
       log:warning "Cannot invoke filename with extension ${FILEEXT}, skipping. Allowed extensions [sql, sh]"

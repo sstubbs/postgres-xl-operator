@@ -18,7 +18,7 @@ pub async fn action(
     let context = create_context(&custom_resource, config_map_sha).await;
 
     if context.is_ok() {
-        let context_unwrapped = context?;
+        let context_unwrapped = context?.to_owned();
         let global_template = create_global_template().await?;
 
         let config = get_kube_config().await?;

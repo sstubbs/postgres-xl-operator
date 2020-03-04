@@ -6,6 +6,7 @@ use super::{
     },
     vars::{CHART_NAME, CHART_VERSION, KUBE_CONFIG_TYPE, RELEASE_NAME, RELEASE_SERVICE},
 };
+use crate::structs::{GeneratedPassword, OnLoadStartup};
 use base64::encode;
 use json_patch::merge;
 use kube::config;
@@ -95,7 +96,7 @@ pub async fn create_context(
         let yaml_struct_merged_object_unwrapped: Values = yaml_struct_merged_object?;
 
         // Global context
-        let global_context = Chart {
+        let mut global_context = Chart {
             name: chart_name.to_owned(),
             cleaned_name: chart_cleaned_name,
             version: chart_version.to_owned(),
@@ -135,6 +136,86 @@ pub async fn create_context(
                 values: yaml_struct_merged_object_unwrapped,
             },
         };
+
+        if global_context.cluster.values.security.password.method == "operator"
+            || global_context.cluster.values.security.password.method == "mount"
+        {
+            // Overrides for operator secret generation
+            // Generate passwords
+            // Root
+            global_context
+                .cluster
+                .generated_passwords
+                .push(GeneratedPassword {
+                    secret_key: global_context
+                        .to_owned()
+                        .cluster
+                        .values
+                        .config
+                        .postgres_user,
+                    secret_value: generate_base64_password().await?,
+                });
+
+            if global_context.cluster.values.connection_pool.enabled {
+                // Connection Pool
+                global_context
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: global_context
+                            .to_owned()
+                            .cluster
+                            .values
+                            .connection_pool
+                            .user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
+
+            if global_context.cluster.values.health_check.enabled {
+                // Health check
+                global_context
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: global_context.to_owned().cluster.values.health_check.user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
+
+            for user in global_context
+                .to_owned()
+                .cluster
+                .values
+                .security
+                .password
+                .extra_username
+            {
+                // Extra users
+                global_context
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
+
+            // Overrides for update password from secret
+            // Create and update passwords
+            global_context.cluster.values.on_load.enabled = true;
+
+            global_context
+                .cluster
+                .values
+                .on_load
+                .startup
+                .push(OnLoadStartup {
+                    name: "create_users.sh".to_owned(),
+                    content: "psql -c \"CREATE DATABASE tester;\"".to_owned(),
+                });
+        }
+
         return Ok(global_context);
     }
     return Err(anyhow!(

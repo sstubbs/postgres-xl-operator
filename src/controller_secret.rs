@@ -1,13 +1,10 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     enums::ResourceAction,
-    functions::{
-        create_context, create_global_template, generate_base64_password, get_kube_config,
-    },
+    functions::{create_context, create_global_template, get_kube_config},
     structs::EmbeddedSecretTemplates,
     vars::NAMESPACE,
 };
-use crate::structs::GeneratedPassword;
 use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
@@ -21,75 +18,7 @@ pub async fn action(
     let context = create_context(&custom_resource, config_map_sha).await;
 
     if context.is_ok() {
-        let mut context_unwrapped = context?.to_owned();
-
-        if context_unwrapped.cluster.values.security.password.method == "operator" || context_unwrapped.cluster.values.security.password.method == "mount" {
-            // Generate passwords
-            // Root
-            context_unwrapped
-                .cluster
-                .generated_passwords
-                .push(GeneratedPassword {
-                    secret_key: context_unwrapped
-                        .to_owned()
-                        .cluster
-                        .values
-                        .config
-                        .postgres_user,
-                    secret_value: generate_base64_password().await?,
-                });
-
-            if context_unwrapped.cluster.values.connection_pool.enabled {
-                // Connection Pool
-                context_unwrapped
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: context_unwrapped
-                            .to_owned()
-                            .cluster
-                            .values
-                            .connection_pool
-                            .user,
-                        secret_value: generate_base64_password().await?,
-                    });
-            }
-
-            if context_unwrapped.cluster.values.health_check.enabled {
-                // Health check
-                context_unwrapped
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: context_unwrapped
-                            .to_owned()
-                            .cluster
-                            .values
-                            .health_check
-                            .user,
-                        secret_value: generate_base64_password().await?,
-                    });
-            }
-
-            for user in context_unwrapped
-                .to_owned()
-                .cluster
-                .values
-                .security
-                .password
-                .extra_username
-            {
-                // Extra users
-                context_unwrapped
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: user,
-                        secret_value: generate_base64_password().await?,
-                    });
-            }
-        }
-
+        let context_unwrapped = context?.to_owned();
         let global_template = create_global_template().await?;
 
         let config = get_kube_config().await?;

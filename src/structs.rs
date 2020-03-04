@@ -191,10 +191,10 @@ pub struct Image {
 // On Load
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoad {
-    enabled: bool,
+    pub enabled: bool,
     back_off_limit: u8,
     resources: OnLoadResource,
-    startup: Vec<OnLoadStartup>,
+    pub startup: Vec<OnLoadStartup>,
     init: Vec<OnLoadInit>,
     add_containers: String,
     volumes: String,
@@ -224,8 +224,8 @@ pub struct OnLoadResourceLimit {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct OnLoadStartup {
-    name: String,
-    content: String,
+    pub name: String,
+    pub content: String,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]

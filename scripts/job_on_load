@@ -45,7 +45,8 @@ CREATE TABLE postgres_xl_helm.state AS (SELECT 'initialized' as key, 'ok' as val
 
 function run_scripts_that_match() {
   local PATTERN="$1"
-  local SRC_PATH="$(realpath "$2")"
+  SRC_PATH="$(realpath "$2")"
+  local SRC_PATH
 
   log:info "Searching for and executing scripts that match PATTERN '$PATTERN' in folder '${SRC_PATH}'"
   local LOAD_SCRIPTS=""
@@ -57,7 +58,8 @@ function run_scripts_that_match() {
   for FPATH in "${LOAD_SCRIPTS[@]}"; do
     IS_FOUND="1"
 
-    local FNAME=$(basename "${FPATH}")
+    FNAME=$(basename "${FPATH}")
+    local FNAME
     local FILEEXT=${FNAME##*.}
 
     case ${FILEEXT} in

@@ -15,7 +15,7 @@ PORT=$2
 log:info "Checking ${HOST}:${PORT} is open with an interval of ${PORT_WAIT_INTERVAL}, max ${PORT_WAIT_TRIES} times.."
 WAIT_INDEX=0
 while true; do
-  nc -w ${PORT}_WAIT_TIMEOUT -zv "${HOST}" "${PORT}" &>/dev/null
+  nc -w "${PORT_WAIT_TIMEOUT}" -zv "${HOST}" "${PORT}" &>/dev/null
   if [ $? -ne 0 ]; then
     if [ ${WAIT_INDEX} -gt ${PORT_WAIT_TRIES} ]; then
       log:error "Timed out while waiting for port ${PORT} on ${HOST}"

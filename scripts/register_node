@@ -15,7 +15,7 @@ function wait_for_postgres() {
       break
     else
       log:info "Waiting for database to be ready.."
-      sleep ${PORT_WAIT_INTERVAL}
+      sleep "${PORT_WAIT_INTERVAL}"
     fi
   done
 }
@@ -51,7 +51,7 @@ function register_node() {
       LOCAL_HOST_IP=$(getent hosts "${NODE_HOST}" | awk '{ print $1 }')
       if [ -z "${LOCAL_HOST_IP}" ]; then
         log:info "Waiting for host to be ready @ ${NODE_HOST} ..."
-        sleep ${PORT_WAIT_INTERVAL}
+        sleep "${PORT_WAIT_INTERVAL}"
       else
         break
       fi
@@ -73,14 +73,14 @@ function main() {
   # (will not affect main script)
 
   # registering datanodes.
-  for i in $(seq 0 "${DATANODE_COUNT}"); do
+  for i in $(seq "0" "${DATANODE_COUNT}"); do
     if [ "${i}" -eq "${DATANODE_COUNT}" ]; then break; fi
     register_node datanode "${i}"
     assert $? "Failed to register datanodes" || return $?
   done
 
-  for i in $(seq 0 "${COORDINATOR_COUNT}"); do
-    if [ $i -eq "${COORDINATOR_COUNT}" ]; then break; fi
+  for i in $(seq "0" "${COORDINATOR_COUNT}"); do
+    if [ "${i}" -eq "${COORDINATOR_COUNT}" ]; then break; fi
     register_node coordinator "${i}"
     assert $? "Failed to register coordinator" || return $?
   done
@@ -93,7 +93,7 @@ function main() {
   assert $? "Failed to reload node pool" || return $?
 
   log:info "Setting state to active."
-  echo "$(date)" >>~/service_activation_time
+  echo "$(date)" >> ~/service_activation_time
   assert $? "Failed generate activation file stamp" || return $?
   log:info "Node ready."
 }

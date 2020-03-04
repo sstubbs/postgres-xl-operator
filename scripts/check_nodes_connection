@@ -6,7 +6,7 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${CUR_PATH}/common.sh"
 
 # check all datanodes are connected.
-for i in $(seq 0 "${DATANODE_COUNT}"); do
+for i in $(seq "0" "${DATANODE_COUNT}"); do
   if [ "${i}" -eq "${DATANODE_COUNT}" ]; then break; fi
   NODE_FULL_NAME="${DATANODE_BASENAME}-${i}"
   NODE_HOST="${NODE_FULL_NAME}.${DATANODE_SERVICE}"

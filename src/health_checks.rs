@@ -118,11 +118,11 @@ pub async fn watch() -> anyhow::Result<()> {
                             &mut std::io::stdout(),
                         )?;
 
-                        // set health_check label to initialised
+                        // set health_check label to initialized
                         let patch = json!({
                             "metadata": {
                                 "labels": {
-                                    "health_check": "initialised",
+                                    "health_check": "initialized",
                                 },
                             },
                         });

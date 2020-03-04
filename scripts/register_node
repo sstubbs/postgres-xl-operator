@@ -65,10 +65,10 @@ function register_node() {
   local ALTER_SCRIPT="ALTER NODE $NODE_NAME WITH (TYPE = '${LOCAL_NODE_TYPE}', HOST = '${NODE_HOST}', PORT = ${PG_PORT});"
   log:script "$ALTER_SCRIPT"
   psql -c "$ALTER_SCRIPT" || true
-#  assert_warn $? "Failed executing sql script. Is node already defined? Node register skipped."
+  #  assert_warn $? "Failed executing sql script. Is node already defined? Node register skipped."
 }
 
-function main(){
+function main() {
   # must be in a function so it can be called in parallel
   # (will not affect main script)
 

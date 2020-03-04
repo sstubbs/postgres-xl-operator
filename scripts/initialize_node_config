@@ -31,9 +31,9 @@ proxy)
   ;;
 esac
 
-cat "/config/config_append_internal_global" >> "${CONFIG_TARGET_FILE}"
+cat "/config/config_append_internal_global" >>"${CONFIG_TARGET_FILE}"
 assert $? "Failed to append internal global configuration to ${CONFIG_TARGET_FILE}" || exit $?
-cat "${NODE_CONFIG_FILE}" >> "${CONFIG_TARGET_FILE}"
+cat "${NODE_CONFIG_FILE}" >>"${CONFIG_TARGET_FILE}"
 assert $? "Failed to append node configuration file ${NODE_CONFIG_FILE} to ${CONFIG_TARGET_FILE}" || exit $?
 
 log:info "Node configuration added to ${CONFIG_TARGET_FILE}"

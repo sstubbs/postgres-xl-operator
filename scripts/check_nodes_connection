@@ -11,6 +11,6 @@ for i in $(seq 0 "${DATANODE_COUNT}"); do
   NODE_FULL_NAME="${DATANODE_BASENAME}-${i}"
   NODE_HOST="${NODE_FULL_NAME}.${DATANODE_SERVICE}"
 
-  pg_isready -h "${NODE_HOST}" -p "${PG_PORT}" &> /dev/null
-  assert $? "${LOGGING_PREFIX} Cluster not ready, failed to connect to datanode at ${NODE_HOST}" >> /dev/stderr || exit $?
+  pg_isready -h "${NODE_HOST}" -p "${PG_PORT}" &>/dev/null
+  assert $? "${LOGGING_PREFIX} Cluster not ready, failed to connect to datanode at ${NODE_HOST}" >>/dev/stderr || exit $?
 done

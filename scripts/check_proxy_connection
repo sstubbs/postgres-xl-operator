@@ -12,6 +12,6 @@ for i in $(seq "0" "${PROXY_COUNT}"); do
   NODE_FULL_NAME="${PROXY_BASENAME}-${i}"
   NODE_HOST="${NODE_FULL_NAME}.${PROXY_SERVICE}"
 
-  nc -zv "${NODE_HOST}" "${PG_GTM_PORT}" &> /dev/null
-  assert $? "Cluster not ready, failed to connect to proxy at ${NODE_HOST}" >> /dev/stderr || exit $?
+  nc -zv "${NODE_HOST}" "${PG_GTM_PORT}" &>/dev/null
+  assert $? "Cluster not ready, failed to connect to proxy at ${NODE_HOST}" >>/dev/stderr || exit $?
 done

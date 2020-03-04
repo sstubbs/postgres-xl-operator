@@ -6,4 +6,4 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${CUR_PATH}/common.sh"
 
 pg_isready
-assert $? "Postgres is not ready" >> /dev/stderr || exit $?
+assert $? "Postgres is not ready" >>/dev/stderr || exit $?

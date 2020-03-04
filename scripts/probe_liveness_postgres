@@ -4,8 +4,8 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 SERVICE_ACTIVE_FILE=$(realpath ~/service_activation_time)
 
 if [ ! -f "${SERVICE_ACTIVE_FILE}" ]; then
-    # dont check, not started yet.
-    exit 0
+  # dont check, not started yet.
+  exit 0
 fi
 
 # shellcheck source=./check_postgres_is_alive

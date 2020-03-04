@@ -8,33 +8,33 @@ source "${CUR_PATH}/common.sh"
 DATA_RECOVERY_PATH="${STORAGE_MOUNT_PATH}/recovery"
 export DATA_RECOVERY_PATH
 
-function backup_data_state(){
-    # this method should be called in parallel.
-    # back up, continusly, every GTM_BACKUP_INTERVAL the gtm state.
+function backup_data_state() {
+  # this method should be called in parallel.
+  # back up, continusly, every GTM_BACKUP_INTERVAL the gtm state.
 
-    : ${GTM_BACKUP_INTERVAL:="1"}
+  : ${GTM_BACKUP_INTERVAL:="1"}
 
-    mkdir -p "${DATA_RECOVERY_PATH}"
-    assert $? "Failed to create or validate recovery path. Recovery is inactive." || return $?
+  mkdir -p "${DATA_RECOVERY_PATH}"
+  assert $? "Failed to create or validate recovery path. Recovery is inactive." || return $?
 
-    while true;do
-        sleep ${GTM_BACKUP_INTERVAL}
-        cp -R "${PGDATA}"/* "${DATA_RECOVERY_PATH}"
-        assert_warn $? "Failed to store gtm state. If this persists, node is at risk."
-    done
+  while true; do
+    sleep ${GTM_BACKUP_INTERVAL}
+    cp -R "${PGDATA}"/* "${DATA_RECOVERY_PATH}"
+    assert_warn $? "Failed to store gtm state. If this persists, node is at risk."
+  done
 }
 
-function recover_if_needed(){
-    # call to prepare the gtm for restart. 
-    # copies from recovery to data folder.
+function recover_if_needed() {
+  # call to prepare the gtm for restart.
+  # copies from recovery to data folder.
 
-    local DATA_RECOVERY_PATH="${STORAGE_MOUNT_PATH}/recovery"
+  local DATA_RECOVERY_PATH="${STORAGE_MOUNT_PATH}/recovery"
 
-    if [ ! -d "${DATA_RECOVERY_PATH}" ]; then
-        return 0
-    fi
+  if [ ! -d "${DATA_RECOVERY_PATH}" ]; then
+    return 0
+  fi
 
-    log:info "Recovery data found @ ${DATA_RECOVERY_PATH}, copy to data directory if newer..."
-    cp -R -f -v -u "${DATA_RECOVERY_PATH}"/* "${PGDATA}"
-    assert $? "Failed to copy recovery data, node is at risk." || return $?
+  log:info "Recovery data found @ ${DATA_RECOVERY_PATH}, copy to data directory if newer..."
+  cp -R -f -v -u "${DATA_RECOVERY_PATH}"/* "${PGDATA}"
+  assert $? "Failed to copy recovery data, node is at risk." || return $?
 }

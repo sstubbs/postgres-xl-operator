@@ -5,8 +5,8 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${CUR_PATH}/common.sh"
 
 if [[ -f "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}" ]]; then
-    PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
-    export PGPASSWORD
+  PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}/${PGUSER}")"
+  export PGPASSWORD
 fi
 
 log:info "Starting as global transaction manager (GTM)"

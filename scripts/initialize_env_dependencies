@@ -10,26 +10,26 @@ export POD_INDEX
 
 if [ -z "${PG_NODE}" ]; then
   case "${NODE_TYPE}" in
-    datanode)
-      PG_NODE="DN_${POD_INDEX}"
-      POD_CLUSTER_INDEX=$((POD_INDEX+COORDINATOR_COUNT+PROXY_COUNT+1))
-      PGXL_NODE_INDEX=$((POD_INDEX+10000))
-      export PGXL_NODE_INDEX
+  datanode)
+    PG_NODE="DN_${POD_INDEX}"
+    POD_CLUSTER_INDEX=$((POD_INDEX + COORDINATOR_COUNT + PROXY_COUNT + 1))
+    PGXL_NODE_INDEX=$((POD_INDEX + 10000))
+    export PGXL_NODE_INDEX
     ;;
-    coordinator)
-      PG_NODE="CN_${POD_INDEX}"
-      POD_CLUSTER_INDEX=$((POD_INDEX+PROXY_COUNT+1))
-      PGXL_NODE_INDEX=$((POD_INDEX+10000))
-      export PGXL_NODE_INDEX
+  coordinator)
+    PG_NODE="CN_${POD_INDEX}"
+    POD_CLUSTER_INDEX=$((POD_INDEX + PROXY_COUNT + 1))
+    PGXL_NODE_INDEX=$((POD_INDEX + 10000))
+    export PGXL_NODE_INDEX
     ;;
-    proxy)
-      PG_NODE="PXY_${POD_INDEX}"
-      POD_CLUSTER_INDEX=$((POD_INDEX+1))
+  proxy)
+    PG_NODE="PXY_${POD_INDEX}"
+    POD_CLUSTER_INDEX=$((POD_INDEX + 1))
     ;;
-    *)
-      if [ -n "${NODE_TYPE}" ]; then
-        log:warning "Cluster node type not recognized '${NODE_TYPE}', skipping env initialization"
-      fi
+  *)
+    if [ -n "${NODE_TYPE}" ]; then
+      log:warning "Cluster node type not recognized '${NODE_TYPE}', skipping env initialization"
+    fi
     ;;
   esac
 fi

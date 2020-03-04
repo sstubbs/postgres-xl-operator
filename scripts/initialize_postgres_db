@@ -5,7 +5,7 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${CUR_PATH}/common.sh"
 log:info "Initializing database on node ${PG_NODE}"
 
-if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
+if [ "${RESET_DB}" == "true" ] && [ -d "${PGDATA}" ]; then
   rm -R "${PGDATA}"
 fi
 
@@ -14,14 +14,14 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
   if ((POD_INDEX > 0)); then
 
     # restore nodes from first one otherwise when creating new nodes they will not have required data
-    case "$NODE_TYPE" in
+    case "${NODE_TYPE}" in
     datanode)
       log:info "Database configuration not found, restoring from first datanode"
       # waiting for first datanode.
       "${CUR_PATH}/wait_for_connection" "local-alias-dn-0" "${PG_PORT}"
       assert $? "Error while waiting for connection. Deployment not ready." || exit $?
       pg_basebackup -d "postgresql://${PGUSER}:${PGPASSWORD}@local-alias-dn-0:${PG_PORT}" -D "${PGDATA}" -P --wal-method=stream
-      sed -i "s|pgxc_node_name = 'DN_0'|pgxc_node_name = 'DN_$POD_INDEX'|" "${PGDATA}/postgresql.conf"
+      sed -i "s|pgxc_node_name = 'DN_0'|pgxc_node_name = 'DN_${POD_INDEX}'|" "${PGDATA}/postgresql.conf"
       ;;
     coordinator)
       log:info "Database configuration not found, restoring from first coordinator"
@@ -29,7 +29,7 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
       "${CUR_PATH}/wait_for_connection" "local-alias-crd-0" "${PG_PORT}"
       assert $? "Error while waiting for connection. Deployment not ready." || exit $?
       pg_basebackup -d "postgresql://${PGUSER}:${PGPASSWORD}@local-alias-crd-0:${PG_PORT}" -D "${PGDATA}" -P --wal-method=stream
-      sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_$POD_INDEX'|" "${PGDATA}/postgresql.conf"
+      sed -i "s|pgxc_node_name = 'CN_0'|pgxc_node_name = 'CN_${POD_INDEX}'|" "${PGDATA}/postgresql.conf"
       ;;
     esac
 

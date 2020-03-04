@@ -11,10 +11,10 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
 
   pg_basebackup -d "postgresql://${PGUSER}:${PGPASSWORD}@${MASTER_SERVICE}:${PG_PORT}" -D "${PGDATA}" -P --wal-method=stream
 
-  echo "standby_mode          = 'on'" > "${PGDATA}/recovery.conf"
-  echo "primary_conninfo      = 'host=${MASTER_SERVICE} port=${PG_PORT} user=${PGUSER} password=${PGPASSWORD}'" >> "${PGDATA}/recovery.conf"
-  echo "trigger_file          = '/tmp/MasterNow'" >> "${PGDATA}/recovery.conf"
-  echo "hot_standby = on" >> "${PGDATA}/postgresql.conf"
+  echo "standby_mode          = 'on'" >"${PGDATA}/recovery.conf"
+  echo "primary_conninfo      = 'host=${MASTER_SERVICE} port=${PG_PORT} user=${PGUSER} password=${PGPASSWORD}'" >>"${PGDATA}/recovery.conf"
+  echo "trigger_file          = '/tmp/MasterNow'" >>"${PGDATA}/recovery.conf"
+  echo "hot_standby = on" >>"${PGDATA}/postgresql.conf"
 fi
 
 # required for postgres permissions.

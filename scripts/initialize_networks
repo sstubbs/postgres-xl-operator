@@ -11,10 +11,9 @@ export PG_AUTH_METHOD="trust"
 if [ -n "${PGPASSWORD}" ]; then
   PG_AUTH_METHOD="${AUTH_TYPE}"
   log:info "Added network config to allow password protected connections."
-else 
+else
   log:warning "Superuser password not found, all connections will be allowed!"
 fi
 
-echo "host all all all $PG_AUTH_METHOD" >> "${PGDATA}/pg_hba.conf"
-echo "host replication all all $PG_AUTH_METHOD" >> "${PGDATA}/pg_hba.conf"
-
+echo "host all all all ${PG_AUTH_METHOD}" >>"${PGDATA}/pg_hba.conf"
+echo "host replication all all ${PG_AUTH_METHOD}" >>"${PGDATA}/pg_hba.conf"

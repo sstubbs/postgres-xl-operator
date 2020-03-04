@@ -35,7 +35,7 @@ logging_core_print() {
   LOG_TYPE_PREFIX="${!LOG_TYPE_PREFIX_ENV_NAME}"
 
   if [ "$LOGGING_SHOW_COLORS" != "true" ]; then
-    echo "${LOGGING_PREFIX}$LOG_TYPE_PREFIX " "$@"
+    echo "${LOGGING_PREFIX}${LOG_TYPE_PREFIX} " "$@"
   else
     local LOG_PREFIX_COLOR_ENV_NAME="LOGGING_${LOG_TYPE}_PREFIX_COLOR"
     local LOG_TEXT_COLOR_ENV_NAME="LOGGING_${LOG_TYPE}_TEXT_COLOR"
@@ -44,7 +44,7 @@ logging_core_print() {
 
     if [ -z "${LOG_TEXT_COLOR}" ]; then LOG_TEXT_COLOR="${RESET_COLOR}"; fi
 
-    echo -e "${LOG_PREFIX_COLOR}${LOGGING_PREFIX}$LOG_TYPE_PREFIX${LOG_TEXT_COLOR}" "$@" "${RESET_COLOR}"
+    echo -e "${LOG_PREFIX_COLOR}${LOGGING_PREFIX}${LOG_TYPE_PREFIX}${LOG_TEXT_COLOR}" "$@" "${RESET_COLOR}"
   fi
 }
 
@@ -69,10 +69,11 @@ function log:archive() {
   logging_core_print "ARCHIVE" "$@"
 }
 
-function print_bash_error_stack(){
-  for ((i=1;i<${#FUNCNAME[@]}-1;i++)); do
-      local FPATH="$(realpath "${BASH_SOURCE[$i+1]}")"
-      log:error "$i: ${FPATH}:${BASH_LINENO[$i]} @ ${FUNCNAME[$i]}"
+function print_bash_error_stack() {
+  for ((i = 1; i < ${#FUNCNAME[@]} - 1; i++)); do
+    FPATH="$(realpath "${BASH_SOURCE[$i + 1]}")"
+    local FPATH
+    log:error "$i: ${FPATH}:${BASH_LINENO[$i]} @ ${FUNCNAME[$i]}"
   done
 }
 

@@ -5,6 +5,10 @@ use serde::{Deserialize, Serialize};
 pub struct EmbeddedScripts;
 
 #[derive(RustEmbed)]
+#[folder = "onload_scripts/"]
+pub struct EmbeddedOnloadScripts;
+
+#[derive(RustEmbed)]
 #[folder = "yaml_structs/"]
 pub struct EmbeddedYamlStructs;
 

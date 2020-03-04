@@ -1,8 +1,8 @@
 use super::{
     custom_resources::KubePostgresXlCluster,
     structs::{
-        Chart, Cluster, EmbeddedGlobalTemplates, EmbeddedScripts, EmbeddedYamlStructs, GlobalLabel,
-        Script, SelectorLabel, Values,
+        Chart, Cluster, EmbeddedGlobalTemplates, EmbeddedOnloadScripts, EmbeddedScripts,
+        EmbeddedYamlStructs, GlobalLabel, Script, SelectorLabel, Values,
     },
     vars::{CHART_NAME, CHART_VERSION, KUBE_CONFIG_TYPE, RELEASE_NAME, RELEASE_SERVICE},
 };
@@ -205,15 +205,21 @@ pub async fn create_context(
             // Create and update passwords
             global_context.cluster.values.on_load.enabled = true;
 
-            global_context
-                .cluster
-                .values
-                .on_load
-                .startup
-                .push(OnLoadStartup {
-                    name: "create_users.sh".to_owned(),
-                    content: "psql -c \"CREATE DATABASE tester;\"".to_owned(),
-                });
+            for asset in EmbeddedOnloadScripts::iter() {
+                let filename = asset.as_ref();
+                let file_data = EmbeddedOnloadScripts::get(filename).unwrap();
+                let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+
+                global_context
+                    .cluster
+                    .values
+                    .on_load
+                    .startup
+                    .push(OnLoadStartup {
+                        name: filename.to_owned(),
+                        content: file_data_string.to_owned(),
+                    });
+            }
         }
 
         return Ok(global_context);

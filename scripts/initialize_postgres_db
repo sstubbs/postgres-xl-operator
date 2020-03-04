@@ -3,7 +3,7 @@
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 # shellcheck source=./common.sh
 source "${CUR_PATH}/common.sh"
-log:info "Initializing database on node $PG_NODE"
+log:info "Initializing database on node ${PG_NODE}"
 
 if [ "$RESET_DB" == "true" ] && [ -d "${PGDATA}" ]; then
   rm -R "${PGDATA}"
@@ -37,8 +37,6 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
     # if it's the first coordinator or any datanode then init
     log:info "Database configuration not found, calling initdb"
 
-    PG_PW_FILE=""
-
     if [ -z "${PGPASSWORD}" ]; then
       log:warning "Database superuser password not found, DB is insecure."
       initdb \
@@ -58,7 +56,6 @@ if [ ! -f "${PGDATA}/postgresql.conf" ]; then
       assert $? "Postgres init db failed, postgres database cannot be started." || exit $?
     fi
 
-    export PG_PW_FILE
   fi
 
   # shellcheck source=./initialize_networks

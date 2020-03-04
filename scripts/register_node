@@ -73,15 +73,15 @@ function main(){
   # (will not affect main script)
 
   # registering datanodes.
-  for i in $(seq 0 $DATANODE_COUNT); do
-    if [ $i -eq $DATANODE_COUNT ]; then break; fi
-    register_node datanode $i
+  for i in $(seq 0 "${DATANODE_COUNT}"); do
+    if [ "${i}" -eq "${DATANODE_COUNT}" ]; then break; fi
+    register_node datanode "${i}"
     assert $? "Failed to register datanodes" || return $?
   done
 
-  for i in $(seq 0 $COORDINATOR_COUNT); do
-    if [ $i -eq $COORDINATOR_COUNT ]; then break; fi
-    register_node coordinator $i
+  for i in $(seq 0 "${COORDINATOR_COUNT}"); do
+    if [ $i -eq "${COORDINATOR_COUNT}" ]; then break; fi
+    register_node coordinator "${i}"
     assert $? "Failed to register coordinator" || return $?
   done
 

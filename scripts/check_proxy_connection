@@ -5,13 +5,13 @@ CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${CUR_PATH}/common.sh"
 
 # check all proxies are connected.
-for i in $(seq 0 ${PROXY_COUNT}); do
+for i in $(seq "0" "${PROXY_COUNT}"); do
 
-  if [ $i -eq ${PROXY_COUNT} ]; then break; fi
+  if [ "${i}" -eq "${PROXY_COUNT}" ]; then break; fi
 
   NODE_FULL_NAME="${PROXY_BASENAME}-${i}"
   NODE_HOST="${NODE_FULL_NAME}.${PROXY_SERVICE}"
 
-  nc -zv "${NODE_HOST}" ${PG_GTM_PORT} &> /dev/null
+  nc -zv "${NODE_HOST}" "${PG_GTM_PORT}" &> /dev/null
   assert $? "Cluster not ready, failed to connect to proxy at ${NODE_HOST}" >> /dev/stderr || exit $?
 done

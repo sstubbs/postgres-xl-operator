@@ -52,10 +52,10 @@ function run_scripts_that_match() {
   LOAD_SCRIPTS="$(find "$SRC_PATH" -maxdepth 1 -name "$PATTERN" | sort)"
   LOAD_SCRIPTS=(${LOAD_SCRIPTS})
 
-  local is_found=0
+  local IS_FOUND="0"
 
   for FPATH in "${LOAD_SCRIPTS[@]}"; do
-    is_found=1
+    IS_FOUND="1"
     
     local FNAME=$(basename "$FPATH")
     local FILEEXT=${FNAME##*.}
@@ -79,7 +79,7 @@ function run_scripts_that_match() {
     esac
   done
 
-  if [ $is_found -eq 0 ]; then
+  if [ "${IS_FOUND}" -eq "0" ]; then
     log:info "No scripts found."
   else
     log:info "Done."
@@ -90,9 +90,9 @@ pg_isready
 assert $? "Database Port is ready but database is not (pg_isready failed) @" "${EXTERNAL_SERVICE}:${PG_PORT}" || exit $?
 
 is_initialized
-db_already_initialized=$?
+DB_ALREADY_INITIALIZED=$?
 
-if [ $db_already_initialized -eq 0 ]; then
+if [ "${DB_ALREADY_INITIALIZED}" -eq "0" ]; then
   log:info "Database has not been initialized, calling init scripts.."
 
   log:info "Invoking init scripts.."

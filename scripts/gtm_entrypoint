@@ -28,13 +28,13 @@ log:info "Set data folder permissions 0700"
 chmod -R 0700 "${PGDATA}"
 
 # loading current gtm control info.
-control_info=""
+CONTROL_INFO=""
 if [ -f "${PGDATA}/gtm.control" ]; then
-  control_info=$(cat "${PGDATA}/gtm.control")
-  control_info=${control_info##*( )}
+  CONTROL_INFO=$(cat "${PGDATA}/gtm.control")
+  CONTROL_INFO=${CONTROL_INFO##*( )}
 fi
 
-if [ -z "$control_info" ]; then
+if [ -z "${CONTROL_INFO}" ]; then
   log:info "GTM configuration not found, calling initdb"
 
   initgtm -D "${PGDATA}" -Z gtm
@@ -53,7 +53,7 @@ else
   fi
 
   log:info "Current control state:"
-  echo "$control_info"
+  echo "${CONTROL_INFO}"
   echo
 fi
 

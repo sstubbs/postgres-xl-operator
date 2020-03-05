@@ -220,6 +220,9 @@ pub async fn create_context(
                         content: file_data_string.to_owned(),
                     });
             }
+        } else if global_context.cluster.values.health_check.enabled {
+            // Create database for health checks
+            global_context.cluster.values.on_load.enabled = true;
         }
 
         return Ok(global_context);

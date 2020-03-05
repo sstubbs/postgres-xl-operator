@@ -4,7 +4,7 @@ use super::schema::ping::dsl::*;
 use super::vars::{
     CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_INTERVAL, NAMESPACE,
 };
-use diesel::{insert_into, sql_query, Connection, PgConnection, RunQueryDsl};
+use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use kube::api::{Api, ListParams, PatchParams};
 use kube::client::APIClient;
 use std::time::Duration;
@@ -85,27 +85,6 @@ pub async fn watch() -> anyhow::Result<()> {
                 let patch_params = PatchParams::default();
 
                 if !cluster.metadata.labels.contains_key("health_check") {
-                    // Create health check database
-                    let database_connection = PgConnection::establish(&database_url);
-                    if database_connection.is_ok() {
-                        let database_connection_unwrapped = database_connection.unwrap();
-                        let create_health_check_database = sql_query(format!(
-                            "CREATE DATABASE {}",
-                            context.cluster.values.config.database
-                        ))
-                        .execute(&database_connection_unwrapped);
-                        if create_health_check_database.is_ok() {
-                            info!(
-                                "database {} created",
-                                context.cluster.values.config.database
-                            )
-                        } else {
-                            error!("{}", create_health_check_database.err().unwrap())
-                        }
-                    } else {
-                        error!("{}", database_connection.err().unwrap())
-                    }
-
                     // Run health check database migrations
                     let health_check_database_connection =
                         PgConnection::establish(&health_check_database_url);

@@ -67,6 +67,8 @@ image:
 # Configuration for a job that is called when the database
 # has finished loading.
 on_load:
+  # Will be automatically enabled if security.password.method = operator or mount to create the operator database and setup users.
+  # It will be also be automatically enabled if health checks are enabled to create the database for them.
   enabled: false
   # the number of times the job will restart.
   back_off_limit: 5

@@ -63,42 +63,60 @@ pub async fn action(
                             }
                         }
                         ResourceAction::Modified => {
+                            // Jobs have immutable fields so rather delete and recreate on modify than modify the resource in place like other types
+                            // Delete job
                             let resource_name = &new_resource_object_unwapped["metadata"]["name"]
                                 .as_str()
                                 .unwrap();
-
-                            let old_resource = resource_client
-                                .get(
-                                    &new_resource_object_unwapped["metadata"]["name"]
-                                        .as_str()
-                                        .unwrap(),
-                                )
-                                .await?;
-
-                            let mut mut_new_resource_object_unwapped =
-                                new_resource_object_unwapped.to_owned();
-                            mut_new_resource_object_unwapped["metadata"]["resourceVersion"] =
-                                serde_yaml::from_str(&format!(
-                                    "\"{}\"",
-                                    &old_resource.metadata.resourceVersion.unwrap().as_str()
-                                ))?;
-
                             match resource_client
-                                .replace(
-                                    resource_name,
-                                    &pp,
-                                    serde_json::to_vec(&mut_new_resource_object_unwapped)?,
-                                )
+                                .delete(resource_name, &DeleteParams::default())
                                 .await
                             {
-                                Ok(o) => {
-                                    if new_resource_object_unwapped["metadata"]["name"]
-                                        == o.metadata.name
+                                Ok(_o) => {
+                                    info!(
+                                        "Deleted {}",
+                                        new_resource_object_unwapped["metadata"]["name"]
+                                            .as_str()
+                                            .unwrap()
+                                    );
+
+                                    // Recreate it
+                                    match resource_client
+                                        .create(
+                                            &pp,
+                                            serde_json::to_vec(&new_resource_object_unwapped)?,
+                                        )
+                                        .await
                                     {
-                                        info!("Updated {}", o.metadata.name);
+                                        Ok(o) => {
+                                            if new_resource_object_unwapped["metadata"]["name"]
+                                                == o.metadata.name
+                                            {
+                                                info!("Created {}", o.metadata.name);
+                                            }
+                                        }
+                                        Err(e) => error!("{:?}", e), // any other case is probably bad
                                     }
                                 }
-                                Err(e) => error!("{:?}", e), // any other case is probably bad
+                                Err(_e) => {
+                                    // Recreate even if error as it might have been cleaned up prior to delete
+                                    match resource_client
+                                        .create(
+                                            &pp,
+                                            serde_json::to_vec(&new_resource_object_unwapped)?,
+                                        )
+                                        .await
+                                    {
+                                        Ok(o) => {
+                                            if new_resource_object_unwapped["metadata"]["name"]
+                                                == o.metadata.name
+                                            {
+                                                info!("Created {}", o.metadata.name);
+                                            }
+                                        }
+                                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                                    }
+                                }
                             }
                         }
                         ResourceAction::Deleted => {

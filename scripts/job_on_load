@@ -18,28 +18,20 @@ log:info "Waiting for database to be ready..."
 assert $? "Aborted, timed out while waiting for database to be ready @" "${EXTERNAL_SERVICE}:${PG_PORT}" || exit $?
 
 function is_initialized() {
-  local DOES_STATE_TABLE_EXIST
-  DOES_STATE_TABLE_EXIST=$(psql -t -c "
-SELECT EXISTS (
-   SELECT 1
-   FROM   information_schema.tables 
-   WHERE  table_schema = 'postgres_xl_helm'
-   AND    table_name = 'state'
-   );
-" | tr -d '[[:space:]]')
-
-  if [ "${DOES_STATE_TABLE_EXIST}" == "f" ]; then
-    return 0
+  if [ "$( psql -tAc "SELECT 1 FROM pg_database WHERE datname='${OPERATOR_DATABASE}'" )" = '1' ]
+  then
+      return 1
+  else
+      return 0
   fi
-
-  return 1
 }
 
 function initialize_pgxl_state() {
   psql -c "
-CREATE SCHEMA IF NOT EXISTS postgres_xl_helm;
-DROP TABLE IF EXISTS postgres_xl_helm.state;
-CREATE TABLE postgres_xl_helm.state AS (SELECT 'initialized' as key, 'ok' as value);
+DROP DATABASE IF EXISTS ${OPERATOR_DATABASE};
+  " || true
+  psql -c "
+CREATE DATABASE ${OPERATOR_DATABASE};
   " || return $?
 }
 

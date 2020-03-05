@@ -19,7 +19,7 @@ data:
   PGUSER: "{{ .cluster.values.config.postgres_user }}"
 
   # The operator database
-  OPERATOR_DATABASE: "{{ .cluster.values.config.postgres_user }}"
+  OPERATOR_DATABASE: "{{ .cluster.values.config.database }}"
 
   # The mount path to the secret for passwords
   PASSWORD_SECRET_MOUNT_PATH: "{{ .cluster.values.security.password.mount_path }}"

@@ -27,12 +27,8 @@ function is_initialized() {
 }
 
 function initialize_pgxl_state() {
-  psql -c "
-DROP DATABASE IF EXISTS ${OPERATOR_DATABASE};
-  " || true
-  psql -c "
-CREATE DATABASE ${OPERATOR_DATABASE};
-  " || return $?
+  psql -c "DROP DATABASE IF EXISTS ${OPERATOR_DATABASE};" || true
+  psql -c "CREATE DATABASE ${OPERATOR_DATABASE};" || return $?
 }
 
 function run_scripts_that_match() {

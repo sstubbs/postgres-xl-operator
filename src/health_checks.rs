@@ -48,7 +48,7 @@ pub async fn watch() -> anyhow::Result<()> {
             if context.cluster.values.health_check.enabled
                 && context.cluster.values.config.database != ""
             {
-                // If secret is being used get the password for tge database_url
+                // If secret is being used get the password for the database_url
                 let mut password = "".to_owned();
 
                 if &context.cluster.values.security.password.secret_name != ""

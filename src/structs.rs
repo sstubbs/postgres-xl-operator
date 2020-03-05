@@ -118,6 +118,7 @@ pub struct Values {
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     append: ConfigAppend,
+    pub database: String,
     log_level: String,
     managers_port: u16,
     pub postgres_port: u16,
@@ -181,7 +182,6 @@ pub struct ExtraLabels {
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HealthCheck {
     pub enabled: bool,
-    pub database: String,
     pub user: String,
 }
 

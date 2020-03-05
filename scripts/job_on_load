@@ -18,7 +18,7 @@ log:info "Waiting for database to be ready..."
 assert $? "Aborted, timed out while waiting for database to be ready @" "${EXTERNAL_SERVICE}:${PG_PORT}" || exit $?
 
 function is_initialized() {
-  local DOES_STATE_TABLE_EXIST=""
+  local DOES_STATE_TABLE_EXIST
   DOES_STATE_TABLE_EXIST=$(psql -t -c "
 SELECT EXISTS (
    SELECT 1
@@ -45,12 +45,12 @@ CREATE TABLE postgres_xl_helm.state AS (SELECT 'initialized' as key, 'ok' as val
 
 function run_scripts_that_match() {
   local PATTERN="$1"
-  SRC_PATH="$(realpath "$2")"
   local SRC_PATH
+  SRC_PATH="$(realpath "$2")"
 
-  log:info "Searching for and executing scripts that match PATTERN '$PATTERN' in folder '${SRC_PATH}'"
-  local LOAD_SCRIPTS=""
-  LOAD_SCRIPTS="$(find "${SRC_PATH}" -maxdepth 1 -name "$PATTERN" | sort)"
+  log:info "Searching for and executing scripts that match PATTERN '${PATTERN}' in folder '${SRC_PATH}'"
+  local LOAD_SCRIPTS
+  LOAD_SCRIPTS="$(find "${SRC_PATH}" -maxdepth 1 -name "${PATTERN}" | sort)"
   LOAD_SCRIPTS=(${LOAD_SCRIPTS})
 
   local IS_FOUND="0"
@@ -58,9 +58,10 @@ function run_scripts_that_match() {
   for FPATH in "${LOAD_SCRIPTS[@]}"; do
     IS_FOUND="1"
 
-    FNAME=$(basename "${FPATH}")
     local FNAME
-    local FILEEXT=${FNAME##*.}
+    FNAME=$(basename "${FPATH}")
+    local FILEEXT
+    FILEEXT=${FNAME##*.}
 
     case ${FILEEXT} in
     sh)
@@ -70,7 +71,7 @@ function run_scripts_that_match() {
       ;;
     sql)
       log:info "Calling psql to execute script in ${FPATH}:"
-      local LOAD_SCRIPTS_SQL=""
+      local LOAD_SCRIPTS_SQL
       LOAD_SCRIPTS_SQL=$(cat "${FPATH}")
       psql -c "$LOAD_SCRIPTS_SQL"
       assert $? "Failed when executing init script file ${FPATH}. Exiting... " || return $?

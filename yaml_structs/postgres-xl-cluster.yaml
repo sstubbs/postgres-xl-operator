@@ -29,6 +29,9 @@ config:
   postgres_port: 5432
   # the root user.
   postgres_user: postgres
+  # This is the the operator database that will be automatically created if needed.
+  # It is used for state of extra init scripts and health checks if enabled.
+  database: "pgxlo"
 
 # Enables a Pgbouncer container in the coordinator pods connected by unix socket.
 connection_pool:
@@ -52,8 +55,6 @@ homedir: /var/lib/postgresql
 
 health_check:
   enabled: false
-  # This is the the health check database that will be automatically created.
-  database: "health_check"
   # This is the the health check user that will be automatically created.
   user: health_check
 

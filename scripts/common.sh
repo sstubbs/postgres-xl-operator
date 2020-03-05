@@ -71,8 +71,8 @@ function log:archive() {
 
 function print_bash_error_stack() {
   for ((i = 1; i < ${#FUNCNAME[@]} - 1; i++)); do
-    FPATH="$(realpath "${BASH_SOURCE[$i + 1]}")"
     local FPATH
+    FPATH="$(realpath "${BASH_SOURCE[$i + 1]}")"
     log:error "$i: ${FPATH}:${BASH_LINENO[$i]} @ ${FUNCNAME[$i]}"
   done
 }

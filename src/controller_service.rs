@@ -9,7 +9,6 @@ use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
 };
-use std::{thread, time};
 
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
@@ -80,8 +79,6 @@ pub async fn action(
                                             .as_str()
                                             .unwrap()
                                     );
-
-                                    thread::sleep(time::Duration::from_millis(5000));
 
                                     // Recreate it
                                     match resource_client

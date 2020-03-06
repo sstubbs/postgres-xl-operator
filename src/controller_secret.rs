@@ -63,43 +63,9 @@ pub async fn action(
                             }
                         }
                         ResourceAction::Modified => {
-                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
-                                .as_str()
-                                .unwrap();
-
-                            let old_resource = resource_client
-                                .get(
-                                    &new_resource_object_unwapped["metadata"]["name"]
-                                        .as_str()
-                                        .unwrap(),
-                                )
-                                .await?;
-
-                            let mut mut_new_resource_object_unwapped =
-                                new_resource_object_unwapped.to_owned();
-                            mut_new_resource_object_unwapped["metadata"]["resourceVersion"] =
-                                serde_yaml::from_str(&format!(
-                                    "\"{}\"",
-                                    &old_resource.metadata.resourceVersion.unwrap().as_str()
-                                ))?;
-
-                            match resource_client
-                                .replace(
-                                    resource_name,
-                                    &pp,
-                                    serde_json::to_vec(&mut_new_resource_object_unwapped)?,
-                                )
-                                .await
-                            {
-                                Ok(o) => {
-                                    if new_resource_object_unwapped["metadata"]["name"]
-                                        == o.metadata.name
-                                    {
-                                        info!("Updated {}", o.metadata.name);
-                                    }
-                                }
-                                Err(e) => error!("{:?}", e), // any other case is probably bad
-                            }
+                            // Don't update secrets on update as they are handled by the rotation controller
+                            // and used for health checks which could cause problems.
+                            // Deleting and recreating the cluster is better if changed values are required.
                         }
                         ResourceAction::Deleted => {
                             let resource_name = &new_resource_object_unwapped["metadata"]["name"]

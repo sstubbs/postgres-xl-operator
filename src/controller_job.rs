@@ -9,7 +9,6 @@ use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
 };
-use std::{thread, time};
 
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
@@ -64,63 +63,9 @@ pub async fn action(
                             }
                         }
                         ResourceAction::Modified => {
-                            // Jobs have immutable fields so rather delete and recreate on modify than modify the resource in place like other types
-                            // Delete job
-                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
-                                .as_str()
-                                .unwrap();
-                            match resource_client
-                                .delete(resource_name, &DeleteParams::default())
-                                .await
-                            {
-                                Ok(_o) => {
-                                    info!(
-                                        "Deleted {}",
-                                        new_resource_object_unwapped["metadata"]["name"]
-                                            .as_str()
-                                            .unwrap()
-                                    );
-
-                                    thread::sleep(time::Duration::from_millis(5000));
-
-                                    // Recreate it
-                                    match resource_client
-                                        .create(
-                                            &pp,
-                                            serde_json::to_vec(&new_resource_object_unwapped)?,
-                                        )
-                                        .await
-                                    {
-                                        Ok(o) => {
-                                            if new_resource_object_unwapped["metadata"]["name"]
-                                                == o.metadata.name
-                                            {
-                                                info!("Created {}", o.metadata.name);
-                                            }
-                                        }
-                                        Err(e) => error!("{:?}", e), // any other case is probably bad
-                                    }
-                                }
-                                Err(_e) => {
-                                    // Recreate even if error as it might have been cleaned up prior to delete
-                                    match resource_client
-                                        .create(
-                                            &pp,
-                                            serde_json::to_vec(&new_resource_object_unwapped)?,
-                                        )
-                                        .await
-                                    {
-                                        Ok(o) => {
-                                            if new_resource_object_unwapped["metadata"]["name"]
-                                                == o.metadata.name
-                                            {
-                                                info!("Created {}", o.metadata.name);
-                                            }
-                                        }
-                                        Err(e) => error!("{:?}", e), // any other case is probably bad
-                                    }
-                                }
-                            }
+                            // Don't update jobs on update as updating passwords should be done by
+                            // the rotation controller.
+                            // Deleting and recreating the cluster is better if changed values are required.
                         }
                         ResourceAction::Deleted => {
                             let resource_name = &new_resource_object_unwapped["metadata"]["name"]

@@ -24,6 +24,7 @@ mod controller_postgres_xl_cluster_informer;
 mod controller_secret;
 mod controller_service;
 mod controller_stateful_set;
+mod controller_network_policy;
 mod custom_resources;
 mod enums;
 mod functions;

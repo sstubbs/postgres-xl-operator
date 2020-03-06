@@ -1,6 +1,6 @@
 use super::{
     controller_config_map, controller_deployment, controller_job, controller_postgres_xl_cluster,
-    controller_secret, controller_service, controller_stateful_set, custom_resources,
+    controller_secret, controller_service, controller_stateful_set, custom_resources, controller_network_policy,
     enums::ResourceAction,
     functions::get_kube_config,
     vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
@@ -67,6 +67,12 @@ pub async fn handle_events(
                 config_map_sha.to_owned(),
             )
                 .await?;
+            controller_network_policy::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                config_map_sha.to_owned(),
+            )
+                .await?;
             controller_job::action(
                 &custom_resource,
                 &ResourceAction::Added,
@@ -107,6 +113,12 @@ pub async fn handle_events(
                 config_map_sha.to_owned(),
             )
                 .await?;
+            controller_network_policy::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                config_map_sha.to_owned(),
+            )
+                .await?;
             controller_job::action(
                 &custom_resource,
                 &ResourceAction::Modified,
@@ -142,6 +154,12 @@ pub async fn handle_events(
             )
             .await?;
             controller_service::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                config_map_sha.to_owned(),
+            )
+                .await?;
+            controller_network_policy::action(
                 &custom_resource,
                 &ResourceAction::Deleted,
                 config_map_sha.to_owned(),

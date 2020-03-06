@@ -40,6 +40,10 @@ pub struct EmbeddedServiceTemplates;
 #[folder = "templates/stateful_set/"]
 pub struct EmbeddedStatefulSetTemplates;
 
+#[derive(RustEmbed)]
+#[folder = "templates/network_policy/"]
+pub struct EmbeddedNetworkPolicyTemplates;
+
 // Chart
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Chart {

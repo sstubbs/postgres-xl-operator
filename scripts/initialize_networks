@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Initialize the host connection to allow all networks,
-# since we are in kuberntes, the assumption is the current
-# network is a trusted network.
+# Initialize the host connection to allow all connections to datanodes and authenticated connections to coordinators.
 
 CUR_PATH="$(dirname "${BASH_SOURCE[0]}")"
 # shellcheck source=./common.sh
@@ -15,5 +13,9 @@ else
   log:warning "Superuser password not found, all connections will be allowed!"
 fi
 
-echo "host all all all ${PG_AUTH_METHOD}" >>"${PGDATA}/pg_hba.conf"
+if [ "${NODE_TYPE}" == "datanode" ]; then
+  echo "host all all all trust" >>"${PGDATA}/pg_hba.conf"
+else
+  echo "host all all all ${PG_AUTH_METHOD}" >>"${PGDATA}/pg_hba.conf"
+fi
 echo "host replication all all ${PG_AUTH_METHOD}" >>"${PGDATA}/pg_hba.conf"

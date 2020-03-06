@@ -141,8 +141,9 @@ pub async fn create_context(
             || global_context.cluster.values.security.password.method == "mount"
         {
             // Overrides for operator secret generation
-            // Generate passwords
-            // Root
+            global_context.cluster.values.on_load.enabled = true;
+
+            // Generate root password
             global_context
                 .cluster
                 .generated_passwords
@@ -156,8 +157,40 @@ pub async fn create_context(
                     secret_value: generate_base64_password().await?,
                 });
 
+            // Run root scripts
+            let filename = "create_update_user_passwords.sh";
+            let file_data = EmbeddedOnloadScripts::get(&filename).unwrap();
+            let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+            global_context
+                .cluster
+                .values
+                .on_load
+                .startup
+                .push(OnLoadStartup {
+                    name: filename.to_owned(),
+                    content: file_data_string.to_owned(),
+                });
+
+            // Generate extra user passwords
+            for user in global_context
+                .to_owned()
+                .cluster
+                .values
+                .security
+                .password
+                .extra_username
+            {
+                global_context
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
+
             if global_context.cluster.values.connection_pool.enabled {
-                // Connection Pool
+                // Generate connection pool password
                 global_context
                     .cluster
                     .generated_passwords
@@ -173,7 +206,7 @@ pub async fn create_context(
             }
 
             if global_context.cluster.values.health_check.enabled {
-                // Health check
+                // Generate health check password
                 global_context
                     .cluster
                     .generated_passwords
@@ -181,35 +214,10 @@ pub async fn create_context(
                         secret_key: global_context.to_owned().cluster.values.health_check.user,
                         secret_value: generate_base64_password().await?,
                     });
-            }
-
-            for user in global_context
-                .to_owned()
-                .cluster
-                .values
-                .security
-                .password
-                .extra_username
-            {
-                // Extra users
-                global_context
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: user,
-                        secret_value: generate_base64_password().await?,
-                    });
-            }
-
-            // Overrides for update password from secret
-            // Create and update passwords
-            global_context.cluster.values.on_load.enabled = true;
-
-            for asset in EmbeddedOnloadScripts::iter() {
-                let filename = asset.as_ref();
-                let file_data = EmbeddedOnloadScripts::get(filename).unwrap();
+                // Run health check scripts
+                let filename = "set_health_check_user_perms.sh";
+                let file_data = EmbeddedOnloadScripts::get(&filename).unwrap();
                 let file_data_string = std::str::from_utf8(file_data.as_ref())?;
-
                 global_context
                     .cluster
                     .values

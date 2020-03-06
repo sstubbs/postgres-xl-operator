@@ -49,13 +49,21 @@ pub async fn watch() -> anyhow::Result<()> {
                 && context.cluster.values.config.database != ""
             {
                 // If secret is being used get the password for the database_url
+                let mut user = &context.cluster.values.config.postgres_user.to_owned();
                 let mut password = "".to_owned();
 
-                if &context.cluster.values.security.password.secret_name != ""
-                    && &context.cluster.values.health_check.user != ""
+                if &context.cluster.values.security.password.method == "operator"
+                    || &context.cluster.values.security.password.method == "mount"
                 {
+                    let mut secret_name = "".to_owned();
+                    if &context.cluster.values.security.password.method == "operator" {
+                        secret_name = format!("{}-{}-{}", &context.cleaned_release_name, &context.cluster.cleaned_name, &context.cluster.values.security.password.secret_name)
+                    } else if &context.cluster.values.security.password.method == "mount" {
+                        secret_name = context.cluster.values.security.password.secret_name;
+                    }
+
                     let secret = secret_client
-                        .get(&context.cluster.values.security.password.secret_name)
+                        .get(&secret_name)
                         .await;
                     if secret.is_ok() {
                         let secret_unwrapped = secret.unwrap();
@@ -63,6 +71,7 @@ pub async fn watch() -> anyhow::Result<()> {
                             .data
                             .get(&context.cluster.values.health_check.user)
                             .unwrap();
+                        user = &context.cluster.values.health_check.user;
                         password = std::str::from_utf8(&password_bytes.0).unwrap().to_owned();
                     }
                 }
@@ -73,8 +82,8 @@ pub async fn watch() -> anyhow::Result<()> {
                 );
 
                 let database_url = format!(
-                    "postgres://postgres:{}@{}:{}",
-                    password, service_name, context.cluster.values.config.postgres_port
+                    "postgres://{}:{}@{}:{}",
+                    user, password, service_name, context.cluster.values.config.postgres_port
                 );
 
                 let health_check_database_url = format!(
@@ -92,9 +101,8 @@ pub async fn watch() -> anyhow::Result<()> {
                     if health_check_database_connection.is_ok() {
                         let health_check_database_connection_unwrapped =
                             health_check_database_connection.unwrap();
-                        embedded_migrations::run_with_output(
+                        embedded_migrations::run(
                             &health_check_database_connection_unwrapped,
-                            &mut std::io::stdout(),
                         )?;
 
                         // set health_check label to initialized

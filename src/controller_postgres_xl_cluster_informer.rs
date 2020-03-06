@@ -61,13 +61,13 @@ pub async fn handle_events(
                 config_map_sha.to_owned(),
             )
             .await?;
-            controller_job::action(
+            controller_service::action(
                 &custom_resource,
                 &ResourceAction::Added,
                 config_map_sha.to_owned(),
             )
-            .await?;
-            controller_service::action(
+                .await?;
+            controller_job::action(
                 &custom_resource,
                 &ResourceAction::Added,
                 config_map_sha.to_owned(),
@@ -101,13 +101,13 @@ pub async fn handle_events(
                 config_map_sha.to_owned(),
             )
             .await?;
-            controller_job::action(
+            controller_service::action(
                 &custom_resource,
                 &ResourceAction::Modified,
                 config_map_sha.to_owned(),
             )
-            .await?;
-            controller_service::action(
+                .await?;
+            controller_job::action(
                 &custom_resource,
                 &ResourceAction::Modified,
                 config_map_sha.to_owned(),
@@ -141,13 +141,13 @@ pub async fn handle_events(
                 config_map_sha.to_owned(),
             )
             .await?;
-            controller_job::action(
+            controller_service::action(
                 &custom_resource,
                 &ResourceAction::Deleted,
                 config_map_sha.to_owned(),
             )
-            .await?;
-            controller_service::action(
+                .await?;
+            controller_job::action(
                 &custom_resource,
                 &ResourceAction::Deleted,
                 config_map_sha.to_owned(),

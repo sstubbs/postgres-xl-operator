@@ -17,6 +17,10 @@ data:
   # the postgres user to use for connections and the root
   # db user.
   PGUSER: "{{ .cluster.values.config.postgres_user }}"
+  # The user for health checks
+  HEALTH_CHECK_USER: "{{ .cluster.values.health_check.user }}"
+  # The user for connection pooling
+  CONNECTION_POOL_USER: "{{ .cluster.values.connection_pool.user }}"
 
   # The operator database
   OPERATOR_DATABASE: "{{ .cluster.values.config.database }}"

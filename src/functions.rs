@@ -143,19 +143,21 @@ pub async fn create_context(
             // Overrides for operator secret generation
             global_context.cluster.values.on_load.enabled = true;
 
-            // Generate root password
-            global_context
-                .cluster
-                .generated_passwords
-                .push(GeneratedPassword {
-                    secret_key: global_context
-                        .to_owned()
-                        .cluster
-                        .values
-                        .config
-                        .postgres_user,
-                    secret_value: generate_base64_password().await?,
-                });
+            if global_context.cluster.values.security.password.method == "operator" {
+                // Generate root password
+                global_context
+                    .cluster
+                    .generated_passwords
+                    .push(GeneratedPassword {
+                        secret_key: global_context
+                            .to_owned()
+                            .cluster
+                            .values
+                            .config
+                            .postgres_user,
+                        secret_value: generate_base64_password().await?,
+                    });
+            }
 
             // Run root scripts
             let filename = "create_update_user_passwords.sh";
@@ -171,49 +173,53 @@ pub async fn create_context(
                     content: file_data_string.to_owned(),
                 });
 
-            // Generate extra user passwords
-            for user in global_context
-                .to_owned()
-                .cluster
-                .values
-                .security
-                .password
-                .extra_username
-            {
-                global_context
+            if global_context.cluster.values.security.password.method == "operator" {
+                // Generate extra user passwords
+                for user in global_context
+                    .to_owned()
                     .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: user,
-                        secret_value: generate_base64_password().await?,
-                    });
-            }
+                    .values
+                    .security
+                    .password
+                    .extra_username
+                {
+                    global_context
+                        .cluster
+                        .generated_passwords
+                        .push(GeneratedPassword {
+                            secret_key: user,
+                            secret_value: generate_base64_password().await?,
+                        });
+                }
 
-            if global_context.cluster.values.connection_pool.enabled {
-                // Generate connection pool password
-                global_context
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: global_context
-                            .to_owned()
-                            .cluster
-                            .values
-                            .connection_pool
-                            .user,
-                        secret_value: generate_base64_password().await?,
-                    });
+                if global_context.cluster.values.connection_pool.enabled {
+                    // Generate connection pool password
+                    global_context
+                        .cluster
+                        .generated_passwords
+                        .push(GeneratedPassword {
+                            secret_key: global_context
+                                .to_owned()
+                                .cluster
+                                .values
+                                .connection_pool
+                                .user,
+                            secret_value: generate_base64_password().await?,
+                        });
+                }
             }
 
             if global_context.cluster.values.health_check.enabled {
-                // Generate health check password
-                global_context
-                    .cluster
-                    .generated_passwords
-                    .push(GeneratedPassword {
-                        secret_key: global_context.to_owned().cluster.values.health_check.user,
-                        secret_value: generate_base64_password().await?,
-                    });
+                if global_context.cluster.values.security.password.method == "operator" {
+                    // Generate health check password
+                    global_context
+                        .cluster
+                        .generated_passwords
+                        .push(GeneratedPassword {
+                            secret_key: global_context.to_owned().cluster.values.health_check.user,
+                            secret_value: generate_base64_password().await?,
+                        });
+                }
                 // Run health check scripts
                 let filename = "set_health_check_user_perms.sh";
                 let file_data = EmbeddedOnloadScripts::get(&filename).unwrap();

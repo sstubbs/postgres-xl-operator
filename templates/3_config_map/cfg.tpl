@@ -24,8 +24,8 @@ data:
   config_append_proxy: |
     # applies only on startup.
     log_min_messages = {{ upper .cluster.values.config.log_level }}
-{{- if .cluster.values.config.append.proxy }}
-{{ range .cluster.values.config.append.proxy -}}
+{{- if .cluster.values.config.append.proxies }}
+{{ range .cluster.values.config.append.proxies -}}
 {{ .name | indent 4 }} = {{ .content }}
 {{ end -}}
 {{- end }}
@@ -33,8 +33,8 @@ data:
   config_append_datanode: |
     # applies only on startup.
     log_min_messages = {{ lower .cluster.values.config.log_level }}
-{{- if .cluster.values.config.append.datanode }}
-{{ range .cluster.values.config.append.datanode -}}
+{{- if .cluster.values.config.append.datanodes }}
+{{ range .cluster.values.config.append.datanodes -}}
 {{ .name | indent 4 }} = {{ .content }}
 {{ end -}}
 {{- end }}
@@ -42,8 +42,8 @@ data:
   config_append_coordinator: |
     # applies only on startup.
     log_min_messages = {{ lower .cluster.values.config.log_level }}
-{{- if .cluster.values.config.append.coordinator }}
-{{ range .cluster.values.config.append.coordinator -}}
+{{- if .cluster.values.config.append.coordinators }}
+{{ range .cluster.values.config.append.coordinators -}}
 {{ .name | indent 4 }} = {{ .content }}
 {{ end -}}
 {{- end }}

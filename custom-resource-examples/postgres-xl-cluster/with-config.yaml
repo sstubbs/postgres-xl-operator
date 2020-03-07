@@ -6,12 +6,12 @@ spec:
   data: |
     config:
       append:
-        coordinator:
+        coordinators:
           - name: max_connections
             content: 200
           - name: enable_seqscan
             content: on
-        datanode:
+        datanodes:
           - name: max_connections
             content: 300
           - name: enable_seqscan

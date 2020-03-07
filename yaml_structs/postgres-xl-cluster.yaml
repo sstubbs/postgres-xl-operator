@@ -8,11 +8,11 @@ config:
     # append to all coordinators.
     # - name: max_connections
     #   content: 100
-    coordinator: []
+    coordinators: []
     # append to all datanodes.
     # - name: max_connections
     #   content: 100
-    datanode: []
+    datanodes: []
     # append to gtm.
     # - name: max_connections
     #   content: 100
@@ -20,7 +20,7 @@ config:
     # append to all proxies.
     # - name: max_connections
     #   content: 100
-    proxy: []
+    proxies: []
   # The log level to use, accepts : ERROR, WARNING, INFO, DEBUG, DEBUG (1-5).
   log_level: warning
   # the port for managers (GTM and proxy).
@@ -128,6 +128,16 @@ replication:
   standby_name: ""
 
 security:
+
+  network_policy:
+    # Creates a network policy to only allow access to/from connection pool, from within this cluster and from coordinator standby.
+    # This is false by default but can be enabled if all access will be through connection pool.
+    coordinators: false
+    # Creates a network policy to only allow access to/from data nodes from within this cluster or from data node standby.
+    datanodes: true
+    # Creates a network policy to only allow access to/from gtm from within this cluster or from gtm standby.
+    # It also creates a network policy to only allow access to proxy from within this cluster.
+    gtm: true
 
   password:
     # Set the password authentication type.

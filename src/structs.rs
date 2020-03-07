@@ -131,10 +131,10 @@ pub struct Config {
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConfigAppend {
-    coordinator: Vec<ConfigAppendCoordinator>,
-    datanode: Vec<ConfigAppendDatanode>,
+    coordinators: Vec<ConfigAppendCoordinator>,
+    datanodes: Vec<ConfigAppendDatanode>,
     gtm: Vec<ConfigAppendGtm>,
-    proxy: Vec<ConfigAppendProxy>,
+    proxies: Vec<ConfigAppendProxy>,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
@@ -260,8 +260,16 @@ pub struct Replication {
 // Security
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Security {
+    pub network_policy: SecurityNetworkPolicy,
     pub password: SecurityPassword,
     pub tls: SecurityTls,
+}
+
+#[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SecurityNetworkPolicy {
+    pub coordinators: bool,
+    pub datanodes: bool,
+    pub gtm: bool,
 }
 
 #[derive(Debug, Gtmpl, Clone, PartialEq, Serialize, Deserialize)]

@@ -10,7 +10,7 @@ use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
 };
-use ring::digest;
+use openssl::sha;
 
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
@@ -134,6 +134,8 @@ pub async fn action(
     } else {
         error!("{}", context.err().unwrap())
     }
-    let config_map_sha = digest::digest(&digest::SHA256, config_map_concatenated.as_bytes());
-    Ok(encode(config_map_sha.as_ref()))
+    let mut hasher = sha::Sha256::new();
+    hasher.update(config_map_concatenated.as_bytes());
+    let hash = hasher.finish();
+    Ok(encode(hash.as_ref()))
 }

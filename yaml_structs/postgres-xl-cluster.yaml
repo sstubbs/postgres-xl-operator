@@ -136,7 +136,7 @@ security:
     # This is the method of how the root password is obtained. Accepts none, operator, secret, mount.
     # none: no password is enabled
     # operator: the operator generates and rotates the secret based on rotation_schedule.
-    # secret: mounts a secret i.e. for cert manager or other external created secrets. This is not implemented yet.
+    # secret: mounts a secret i.e. for cert manager or other external created secrets.
     # mount: this is purely a mount path i.e. for when vault sidecar injection is used. This is not implemented yet.
     method: none
     # The directory where the secret is mounted in the container.
@@ -153,7 +153,7 @@ security:
     # This is the method of how the cert/key is obtained. Accepts none, operator, secret, mount.
     # none: no tls is enabled
     # operator: the operator generates and rotates the secret based on rotation_schedule.
-    # secret: mounts a secret i.e. for cert manager or other external created secrets. This is not implemented yet.
+    # secret: mounts a secret i.e. for cert manager or other external created secrets.
     # mount: this is purely a mount path i.e. for when vault sidecar injection is used. This is not implemented yet.
     method: none
     # The directory where the secret is mounted in the container.

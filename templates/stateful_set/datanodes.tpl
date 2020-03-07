@@ -123,7 +123,7 @@ spec:
 {{ .cluster.values.datanodes.add_containers | indent 6 }}
 {{- end }}
       volumes:
-{{- if .cluster.values.datanodes.pvc.resources.requests.storage }}{{- else }}
+{{- if not .cluster.values.datanodes.pvc.resources.requests.storage }}
         - name: datastore
           emptyDir: {}
 {{- end }}

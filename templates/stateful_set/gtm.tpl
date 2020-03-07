@@ -109,7 +109,7 @@ spec:
 {{ .cluster.values.gtm.add_containers | indent 6 }}
 {{- end }}
       volumes:
-{{- if .cluster.values.gtm.pvc.resources.requests.storage }}{{- else }}
+{{- not if .cluster.values.gtm.pvc.resources.requests.storage }}
         - name: datastore
           emptyDir: {}
 {{- end }}

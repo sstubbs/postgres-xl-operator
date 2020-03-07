@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/component: {{ $component }}
 {{- template "global_labels" . }}
 spec:
+  ttlSecondsAfterFinished: 120
   backoffLimit: {{ .cluster.values.on_load.back_off_limit }}
   template:
     metadata:

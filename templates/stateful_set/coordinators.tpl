@@ -71,6 +71,7 @@ spec:
         ports:
           - containerPort: {{ .cluster.values.config.postgres_port }}
             name: {{ $component }}
+{{ if not .cluster.values.replication.master_name }}
         readinessProbe:
           exec:
             command:
@@ -83,6 +84,7 @@ spec:
             - /scripts/probe_liveness_postgres
           initialDelaySeconds: 30
           periodSeconds: 5
+{{ end }}
         resources:
 {{- if or .cluster.values.coordinators.resources.requests.memory .cluster.values.coordinators.resources.requests.cpu }}
           requests:

@@ -272,3 +272,7 @@ This application must be running when performing any operations by running the f
 ### Extending The Operator
 - Adding a new parameter if required into a custom resource involves adding it to `yaml_structs/$resource_type` and mapping it to structs in `src/structs.rs`
 - Templates in the `templates` directory are created from the context by [ gtmpl-rust ](https://github.com/fiji-flo/gtmpl-rust) so any other required kubernetes resources can be added to those sub folders but only one YAML document per file.
+
+### Security
+openssl for kube-rs, config sha, and cert generation is currently being used for compliance.
+Preferably [rusttls](https://github.com/ctz/rustls) can be used in the future for performance gains.

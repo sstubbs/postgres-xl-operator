@@ -2,8 +2,10 @@ use super::custom_resources::KubePostgresXlCluster;
 use super::functions::{create_context, get_kube_config};
 use super::schema::ping::dsl::*;
 use super::vars::{
-    CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_INTERVAL, NAMESPACE,
+    CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_SCHEDULE, NAMESPACE,
 };
+use chrono::{Utc};
+use cron_parser::parse;
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use kube::api::{Api, ListParams, PatchParams};
 use kube::client::APIClient;
@@ -11,11 +13,7 @@ use std::time::Duration;
 use tokio::time;
 
 pub async fn watch() -> anyhow::Result<()> {
-    let interval: u64 = std::env::var("HEALTH_CHECK_INTERVAL")
-        .unwrap_or(HEALTH_CHECK_INTERVAL.into())
-        .parse::<u64>()
-        .unwrap();
-    let mut interval_duration = time::interval(Duration::from_secs(interval));
+    let schedule = std::env::var("HEALTH_CHECK_SCHEDULE").unwrap_or(HEALTH_CHECK_SCHEDULE.into());
 
     embed_migrations!("migrations");
 
@@ -36,7 +34,17 @@ pub async fn watch() -> anyhow::Result<()> {
     let list_params = ListParams::default();
 
     loop {
-        interval_duration.tick().await;
+        let next = parse(&schedule, &Utc::now());
+        if next.is_ok() {
+            let wait_seconds = &next.unwrap().timestamp() - &Utc::now().timestamp();
+            time::delay_for(Duration::from_secs(wait_seconds as u64)).await;
+        } else {
+            time::delay_for(Duration::from_secs(300)).await;
+            error!(
+                "{}: error with health check schedule, using default of 5 minutes.",
+                next.err().unwrap().to_string()
+            )
+        }
 
         // get clusters
         let clusters = resource_client.list(&list_params);
@@ -57,14 +65,17 @@ pub async fn watch() -> anyhow::Result<()> {
                 {
                     let mut secret_name = "".to_owned();
                     if &context.cluster.values.security.password.method == "operator" {
-                        secret_name = format!("{}-{}-{}", &context.cleaned_release_name, &context.cluster.cleaned_name, &context.cluster.values.security.password.secret_name)
+                        secret_name = format!(
+                            "{}-{}-{}",
+                            &context.cleaned_release_name,
+                            &context.cluster.cleaned_name,
+                            &context.cluster.values.security.password.secret_name
+                        )
                     } else if &context.cluster.values.security.password.method == "mount" {
                         secret_name = context.cluster.values.security.password.secret_name;
                     }
 
-                    let secret = secret_client
-                        .get(&secret_name)
-                        .await;
+                    let secret = secret_client.get(&secret_name).await;
                     if secret.is_ok() {
                         let secret_unwrapped = secret.unwrap();
                         let password_bytes = secret_unwrapped
@@ -101,9 +112,7 @@ pub async fn watch() -> anyhow::Result<()> {
                     if health_check_database_connection.is_ok() {
                         let health_check_database_connection_unwrapped =
                             health_check_database_connection.unwrap();
-                        embedded_migrations::run(
-                            &health_check_database_connection_unwrapped,
-                        )?;
+                        embedded_migrations::run(&health_check_database_connection_unwrapped)?;
 
                         // set health_check label to initialized
                         let patch = json!({

@@ -274,5 +274,6 @@ This application must be running when performing any operations by running the f
 - Templates in the `templates` directory are created from the context by [ gtmpl-rust ](https://github.com/fiji-flo/gtmpl-rust) so any other required kubernetes resources can be added to those sub folders but only one YAML document per file.
 
 ### Security
-openssl for kube-rs, config sha, and cert generation is currently being used for compliance.
-Preferably [rusttls](https://github.com/ctz/rustls) can be used in the future for performance gains.
+- openssl for kube-rs, config sha, and cert generation is currently being used for compliance.
+- Preferably [rusttls](https://github.com/ctz/rustls) can be used in the future for performance gains.
+- To run sql inside a pod get the password with `export PGPASSWORD="$(cat "${PASSWORD_SECRET_MOUNT_PATH}"/"${PGUSER}")"`

@@ -134,10 +134,10 @@ security:
     # This is false by default but can be enabled if all access will be through connection pool.
     coordinators: false
     # Creates a network policy to only allow access to/from data nodes from within this cluster or from data node standby.
-    datanodes: true
+    datanodes: false
     # Creates a network policy to only allow access to/from gtm from within this cluster or from gtm standby.
     # It also creates a network policy to only allow access to proxy from within this cluster.
-    gtm: true
+    gtm: false
 
   password:
     # Set the password authentication type.

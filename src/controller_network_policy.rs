@@ -39,7 +39,7 @@ pub async fn action(
                     &global_template,
                     &file_data_string.to_owned(),
                 )
-                    .await;
+                .await;
 
                 if new_resource_object.is_ok() {
                     let new_resource_object_unwapped = new_resource_object.unwrap();

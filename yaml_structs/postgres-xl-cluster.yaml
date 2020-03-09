@@ -62,7 +62,7 @@ image:
   # The default postgres-xl image to use in all pods.
   name: sstubbs/postgres-xl
   # The default postgres-xl image version to use in all pods.
-  version: 0.4.0
+  version: 0.6.0
 
 # Configuration for a job that is called when the database
 # has finished loading.
@@ -147,7 +147,6 @@ security:
     # none: no password is enabled
     # operator: the operator generates and rotates the secret based on rotation_schedule.
     # secret: mounts a secret i.e. for cert manager or other external created secrets.
-    # mount: this is purely a mount path i.e. for when vault sidecar injection is used. This is not implemented yet.
     method: none
     # The directory where the secret is mounted in the container.
     mount_path: /pgpass
@@ -164,7 +163,6 @@ security:
     # none: no tls is enabled
     # operator: the operator generates and rotates the secret based on rotation_schedule.
     # secret: mounts a secret i.e. for cert manager or other external created secrets.
-    # mount: this is purely a mount path i.e. for when vault sidecar injection is used. This is not implemented yet.
     method: none
     # The directory where the secret is mounted in the container.
     mount_path: /tls

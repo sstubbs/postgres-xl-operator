@@ -4,7 +4,7 @@ use super::schema::ping::dsl::*;
 use super::vars::{
     CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_SCHEDULE, NAMESPACE,
 };
-use chrono::{Utc};
+use chrono::Utc;
 use cron_parser::parse;
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use kube::api::{Api, ListParams, PatchParams};

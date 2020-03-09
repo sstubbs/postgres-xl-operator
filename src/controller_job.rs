@@ -9,6 +9,8 @@ use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
 };
+use std::time::Duration;
+use tokio::time;
 
 pub async fn action(
     custom_resource: &KubePostgresXlCluster,
@@ -63,9 +65,46 @@ pub async fn action(
                             }
                         }
                         ResourceAction::Modified => {
-                            // Don't update jobs on update as updating passwords should be done by
-                            // the rotation controller.
-                            // Deleting and recreating the cluster is better if changed values are required.
+                            // Jobs have immutable fields so rather delete and recreate on modify than modify the resource in place like other types
+                            // Delete hob
+                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
+                                .as_str()
+                                .unwrap();
+                            match resource_client
+                                .delete(resource_name, &DeleteParams::default())
+                                .await
+                            {
+                                Ok(_o) => {
+                                    info!(
+                                        "Deleted {}",
+                                        new_resource_object_unwapped["metadata"]["name"]
+                                            .as_str()
+                                            .unwrap()
+                                    );
+
+                                    // Jobs take a bit of time to delete so wait for 30 seconds before recreating
+                                    time::delay_for(Duration::from_secs(30)).await;
+
+                                    // Recreate it
+                                    match resource_client
+                                        .create(
+                                            &pp,
+                                            serde_json::to_vec(&new_resource_object_unwapped)?,
+                                        )
+                                        .await
+                                    {
+                                        Ok(o) => {
+                                            if new_resource_object_unwapped["metadata"]["name"]
+                                                == o.metadata.name
+                                            {
+                                                info!("Created {}", o.metadata.name);
+                                            }
+                                        }
+                                        Err(e) => error!("{:?}", e), // any other case is probably bad
+                                    }
+                                }
+                                Err(e) => error!("{:?}", e), // any other case is probably bad
+                            }
                         }
                         ResourceAction::Deleted => {
                             let resource_name = &new_resource_object_unwapped["metadata"]["name"]

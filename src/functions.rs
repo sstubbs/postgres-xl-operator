@@ -155,7 +155,7 @@ pub async fn create_context(
                             .values
                             .config
                             .postgres_user,
-                        secret_value: generate_base64_password().await?,
+                        secret_value: encode(&generate_password().await?),
                     });
             }
 
@@ -188,7 +188,7 @@ pub async fn create_context(
                         .generated_passwords
                         .push(GeneratedPassword {
                             secret_key: user,
-                            secret_value: generate_base64_password().await?,
+                            secret_value: encode(&generate_password().await?),
                         });
                 }
 
@@ -204,7 +204,7 @@ pub async fn create_context(
                                 .values
                                 .connection_pool
                                 .user,
-                            secret_value: generate_base64_password().await?,
+                            secret_value: encode(&generate_password().await?),
                         });
                 }
             }
@@ -217,7 +217,7 @@ pub async fn create_context(
                         .generated_passwords
                         .push(GeneratedPassword {
                             secret_key: global_context.to_owned().cluster.values.health_check.user,
-                            secret_value: generate_base64_password().await?,
+                            secret_value: encode(&generate_password().await?),
                         });
                 }
                 // Run health check scripts
@@ -286,8 +286,7 @@ pub async fn create_resource_object(
     };
 }
 
-pub async fn generate_base64_password() -> anyhow::Result<String> {
+pub async fn generate_password() -> anyhow::Result<String> {
     let random_string: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
-    let encoded_random_string = encode(&random_string);
-    return Ok(encoded_random_string);
+    return Ok(random_string);
 }

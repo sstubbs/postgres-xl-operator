@@ -30,6 +30,7 @@ mod enums;
 mod functions;
 mod health_checks;
 mod models;
+mod password_rotate;
 mod schema;
 mod structs;
 mod vars;
@@ -42,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
     );
     env_logger::init();
     task::spawn(health_checks::watch());
+    task::spawn(password_rotate::watch());
     task::spawn(controller_postgres_xl_cluster_informer::watch()).await??;
     Ok(())
 }

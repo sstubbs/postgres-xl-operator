@@ -5,8 +5,8 @@ use super::{
     structs::EmbeddedSecretTemplates,
     vars::NAMESPACE,
 };
-use base64::decode;
-use diesel::{sql_query, Connection, PgConnection, RunQueryDsl};
+use crate::structs::GeneratedPassword;
+use base64::encode;
 use kube::{
     api::{Api, DeleteParams, PostParams},
     client::APIClient,
@@ -20,7 +20,7 @@ pub async fn action(
     let context = create_context(&custom_resource, config_map_sha).await;
 
     if context.is_ok() {
-        let context_unwrapped = context?.to_owned();
+        let mut context_unwrapped = context?.to_owned();
         let global_template = create_global_template().await?;
 
         let config = get_kube_config().await?;
@@ -36,6 +36,65 @@ pub async fn action(
                 // Create new resources
                 let file_data = EmbeddedSecretTemplates::get(&filename).unwrap();
                 let file_data_string = std::str::from_utf8(file_data.as_ref())?;
+
+                // if operator is being used and the pgpass template is being used
+                match resource_action {
+                    ResourceAction::Modified => {
+                        if &context_unwrapped.cluster.values.security.password.method == "operator"
+                        {
+                            if filename == "pgpass.tpl" {
+                                let secret_name = format!(
+                                    "{}-{}-{}",
+                                    &context_unwrapped.cleaned_release_name,
+                                    &context_unwrapped.cluster.cleaned_name,
+                                    &context_unwrapped
+                                        .cluster
+                                        .values
+                                        .security
+                                        .password
+                                        .secret_name
+                                );
+
+                                let old_resource = resource_client.get(&secret_name).await;
+
+                                if old_resource.is_ok() {
+                                    let old_resource_unwrapped = old_resource.unwrap();
+
+                                    let mut updated_passwords = Vec::new();
+
+                                    for new_password in
+                                        &context_unwrapped.cluster.generated_passwords
+                                    {
+                                        let old_password = old_resource_unwrapped
+                                            .data
+                                            .get(&new_password.secret_key);
+                                        if old_password.is_some() {
+                                            let old_password_unwrapped = old_password.unwrap();
+                                            let old_password_value =
+                                                std::str::from_utf8(&old_password_unwrapped.0)
+                                                    .unwrap()
+                                                    .to_owned();
+                                            updated_passwords.push(GeneratedPassword {
+                                                secret_key: new_password.secret_key.to_owned(),
+                                                secret_value: encode(&old_password_value),
+                                            })
+                                        } else {
+                                            updated_passwords.push(GeneratedPassword {
+                                                secret_key: new_password.secret_key.to_owned(),
+                                                secret_value: new_password.secret_value.to_owned(),
+                                            })
+                                        }
+                                    }
+
+                                    context_unwrapped.cluster.generated_passwords =
+                                        updated_passwords;
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
                 let new_resource_object = super::functions::create_resource_object(
                     &context_unwrapped.to_owned(),
                     &global_template,
@@ -76,110 +135,6 @@ pub async fn action(
                                         .unwrap(),
                                 )
                                 .await?;
-
-                            // Update root user password otherwise job won't be able to connect and alter other user passwords.
-                            if &context_unwrapped.cluster.values.security.password.method
-                                == "operator"
-                                || &context_unwrapped.cluster.values.security.password.method
-                                    == "mount"
-                            {
-                                if &new_resource_object_unwapped["metadata"]["name"]
-                                    == &context_unwrapped
-                                        .cluster
-                                        .values
-                                        .security
-                                        .password
-                                        .secret_name
-                                    || &new_resource_object_unwapped["metadata"]["name"]
-                                        == &format!(
-                                            "{}-{}-{}",
-                                            &context_unwrapped.cleaned_release_name,
-                                            &context_unwrapped.cluster.cleaned_name,
-                                            &context_unwrapped
-                                                .cluster
-                                                .values
-                                                .security
-                                                .password
-                                                .secret_name
-                                        )
-                                {
-                                    let password_bytes = old_resource
-                                        .data
-                                        .get(&context_unwrapped.cluster.values.config.postgres_user)
-                                        .unwrap();
-                                    let user =
-                                        &context_unwrapped.cluster.values.config.postgres_user;
-                                    let password =
-                                        std::str::from_utf8(&password_bytes.0).unwrap().to_owned();
-                                    let service_name = format!(
-                                        "{}-{}-svc-crd",
-                                        &context_unwrapped.cleaned_release_name,
-                                        &context_unwrapped.cluster.cleaned_name
-                                    );
-                                    let database_url = format!(
-                                        "postgres://{}:{}@{}:{}",
-                                        &user,
-                                        &password,
-                                        &service_name,
-                                        &context_unwrapped.cluster.values.config.postgres_port
-                                    );
-                                    let new_password_bytes = decode(
-                                        &context_unwrapped
-                                            .cluster
-                                            .generated_passwords
-                                            .iter()
-                                            .filter(|&gpw| {
-                                                &gpw.secret_key
-                                                    == &context_unwrapped
-                                                        .cluster
-                                                        .values
-                                                        .config
-                                                        .postgres_user
-                                            })
-                                            .next()
-                                            .unwrap()
-                                            .secret_value,
-                                    )
-                                    .unwrap();
-                                    let new_password =
-                                        std::str::from_utf8(new_password_bytes.as_ref()).unwrap();
-                                    let database_connection =
-                                        PgConnection::establish(&database_url);
-
-                                    if database_connection.is_ok() {
-                                        let database_connection_unwrapped =
-                                            database_connection.unwrap();
-
-                                        let update_password = sql_query(format!(
-                                            "ALTER USER {} WITH PASSWORD '{}';",
-                                            user, new_password
-                                        ))
-                                        .execute(&database_connection_unwrapped);
-
-                                        if update_password.is_ok() {
-                                            info!(
-                                                "Successfully updated user password for {}.",
-                                                &context_unwrapped
-                                                    .cluster
-                                                    .values
-                                                    .config
-                                                    .postgres_user
-                                            )
-                                        } else {
-                                            error!(
-                                                "Could not update password for {}: {}",
-                                                &context_unwrapped
-                                                    .cluster
-                                                    .values
-                                                    .config
-                                                    .postgres_user,
-                                                update_password.err().unwrap().to_string()
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            // End update root user password.
 
                             let mut mut_new_resource_object_unwapped =
                                 new_resource_object_unwapped.to_owned();

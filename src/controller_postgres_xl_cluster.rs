@@ -71,6 +71,9 @@ pub async fn action_create_slave(
             // Health checks do not work for standby so disable them
             current_data["health_checks"]["enabled"] = serde_yaml::from_str("false")?;
 
+            // Connection pool does not work for standby so disable it
+            current_data["health_checks"]["enabled"] = serde_yaml::from_str("false")?;
+
             // Password generation does not work for standby so disable it
             current_data["security"]["password"]["method"] = serde_yaml::from_str("none")?;
 

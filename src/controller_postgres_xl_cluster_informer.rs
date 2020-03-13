@@ -6,6 +6,7 @@ use super::{
     functions::get_kube_config,
     vars::{CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE},
 };
+use crate::structs::GeneratedPassword;
 use futures::StreamExt;
 use kube::{
     api::{Informer, RawApi, WatchEvent},
@@ -40,10 +41,16 @@ pub async fn watch() -> anyhow::Result<()> {
 pub async fn handle_events(
     ev: WatchEvent<custom_resources::KubePostgresXlCluster>,
 ) -> anyhow::Result<()> {
+    let generated_passwords: Vec<GeneratedPassword> = Vec::new();
     match ev {
         WatchEvent::Added(custom_resource) => {
-            controller_secret::action(&custom_resource, &ResourceAction::Added, "".to_owned())
-                .await?;
+            controller_secret::action(
+                &custom_resource,
+                &ResourceAction::Added,
+                "".to_owned(),
+                generated_passwords,
+            )
+            .await?;
             let config_map_sha = controller_config_map::action(
                 &custom_resource,
                 &ResourceAction::Added,
@@ -88,8 +95,13 @@ pub async fn handle_events(
             .await?;
         }
         WatchEvent::Modified(custom_resource) => {
-            controller_secret::action(&custom_resource, &ResourceAction::Modified, "".to_owned())
-                .await?;
+            controller_secret::action(
+                &custom_resource,
+                &ResourceAction::Modified,
+                "".to_owned(),
+                generated_passwords,
+            )
+            .await?;
             let config_map_sha = controller_config_map::action(
                 &custom_resource,
                 &ResourceAction::Modified,
@@ -134,8 +146,13 @@ pub async fn handle_events(
             .await?;
         }
         WatchEvent::Deleted(custom_resource) => {
-            controller_secret::action(&custom_resource, &ResourceAction::Deleted, "".to_owned())
-                .await?;
+            controller_secret::action(
+                &custom_resource,
+                &ResourceAction::Deleted,
+                "".to_owned(),
+                generated_passwords,
+            )
+            .await?;
             let config_map_sha = controller_config_map::action(
                 &custom_resource,
                 &ResourceAction::Deleted,

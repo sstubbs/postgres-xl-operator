@@ -16,6 +16,7 @@ pub async fn action(
     custom_resource: &KubePostgresXlCluster,
     resource_action: &ResourceAction,
     config_map_sha: String,
+    generated_passwords: Vec<GeneratedPassword>,
 ) -> anyhow::Result<()> {
     let context = create_context(&custom_resource, config_map_sha).await;
 
@@ -55,39 +56,48 @@ pub async fn action(
                                         .secret_name
                                 );
 
-                                let old_resource = resource_client.get(&secret_name).await;
+                                if generated_passwords.is_empty() {
+                                    // If not a password rotation use the old or current value
+                                    let old_resource = resource_client.get(&secret_name).await;
 
-                                if old_resource.is_ok() {
-                                    let old_resource_unwrapped = old_resource.unwrap();
+                                    if old_resource.is_ok() {
+                                        let old_resource_unwrapped = old_resource.unwrap();
 
-                                    let mut updated_passwords = Vec::new();
+                                        let mut updated_passwords = Vec::new();
 
-                                    for new_password in
-                                        &context_unwrapped.cluster.generated_passwords
-                                    {
-                                        let old_password = old_resource_unwrapped
-                                            .data
-                                            .get(&new_password.secret_key);
-                                        if old_password.is_some() {
-                                            let old_password_unwrapped = old_password.unwrap();
-                                            let old_password_value =
-                                                std::str::from_utf8(&old_password_unwrapped.0)
-                                                    .unwrap()
-                                                    .to_owned();
-                                            updated_passwords.push(GeneratedPassword {
-                                                secret_key: new_password.secret_key.to_owned(),
-                                                secret_value: encode(&old_password_value),
-                                            })
-                                        } else {
-                                            updated_passwords.push(GeneratedPassword {
-                                                secret_key: new_password.secret_key.to_owned(),
-                                                secret_value: new_password.secret_value.to_owned(),
-                                            })
+                                        for new_password in
+                                            &context_unwrapped.cluster.generated_passwords
+                                        {
+                                            let old_password = old_resource_unwrapped
+                                                .data
+                                                .get(&new_password.secret_key);
+                                            if old_password.is_some() {
+                                                let old_password_unwrapped = old_password.unwrap();
+                                                let old_password_value =
+                                                    std::str::from_utf8(&old_password_unwrapped.0)
+                                                        .unwrap()
+                                                        .to_owned();
+                                                updated_passwords.push(GeneratedPassword {
+                                                    secret_key: new_password.secret_key.to_owned(),
+                                                    secret_value: encode(&old_password_value),
+                                                })
+                                            } else {
+                                                updated_passwords.push(GeneratedPassword {
+                                                    secret_key: new_password.secret_key.to_owned(),
+                                                    secret_value: new_password
+                                                        .secret_value
+                                                        .to_owned(),
+                                                })
+                                            }
                                         }
-                                    }
 
+                                        context_unwrapped.cluster.generated_passwords =
+                                            updated_passwords;
+                                    }
+                                } else {
+                                    // Otherwise use the rotated passwords
                                     context_unwrapped.cluster.generated_passwords =
-                                        updated_passwords;
+                                        generated_passwords.to_owned();
                                 }
                             }
                         }

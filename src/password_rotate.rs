@@ -1,16 +1,17 @@
 use super::custom_resources::KubePostgresXlCluster;
 use super::functions::{create_context, get_kube_config};
-use super::schema::ping::dsl::*;
 use super::vars::{
     CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, NAMESPACE, PASSWORD_ROTATE_SCHEDULE,
 };
-use crate::functions::{create_global_template, generate_password};
+use crate::controller_secret;
+use crate::enums::ResourceAction;
+use crate::functions::{generate_password};
 use crate::structs::GeneratedPassword;
 use chrono::Utc;
 use cron_parser::parse;
 use diesel::{sql_query, Connection, PgConnection, RunQueryDsl};
-use hex::encode;
-use kube::api::{Api, ListParams, PatchParams};
+use base64::encode;
+use kube::api::{Api, ListParams};
 use kube::client::APIClient;
 use std::time::Duration;
 use tokio::time;
@@ -52,8 +53,7 @@ pub async fn watch() -> anyhow::Result<()> {
         let clusters = resource_client.list(&list_params);
 
         for cluster in clusters.await?.iter() {
-            let mut context = create_context(cluster, "".to_owned()).await?;
-
+            let context = create_context(cluster, "".to_owned()).await?;
             // Check if operator is used for rotation
             if &context.cluster.values.security.password.method == "operator" {
                 let mut user = &context.cluster.values.config.postgres_user.to_owned();
@@ -67,13 +67,14 @@ pub async fn watch() -> anyhow::Result<()> {
                 );
 
                 let secret = secret_client.get(&secret_name).await;
+
                 if secret.is_ok() {
                     let secret_unwrapped = secret.unwrap();
                     let password_bytes = secret_unwrapped
                         .data
-                        .get(&context.cluster.values.health_check.user)
+                        .get(&context.cluster.values.config.postgres_user)
                         .unwrap();
-                    user = &context.cluster.values.health_check.user;
+                    user = &context.cluster.values.config.postgres_user;
                     password = std::str::from_utf8(&password_bytes.0).unwrap().to_owned();
                 }
 
@@ -91,7 +92,7 @@ pub async fn watch() -> anyhow::Result<()> {
 
                 if database_connection.is_ok() {
                     let database_connection_unwrapped = database_connection.unwrap();
-                    let mut generated_passwords = Vec::new();
+                    let mut generated_passwords: Vec<GeneratedPassword> = Vec::new();
                     for generated_password in context.cluster.generated_passwords {
                         let new_password = generate_password().await?;
                         // Update password in the database
@@ -117,15 +118,18 @@ pub async fn watch() -> anyhow::Result<()> {
 
                         generated_passwords.push(GeneratedPassword {
                             secret_key: generated_password.secret_key,
-                            secret_value: encode(&password),
+                            secret_value: encode(&new_password),
                         });
                     }
 
                     // Update password secrets
-                    context.cluster.generated_passwords = generated_passwords;
-
-                    // Update secret
-                    let global_template = create_global_template().await?;
+                    controller_secret::action(
+                        &cluster,
+                        &ResourceAction::Modified,
+                        "".to_owned(),
+                        generated_passwords,
+                    )
+                    .await?;
                 }
             }
         }

@@ -145,11 +145,11 @@ pub async fn watch() -> anyhow::Result<()> {
                             health_check_database_connection.unwrap();
                         embedded_migrations::run(&health_check_database_connection_unwrapped)?;
 
-                        // set health_check label to initialized
+                        // set health_check label to healthy
                         let patch = json!({
                             "metadata": {
                                 "labels": {
-                                    "health_check": "initialized",
+                                    "health_check": "healthy",
                                 },
                             },
                         });

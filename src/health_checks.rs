@@ -3,8 +3,9 @@ use super::functions::{create_context, get_kube_config};
 use super::schema::ping::dsl::*;
 use super::vars::{
     CLUSTER_RESOURCE_PLURAL, CUSTOM_RESOURCE_GROUP, HEALTH_CHECK_SCHEDULE, NAMESPACE,
+    PASSWORD_ROTATE_SCHEDULE,
 };
-use chrono::Utc;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use cron_parser::parse;
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use kube::api::{Api, ListParams, PatchParams};
@@ -14,6 +15,9 @@ use tokio::time;
 
 pub async fn watch() -> anyhow::Result<()> {
     let schedule = std::env::var("HEALTH_CHECK_SCHEDULE").unwrap_or(HEALTH_CHECK_SCHEDULE.into());
+
+    let rotate_schedule =
+        std::env::var("PASSWORD_ROTATE_SCHEDULE").unwrap_or(PASSWORD_ROTATE_SCHEDULE.into());
 
     embed_migrations!("migrations");
 
@@ -34,16 +38,43 @@ pub async fn watch() -> anyhow::Result<()> {
     let list_params = ListParams::default();
 
     loop {
-        let next = parse(&schedule, &Utc::now());
-        if next.is_ok() {
-            let wait_seconds = &next.unwrap().timestamp() - &Utc::now().timestamp();
-            time::delay_for(Duration::from_secs(wait_seconds as u64)).await;
+        let next_health_check = parse(&schedule, &Utc::now());
+        let next_rotation = parse(&rotate_schedule, &Utc::now());
+        if next_health_check.is_ok() && next_rotation.is_ok() {
+            let next_health_check_timestamp = &next_health_check.unwrap().timestamp();
+            let next_rotation_timestamp = &next_rotation.unwrap().timestamp();
+            if &next_health_check_timestamp == &next_rotation_timestamp {
+                // Increment by one so we can find the next interval as we don't want it to run at the same time as rotation
+                let incremented_health_check_timestamp = next_health_check_timestamp + 1;
+                // Create a NaiveDateTime from the timestamp
+                let naive = NaiveDateTime::from_timestamp(incremented_health_check_timestamp, 0);
+                // Create a normal DateTime from the NaiveDateTime
+                let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+                // crete a new next interval object
+                let incremented_health_check = parse(&schedule, &datetime);
+                if incremented_health_check.is_ok() {
+                    info!("Skipping next health check to allow password rotation.");
+                    let wait_seconds =
+                        &incremented_health_check.unwrap().timestamp() - &Utc::now().timestamp();
+                    time::delay_for(Duration::from_secs(wait_seconds as u64)).await;
+                } else {
+                    error!(
+                        "{}: error with health check schedule, using default of 5 minutes.",
+                        incremented_health_check.err().unwrap().to_string()
+                    );
+                    time::delay_for(Duration::from_secs(300)).await;
+                }
+            } else {
+                let wait_seconds =
+                    &next_health_check_timestamp.to_owned() - &Utc::now().timestamp().to_owned();
+                time::delay_for(Duration::from_secs(wait_seconds as u64)).await;
+            }
         } else {
-            time::delay_for(Duration::from_secs(300)).await;
             error!(
                 "{}: error with health check schedule, using default of 5 minutes.",
-                next.err().unwrap().to_string()
-            )
+                next_health_check.err().unwrap().to_string()
+            );
+            time::delay_for(Duration::from_secs(300)).await;
         }
 
         // get clusters

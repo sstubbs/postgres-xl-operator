@@ -8,7 +8,7 @@ use super::{
 use crate::structs::GeneratedPassword;
 use base64::encode;
 use kube::{
-    api::{Api, DeleteParams, PostParams},
+    api::{Api, PostParams},
     client::APIClient,
 };
 
@@ -173,21 +173,7 @@ pub async fn action(
                             }
                         }
                         ResourceAction::Deleted => {
-                            let resource_name = &new_resource_object_unwapped["metadata"]["name"]
-                                .as_str()
-                                .unwrap();
-                            match resource_client
-                                .delete(resource_name, &DeleteParams::default())
-                                .await
-                            {
-                                Ok(_o) => info!(
-                                    "Deleted {}",
-                                    new_resource_object_unwapped["metadata"]["name"]
-                                        .as_str()
-                                        .unwrap()
-                                ),
-                                Err(e) => error!("{:?}", e), // any other case is probably bad
-                            }
+                            // Do not delete as if using pvc or standby this will be required.
                         }
                     }
                 }

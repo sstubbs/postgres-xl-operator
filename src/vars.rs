@@ -11,4 +11,4 @@ pub static CLUSTER_RESOURCE_PLURAL: &str = "postgres-xl-clusters";
 //pub static CLUSTER_RESOURCE_KIND: &str = "PostgresXlCluster";
 //pub static CLUSTER_RESOURCE_KIND_LOWER: &str = "postgresxlcluster";
 pub static HEALTH_CHECK_SCHEDULE: &str = "*/5 * * * *";
-pub static PASSWORD_ROTATE_SCHEDULE: &str = "0 0 * * FRI";
+pub static PASSWORD_ROTATE_SCHEDULE: &str = "0 0 1 * *";

@@ -5,12 +5,12 @@ use super::vars::{
 };
 use crate::controller_secret;
 use crate::enums::ResourceAction;
-use crate::functions::{generate_password};
+use crate::functions::generate_password;
 use crate::structs::GeneratedPassword;
+use base64::encode;
 use chrono::Utc;
 use cron_parser::parse;
 use diesel::{sql_query, Connection, PgConnection, RunQueryDsl};
-use base64::encode;
 use kube::api::{Api, ListParams};
 use kube::client::APIClient;
 use std::time::Duration;

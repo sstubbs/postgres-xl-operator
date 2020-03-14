@@ -7,7 +7,7 @@ logLevel: info
 kubeConfigType: incluster
 clusterResourcePlural: postgres-xl-clusters
 healthCheckSchedule: "*/5 * * * *"
-passwordRotateSchedule: "0 0 * * FRI"
+passwordRotateSchedule: "0 0 1 * *"
 
 image:
   repository: sstubbs/postgres-xl-operator
